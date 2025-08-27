@@ -1,3 +1,4 @@
+// UserRepository.java (unchanged)
 package com.example.cms.repository;
 
 import com.example.cms.entity.User;

@@ -1,3 +1,4 @@
+// Updated Customer.java (added sector relation)
 package com.example.cms.entity;
 
 import jakarta.persistence.*;
@@ -6,10 +7,9 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import java.time.LocalDateTime;
 
-
 @Entity
-@Data
 @Table(name = "customers")
+@Data
 public class Customer {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,5 +26,10 @@ public class Customer {
 
     private String phone;
 
+    @ManyToOne
+    @JoinColumn(name = "sector_id")
+    private Sector sector;
+
+    @Column(updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 }
