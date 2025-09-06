@@ -1,4 +1,18 @@
-target/
+# IntelliJ
 .idea/
-build/
+*.iml
+
+# Maven
+target/
+*.log
+
+# Gradle
 .gradle/
+build/
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+
+# Docker
+.idea/httpRequests/

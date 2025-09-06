@@ -1,3 +1,4 @@
+// Updated User.java (added sector relation for managers)
 package com.example.cms.entity;
 
 import jakarta.persistence.*;
@@ -20,6 +21,10 @@ public class User {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;
+
+    @ManyToOne
+    @JoinColumn(name = "sector_id")
+    private Sector sector; // For MANAGER role
 
     public enum Role {
         ADMIN, MANAGER, USER

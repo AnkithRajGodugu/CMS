@@ -1,3 +1,4 @@
+// GlobalExceptionHandler.java (unchanged)
 package com.example.cms.exception;
 
 import org.springframework.dao.DataIntegrityViolationException;
