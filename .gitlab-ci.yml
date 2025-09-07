@@ -38,8 +38,10 @@ test:
   before_script:
     - cd backend
     - sleep 10     # Wait for environment to be ready
+    - unset SPRING_DATASOURCE_URL
   script:
     - echo "⚡ Running tests with Testcontainers"
+    - unset SPRING_DATASOURCE_URL
     - mvn test verify
   # No after_script needed for this job
   cache:
