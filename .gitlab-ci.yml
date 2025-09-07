@@ -27,7 +27,8 @@ test:
   services:
     - docker:dind
   variables:
-    DOCKER_TLS_CERTDIR: ""   # Required for Testcontainers
+    DOCKER_TLS_CERTDIR: ""
+    DOCKER_HOST: tcp://docker:2375
   script:
     - echo "⚡ Running tests with Testcontainers (Postgres)"
     - mvn test verify
