@@ -10,13 +10,14 @@ build:
   stage: build
   image: maven:3.9.6-eclipse-temurin-17
   script:
+    - cd backend
     - mvn clean package -DskipTests
   artifacts:
     paths:
-      - target/*.jar
+      - backend/target/*.jar
   cache:
     paths:
-      - .m2/repository
+      - backend/.m2/repository
 
 # =========================
 # 2. Run Tests with PostgreSQL
@@ -30,11 +31,12 @@ test:
     DOCKER_TLS_CERTDIR: ""
     DOCKER_HOST: tcp://docker:2375
   script:
+    - cd backend
     - echo "⚡ Running tests with Testcontainers (Postgres)"
     - mvn test verify
   cache:
     paths:
-      - .m2/repository
+      - backend/.m2/repository
   coverage: '/Total.*?([0-9]{1,3})%/'
 
 # =========================
