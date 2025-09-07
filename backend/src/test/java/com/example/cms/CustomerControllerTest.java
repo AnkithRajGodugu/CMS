@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
@@ -16,6 +17,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
+@ActiveProfiles("test")
 @AutoConfigureMockMvc
 class CustomerControllerTest extends TestcontainersConfig {
 
@@ -31,7 +33,7 @@ class CustomerControllerTest extends TestcontainersConfig {
         // Arrange: new customer
         Customer customer = new Customer();
         customer.setFirstName("Uday");
-        customer.setLastName("Sanjay");
+        customer.setLastName("Kori");
         customer.setEmail("uday@example.com");
 
         // Act: POST /api/customers

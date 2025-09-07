@@ -32,4 +32,24 @@ public class Customer {
 
     @Column(updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
+
+    // Explicit getters and setters for test compatibility
+    public String getFirstName() {
+        return firstName;
+    }
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+    public String getLastName() {
+        return lastName;
+    }
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+    public String getEmail() {
+        return email;
+    }
+    public void setEmail(String email) {
+        this.email = email;
+    }
 }
