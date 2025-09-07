@@ -34,6 +34,7 @@ test:
     DOCKER_TLS_CERTDIR: ""
     DOCKER_HOST: tcp://docker:2375
     SPRING_PROFILES_ACTIVE: test  # Activate test profile for Testcontainers
+    SPRING_DATASOURCE_URL: ""
     MAVEN_OPTS: "-Djava.net.preferIPv4Stack=true"
   before_script:
     - cd backend

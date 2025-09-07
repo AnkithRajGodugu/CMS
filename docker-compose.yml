@@ -42,9 +42,6 @@ services:
     container_name: cms-backend
     restart: always
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/cms_db
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: Hello@123!
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
     ports:
       - "8080:8080"

@@ -30,4 +30,4 @@ COPY --from=backend-build /app/target/*.jar app.jar
 COPY --from=frontend-build /app/frontend/dist src/main/resources/static
 
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "app.jar", "--spring.datasource.url=${SPRING_DATASOURCE_URL}", "--spring.datasource.username=${SPRING_DATASOURCE_USERNAME}", "--spring.datasource.password=${SPRING_DATASOURCE_PASSWORD}"]
+ENTRYPOINT ["java", "-jar", "app.jar"]
