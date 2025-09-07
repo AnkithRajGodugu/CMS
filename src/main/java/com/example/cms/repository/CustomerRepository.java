@@ -16,6 +16,8 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
     @Query("SELECT c FROM Customer c WHERE c.email LIKE %:email%")
     List<Customer> findByEmailContaining(@Param("email") String email);
 
+    Customer findByEmail(String email);
+
     List<Customer> findBySector(Sector sector);
 
     long countBySectorAndCreatedAtBetween(Sector sector, LocalDateTime start, LocalDateTime end);
