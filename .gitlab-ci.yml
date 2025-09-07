@@ -37,14 +37,11 @@ test:
     MAVEN_OPTS: "-Djava.net.preferIPv4Stack=true"
   before_script:
     - cd backend
-    - docker info  # Check Docker connection
-    - sleep 10     # Wait for Docker to be fully ready
+    - sleep 10     # Wait for environment to be ready
   script:
     - echo "⚡ Running tests with Testcontainers"
     - mvn test verify
-  after_script:
-    - docker ps -a  # Debug: Show all containers
-    - docker logs $(docker ps -aq) 2>/dev/null || true  # Debug: Show container logs
+  # No after_script needed for this job
   cache:
     key: ${CI_COMMIT_REF_SLUG}
     paths:
