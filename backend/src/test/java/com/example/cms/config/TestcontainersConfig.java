@@ -10,7 +10,9 @@ public abstract class TestcontainersConfig {
     static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15")
             .withDatabaseName("cms_db")
             .withUsername("cms_user")
-            .withPassword("cms_pass");
+            .withPassword("cms_pass")
+            .withUrlParam("currentSchema", "public")
+            .withUrlParam("TimeZone", "UTC");
 
     static {
         postgres.start();
