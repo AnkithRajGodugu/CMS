@@ -1,21 +1,33 @@
-# Use official OpenJDK 17 image as the base
-FROM openjdk:17-jdk-slim
-
-# Set working directory
+# ========================
+# 1. Build Backend (Maven)
+# ========================
+FROM maven:3.9.6-eclipse-temurin-17 AS backend-build
 WORKDIR /app
-
-# Copy Maven configuration and source code
 COPY pom.xml .
 COPY src ./src
+RUN mvn clean package -DskipTests
 
-# Copy application.properties
-COPY src/main/resources/application.properties ./src/main/resources/
+# ========================
+# 2. Build Frontend (React + Vite)
+# ========================
+FROM node:20 AS frontend-build
+WORKDIR /app/frontend
+COPY frontend/package*.json ./
+RUN npm install
+COPY frontend/ .
+RUN npm run build
 
-# Install Maven and build the application
-RUN apt-get update && apt-get install -y maven && mvn clean package -DskipTests
+# ========================
+# 3. Final Runtime Image
+# ========================
+FROM eclipse-temurin:17-jdk-jammy
+WORKDIR /app
 
-# Expose port 8080
+# Copy backend JAR
+COPY --from=backend-build /app/target/*.jar app.jar
+
+# Copy frontend build into Spring Boot static resources
+COPY --from=frontend-build /app/frontend/dist src/main/resources/static
+
 EXPOSE 8080
-
-# Run the Spring Boot application
-CMD ["java", "-jar", "target/cms-0.0.1-SNAPSHOT.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar"]
