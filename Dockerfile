@@ -3,8 +3,8 @@
 # ========================
 FROM maven:3.9.6-eclipse-temurin-17 AS backend-build
 WORKDIR /app
-COPY pom.xml .
-COPY src ./src
+COPY backend/pom.xml .
+COPY backend/src ./src
 RUN mvn clean package -DskipTests
 
 # ========================
@@ -30,4 +30,4 @@ COPY --from=backend-build /app/target/*.jar app.jar
 COPY --from=frontend-build /app/frontend/dist src/main/resources/static
 
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar", "--spring.datasource.url=${SPRING_DATASOURCE_URL}", "--spring.datasource.username=${SPRING_DATASOURCE_USERNAME}", "--spring.datasource.password=${SPRING_DATASOURCE_PASSWORD}"]
