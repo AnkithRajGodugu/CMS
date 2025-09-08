@@ -31,7 +31,7 @@ class CustomerControllerTest extends TestcontainersConfig {
         // Arrange: new customer
         Customer customer = new Customer();
         customer.setFirstName("Uday");
-        customer.setLastName("Sanjay");
+        customer.setLastName("Kori");
         customer.setEmail("uday@example.com");
 
         // Act: POST /api/customers

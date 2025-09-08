@@ -20,7 +20,7 @@ class CustomerRepositoryTest extends TestcontainersConfig {
         // Arrange
         Customer customer = new Customer();
         customer.setFirstName("Uday");
-        customer.setLastName("Sanjay");
+        customer.setLastName("Kori");
         customer.setEmail("uday@example.com");
 
         // Act
