@@ -12,7 +12,7 @@ public abstract class TestcontainersConfig {
             .withUsername("cms_user")
             .withPassword("cms_pass")
             .withUrlParam("currentSchema", "public")
-            .withUrlParam("TimeZone", "UTC");
+            .withEnv("TZ", "Asia/Kolkata");
 
     static {
         postgres.start();
