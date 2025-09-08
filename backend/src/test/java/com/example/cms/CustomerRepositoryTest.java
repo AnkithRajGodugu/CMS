@@ -6,12 +6,10 @@ import com.example.cms.repository.CustomerRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
-@ActiveProfiles("test")
 class CustomerRepositoryTest extends TestcontainersConfig {
 
     @Autowired
@@ -22,7 +20,7 @@ class CustomerRepositoryTest extends TestcontainersConfig {
         // Arrange
         Customer customer = new Customer();
         customer.setFirstName("Uday");
-        customer.setLastName("Kori");
+        customer.setLastName("Sanjay");
         customer.setEmail("uday@example.com");
 
         // Act

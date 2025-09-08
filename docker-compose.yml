@@ -13,7 +13,7 @@ services:
       POSTGRES_PASSWORD: Hello@123!
       POSTGRES_DB: cms_db
     ports:
-      - "0:5432"
+      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
@@ -33,15 +33,20 @@ services:
       - postgres
 
   # =====================
-  # Backend (Spring Boot)
+  # Backend + Frontend (Spring Boot + React build)
   # =====================
   backend:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        VITE_API_URL: http://backend:8080   # 🔥 dynamic API URL for frontend build
     container_name: cms-backend
     restart: always
     environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/cms_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: Hello@123!
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
     ports:
       - "8080:8080"

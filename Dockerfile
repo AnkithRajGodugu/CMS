@@ -14,7 +14,12 @@ FROM node:20 AS frontend-build
 WORKDIR /app/frontend
 COPY frontend/package*.json ./
 RUN npm install
-COPY frontend/ .
+COPY frontend/ ./
+
+# Pass API URL dynamically (overridable via docker-compose or GitLab CI)
+ARG VITE_API_URL=http://localhost:8080
+ENV VITE_API_URL=${VITE_API_URL}
+
 RUN npm run build
 
 # ========================
@@ -27,7 +32,11 @@ WORKDIR /app
 COPY --from=backend-build /app/target/*.jar app.jar
 
 # Copy frontend build into Spring Boot static resources
-COPY --from=frontend-build /app/frontend/dist src/main/resources/static
+COPY --from=frontend-build /app/frontend/dist /app/static
 
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "app.jar"]
+
+ENTRYPOINT ["java", "-jar", "app.jar", \
+  "--spring.datasource.url=${SPRING_DATASOURCE_URL}", \
+  "--spring.datasource.username=${SPRING_DATASOURCE_USERNAME}", \
+  "--spring.datasource.password=${SPRING_DATASOURCE_PASSWORD}"]
