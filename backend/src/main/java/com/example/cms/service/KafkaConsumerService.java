@@ -2,6 +2,7 @@ package com.example.cms.service;
 
 import com.example.cms.event.CustomerEvent;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.kafka.support.KafkaHeaders;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @Slf4j
+@ConditionalOnProperty(name = "spring.kafka.enabled", havingValue = "true", matchIfMissing = true)
 public class KafkaConsumerService {
 
     @KafkaListener(topics = "customer-events", groupId = "cms-group")
