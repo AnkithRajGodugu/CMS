@@ -1,24 +1,80 @@
 stages:
   - build
   - test
+  - docker
 
+# =========================
+# 1. Build JAR with Maven
+# =========================
 build:
   stage: build
   image: maven:3.9.6-eclipse-temurin-17
   script:
+    - cd backend
     - mvn clean package -DskipTests
   artifacts:
     paths:
-      - target/*.jar
+      - backend/target/*.jar
   cache:
+    key: ${CI_COMMIT_REF_SLUG}
     paths:
-      - .m2/repository
+      - backend/.m2/repository
+    policy: pull-push
 
+# =========================
+# 2. Run Tests with Testcontainers
+# =========================
 test:
   stage: test
   image: maven:3.9.6-eclipse-temurin-17
+  services:
+    - name: docker:dind
+      command: ["--tls=false", "--host=tcp://0.0.0.0:2375"]
+  variables:
+    DOCKER_TLS_CERTDIR: ""
+    DOCKER_HOST: tcp://docker:2375
+    SPRING_PROFILES_ACTIVE: test   # Ensures application-test.yml is used
+    MAVEN_OPTS: "-Djava.net.preferIPv4Stack=true"
+  before_script:
+    - cd backend
+    - echo "Waiting for Docker daemon..."
+    - for i in {1..30}; do docker info && break || (echo "Retry $i"; sleep 2); done
   script:
-    - mvn test
+    - echo "⚡ Running tests with Testcontainers"
+    - mvn clean verify -DskipITs=false
+  after_script:
+    - docker ps -a || true
+    - docker logs $(docker ps -aq) 2>/dev/null || true
   cache:
+    key: ${CI_COMMIT_REF_SLUG}
     paths:
-      - .m2/repository
+      - backend/.m2/repository
+    policy: pull
+  coverage: '/Total.*?([0-9]{1,3})%/'
+  retry:
+    max: 2
+    when:
+      - runner_system_failure
+      - stuck_or_timeout_failure
+
+# =========================
+# 3. Build & Push Docker Image
+# =========================
+docker-build:
+  stage: docker
+  image: docker:27.0.2
+  services:
+    - docker:dind
+  variables:
+    DOCKER_TLS_CERTDIR: ""
+    DOCKER_HOST: tcp://docker:2375
+  before_script:
+    - cd backend
+  script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" $CI_REGISTRY --password-stdin
+    - docker build -t $CI_REGISTRY_IMAGE:latest .
+    - docker push $CI_REGISTRY_IMAGE:latest
+  only:
+    - main
+  dependencies:
+    - build

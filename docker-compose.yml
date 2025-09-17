@@ -1,48 +1,57 @@
-version: '3.8'
+version: "3.9"
 
 services:
+  # =====================
+  # PostgreSQL Database
+  # =====================
+  postgres:
+    image: postgres:15
+    container_name: cms-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Hello@123!
+      POSTGRES_DB: cms_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # =====================
+  # pgAdmin (DB UI - optional)
+  # =====================
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: cms-pgadmin
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@cms.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+
+  # =====================
+  # Backend + Frontend (Spring Boot + React build)
+  # =====================
   backend:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        VITE_API_URL: http://backend:8080   # 🔥 dynamic API URL for frontend build
+    container_name: cms-backend
+    restart: always
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/cms_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: Hello@123!
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
     ports:
       - "8080:8080"
-    environment:
-      - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/cms_db?useSSL=false&serverTimezone=UTC
-      - SPRING_DATASOURCE_USERNAME=root
-      - SPRING_DATASOURCE_PASSWORD=Hello@123!
-      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
     depends_on:
-      - db
-    networks:
-      - cms-network
-
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    ports:
-      - "5173:80"
-    depends_on:
-      - backend
-    networks:
-      - cms-network
-
-  db:
-    image: mysql:8.0
-    environment:
-      - MYSQL_ROOT_PASSWORD=Hello@123!
-      - MYSQL_DATABASE=cms_db
-    ports:
-      - "3306:3306"
-    volumes:
-      - db-data:/var/lib/mysql
-    networks:
-      - cms-network
+      - postgres
 
 volumes:
-  db-data:
-
-networks:
-  cms-network:
-    driver: bridge
+  postgres_data:

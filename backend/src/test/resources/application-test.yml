@@ -1,0 +1,19 @@
+spring:
+  datasource:
+    url: jdbc:tc:postgresql:15:///cmsdb
+    driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
+    username: cmsuser
+    password: cmspassword
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: true
+
+  test:
+    database:
+      replace: none   # Don’t auto-switch to H2
+

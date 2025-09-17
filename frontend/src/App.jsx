@@ -5,6 +5,7 @@ import CustomerForm from './components/CustomerForm';
 import SectorList from './components/SectorList';
 import UserList from './components/UserList';
 import Report from './components/Report';
+import Counter from './components/Counter';
 import './App.css';
 
 function App() {
@@ -19,6 +20,7 @@ function App() {
                     <Route path="/sectors" element={<SectorList />} />
                     <Route path="/users" element={<UserList />} />
                     <Route path="/reports" element={<Report />} />
+                    <Route path="/counter" element={<Counter />} />
                     <Route path="/" element={<Login />} />
                 </Routes>
             </div>
