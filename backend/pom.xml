@@ -85,6 +85,17 @@
             <version>1.19.8</version>
             <scope>test</scope>
         </dependency>
+        
+        <!-- Kafka Dependencies -->
+        <dependency>
+            <groupId>org.springframework.kafka</groupId>
+            <artifactId>spring-kafka</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.kafka</groupId>
+            <artifactId>spring-kafka-test</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -122,8 +133,9 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.2.5</version>
                 <configuration>
-                    <!-- IMPORTANT: Replace this with the absolute path to your Java 17 JDK -->
-                    <jvm>/path/to/your/jdk-17/bin/java</jvm>
+                    <systemPropertyVariables>
+                        <spring.profiles.active>test</spring.profiles.active>
+                    </systemPropertyVariables>
                 </configuration>
             </plugin>
             <!-- JaCoCo for test coverage -->
