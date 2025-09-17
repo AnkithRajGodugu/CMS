@@ -13,7 +13,7 @@ RUN mvn clean package -DskipTests
 FROM node:20 AS frontend-build
 WORKDIR /app/frontend
 COPY frontend/package*.json ./
-RUN npm install
+RUN npm install --legacy-peer-deps
 COPY frontend/ ./
 
 # Pass API URL dynamically (overridable via docker-compose or GitLab CI)

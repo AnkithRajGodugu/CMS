@@ -3,10 +3,13 @@ package com.example.cms.config;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
+@Testcontainers
 public abstract class TestcontainersConfig {
 
-    // Start a Postgres container
+    @Container
     static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15")
             .withDatabaseName("cms_db")
             .withUsername("cms_user")
@@ -14,15 +17,11 @@ public abstract class TestcontainersConfig {
             .withUrlParam("currentSchema", "public")
             .withEnv("TZ", "Asia/Kolkata");
 
-    static {
-        postgres.start();
-    }
-
-    // Override Spring Boot datasource properties
     @DynamicPropertySource
-    static void overrideProps(DynamicPropertyRegistry registry) {
+    static void configureProperties(DynamicPropertyRegistry registry) {
         registry.add("spring.datasource.url", postgres::getJdbcUrl);
         registry.add("spring.datasource.username", postgres::getUsername);
         registry.add("spring.datasource.password", postgres::getPassword);
+        registry.add("spring.jpa.hibernate.ddl-auto", () -> "create-drop");
     }
 }
