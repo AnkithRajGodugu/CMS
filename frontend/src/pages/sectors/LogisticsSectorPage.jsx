@@ -108,15 +108,27 @@ const LogisticsSectorPage = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {features.map((feature, index) => (
-              <div key={index} className="card bg-base-100 shadow-xl hover:shadow-2xl transition-all duration-300">
-                <div className="card-body text-center">
-                  <div className="text-5xl mb-4">{feature.icon}</div>
-                  <h3 className="card-title justify-center mb-4 text-orange-600">{feature.title}</h3>
-                  <p className="text-base-content/70">{feature.description}</p>
-                </div>
-              </div>
-            ))}
+            {features.map((feature, index) => {
+              // Map feature titles to their respective page routes
+              const pageRoutes = {
+                'Shipment Tracking': '/logistics-&-supply/LogisticsShipmentTrackingPage',
+                'Inventory Management': '/logistics-&-supply/LogisticsInventoryManagementPage',
+                'Route Optimization': '/logistics-&-supply/LogisticsRouteOptimizationPage',
+                'Vendor Relations': '/logistics-&-supply/LogisticsVendorRelationsPage',
+                'Warehouse Management': '/logistics-&-supply/LogisticsWarehouseManagementPage',
+                'Fleet Management': '/logistics-&-supply/LogisticsFleetManagementPage',
+              };
+              const route = pageRoutes[feature.title];
+              return (
+                <Link to={route} key={index} className="card bg-base-100 shadow-xl hover:shadow-2xl transition-all duration-300">
+                  <div className="card-body text-center">
+                    <div className="text-5xl mb-4">{feature.icon}</div>
+                    <h3 className="card-title justify-center mb-4 text-orange-600">{feature.title}</h3>
+                    <p className="text-base-content/70">{feature.description}</p>
+                  </div>
+                </Link>
+              );
+            })}
           </div>
         </div>
       </section>
