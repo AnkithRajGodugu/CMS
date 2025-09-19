@@ -72,6 +72,8 @@
             <version>0.11.5</version>
             <scope>runtime</scope>
         </dependency>
+        
+        <!-- Spring Security JWT - already included above -->
 
         <!-- Testcontainers - JUnit + PostgreSQL -->
         <dependency>

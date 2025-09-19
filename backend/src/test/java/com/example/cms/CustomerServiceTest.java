@@ -1,22 +1,23 @@
 package com.example.cms;
 
+import java.security.Principal;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import org.mockito.MockitoAnnotations;
+
 import com.example.cms.entity.Customer;
 import com.example.cms.entity.User;
 import com.example.cms.repository.CustomerRepository;
 import com.example.cms.repository.UserRepository;
 import com.example.cms.service.CustomerService;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-
-import java.security.Principal;
-import java.time.LocalDateTime;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.*;
 
 class CustomerServiceTest {
 
@@ -44,7 +45,7 @@ class CustomerServiceTest {
         customer.setLastName("Doe");
         customer.setEmail("john.doe@example.com");
         customer.setPhone("1234567890");
-        customer.setCreatedAt(LocalDateTime.now());
+        // createdAt is automatically set in constructor
 
         User user = new User();
         user.setUsername("admin");

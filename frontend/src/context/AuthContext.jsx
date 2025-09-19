@@ -1,16 +1,40 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { isAuthenticated, getUserData, logout as authLogout } from '../utils/auth';
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  // Example: user object { isAuthenticated: true, role: 'logistics', name: 'John Doe' }
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const login = (userData) => setUser(userData);
-  const logout = () => setUser(null);
+  useEffect(() => {
+    // Check if user is authenticated on app load
+    if (isAuthenticated()) {
+      const userData = getUserData();
+      setUser(userData);
+    }
+    setLoading(false);
+  }, []);
+
+  const login = (userData) => {
+    setUser(userData);
+  };
+
+  const logout = () => {
+    authLogout();
+    setUser(null);
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="loading loading-spinner loading-lg text-primary"></div>
+      </div>
+    );
+  }
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, login, logout, isAuthenticated: !!user }}>
       {children}
     </AuthContext.Provider>
   );

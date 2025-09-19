@@ -13,6 +13,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
+
+import java.util.Optional;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -48,10 +50,11 @@ public class ReportController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        Sector sector = sectorRepository.findByName(sectorName);
-        if (sector == null) {
+        Optional<Sector> sectorOpt = sectorRepository.findByName(sectorName);
+        if (sectorOpt.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
+        Sector sector = sectorOpt.get();
 
         if (currentUser.getRole() != User.Role.ADMIN &&
                 !(currentUser.getRole() == User.Role.MANAGER && sector.equals(currentUser.getSector()))) {
