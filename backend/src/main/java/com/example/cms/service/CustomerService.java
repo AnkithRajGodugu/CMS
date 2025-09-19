@@ -2,6 +2,7 @@ package com.example.cms.service;
 
 import com.example.cms.entity.Customer;
 import com.example.cms.entity.User;
+import com.example.cms.event.CustomerEvent;
 import com.example.cms.repository.CustomerRepository;
 import com.example.cms.repository.UserRepository;
 import jakarta.validation.Valid;
@@ -11,17 +12,24 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class CustomerService {
 
-    @Autowired
-    private CustomerRepository customerRepository;
+    private final CustomerRepository customerRepository;
+    private final UserRepository userRepository;
+    private final KafkaProducerService kafkaProducerService;
 
-    @Autowired
-    private UserRepository userRepository;
+    public CustomerService(CustomerRepository customerRepository,
+            UserRepository userRepository,
+            @Autowired(required = false) KafkaProducerService kafkaProducerService) {
+        this.customerRepository = customerRepository;
+        this.userRepository = userRepository;
+        this.kafkaProducerService = kafkaProducerService;
+    }
 
     private User getUserFromPrincipal(Principal principal) {
         return userRepository.findByUsername(principal.getName());
@@ -33,7 +41,12 @@ public class CustomerService {
         if (currentUser.getRole() == User.Role.MANAGER) {
             customer.setSector(currentUser.getSector());
         }
-        return customerRepository.save(customer);
+        Customer savedCustomer = customerRepository.save(customer);
+
+        // Publish customer creation event
+        publishCustomerEvent(savedCustomer, "CREATED", currentUser.getUsername());
+
+        return savedCustomer;
     }
 
     public List<Customer> getCustomersForUser(Principal principal) {
@@ -63,14 +76,27 @@ public class CustomerService {
             customer.setEmail(customerDetails.getEmail());
             customer.setPhone(customerDetails.getPhone());
             customer.setSector(customerDetails.getSector());
-            return customerRepository.save(customer);
+            Customer updatedCustomer = customerRepository.save(customer);
+
+            // Publish customer update event
+            publishCustomerEvent(updatedCustomer, "UPDATED", currentUser.getUsername());
+
+            return updatedCustomer;
         });
     }
 
     @PreAuthorize("hasRole('ADMIN') or @authz.isManagerOfCustomer(principal, #id)")
     public boolean deleteCustomer(Long id, Principal principal) {
-        if (customerRepository.existsById(id)) {
+        Optional<Customer> customerOpt = customerRepository.findById(id);
+        if (customerOpt.isPresent()) {
+            Customer customer = customerOpt.get();
+            User currentUser = getUserFromPrincipal(principal);
+
             customerRepository.deleteById(id);
+
+            // Publish customer deletion event
+            publishCustomerEvent(customer, "DELETED", currentUser.getUsername());
+
             return true;
         }
         return false;
@@ -93,6 +119,35 @@ public class CustomerService {
                 customer.setSector(currentUser.getSector());
             }
         }
-        return customerRepository.saveAll(customers);
+        List<Customer> savedCustomers = customerRepository.saveAll(customers);
+
+        // Publish bulk creation events
+        for (Customer customer : savedCustomers) {
+            publishCustomerEvent(customer, "CREATED", currentUser.getUsername());
+        }
+
+        return savedCustomers;
+    }
+
+    private void publishCustomerEvent(Customer customer, String eventType, String performedBy) {
+        if (kafkaProducerService != null) {
+            try {
+                CustomerEvent event = new CustomerEvent(
+                        customer.getId(),
+                        eventType,
+                        customer.getFirstName(),
+                        customer.getLastName(),
+                        customer.getEmail(),
+                        customer.getPhone(),
+                        customer.getSector() != null ? customer.getSector().getName() : null,
+                        LocalDateTime.now(),
+                        performedBy
+                );
+                kafkaProducerService.sendCustomerEvent(event);
+            } catch (Exception e) {
+                // Log error but don't fail the main operation
+                System.err.println("Failed to publish customer event: " + e.getMessage());
+            }
+        }
     }
 }
