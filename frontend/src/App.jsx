@@ -6,6 +6,7 @@ import SectorList from './components/SectorList';
 import UserList from './components/UserList';
 import Report from './components/Report';
 import Counter from './components/Counter';
+import LoanPage from './pages/banking/loan';
 import './App.css';
 
 function App() {
@@ -13,6 +14,12 @@ function App() {
         <Router>
             <div>
                 <h1>CMS Dashboard</h1>
+                <nav style={{ marginBottom: 12 }}>
+                    <a href="/" style={{ marginRight: 8 }}>Home</a>
+                    <a href="/banking/loan" style={{ marginRight: 8 }}>Loan</a>
+                    <a href="/customers" style={{ marginRight: 8 }}>Customers</a>
+                    <a href="/sectors" style={{ marginRight: 8 }}>Sectors</a>
+                </nav>
                 <Routes>
                     <Route path="/login" element={<Login />} />
                     <Route path="/customers" element={<CustomerList />} />
@@ -21,6 +28,7 @@ function App() {
                     <Route path="/users" element={<UserList />} />
                     <Route path="/reports" element={<Report />} />
                     <Route path="/counter" element={<Counter />} />
+                    <Route path="/banking/loan" element={<LoanPage />} />
                     <Route path="/" element={<Login />} />
                 </Routes>
             </div>
