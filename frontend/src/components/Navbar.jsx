@@ -1,14 +1,19 @@
 import { Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../hooks/useAuth';
+import { useTheme } from '../context/SafeThemeContext';
 
 const Navbar = () => {
   const { user, logout, isAuthenticated } = useAuth();
+  const { currentTheme } = useTheme();
 
   return (
-    <div className="navbar bg-base-100 shadow-lg">
+    <div 
+      className="navbar bg-base-100 shadow-lg transition-all duration-300"
+      style={{ borderBottom: `2px solid ${currentTheme?.primary || '#1e40af'}` }}
+    >
       <div className="navbar-start">
         <Link to="/" className="btn btn-ghost text-xl">
-          CMS Platform
+          <span className="gradient-text">CMS Platform</span>
         </Link>
       </div>
       
@@ -39,7 +44,10 @@ const Navbar = () => {
         {isAuthenticated ? (
           <div className="dropdown dropdown-end">
             <div tabIndex={0} role="button" className="btn btn-ghost btn-circle avatar">
-              <div className="w-10 rounded-full bg-primary text-primary-content flex items-center justify-center">
+              <div 
+                className="w-10 rounded-full text-white flex items-center justify-center font-semibold"
+                style={{ backgroundColor: currentTheme?.primary || '#1e40af' }}
+              >
                 {user?.username?.charAt(0).toUpperCase() || 'U'}
               </div>
             </div>
@@ -55,10 +63,14 @@ const Navbar = () => {
           </div>
         ) : (
           <div className="space-x-2">
-            <Link to="/login" className="btn btn-primary">
+            <Link to="/login" className="btn btn-ghost">
               Login
             </Link>
-            <Link to="/signup" className="btn btn-outline">
+            <Link 
+              to="/signup" 
+              className="btn text-white"
+              style={{ backgroundColor: currentTheme?.primary || '#1e40af' }}
+            >
               Sign Up
             </Link>
           </div>

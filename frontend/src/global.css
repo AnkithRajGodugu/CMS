@@ -2,8 +2,9 @@
 /* Load Inter and Material Symbols globally */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined');
-@import "tailwindcss";
-@import "tw-animate-css";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 /* Removed invalid @custom-variant rule */
 
@@ -98,13 +99,83 @@
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    border-color: var(--border);
   }
   body {
-  @apply bg-background text-foreground;
-  font-family: var(--font-sans), system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
-  /* enable material symbols */
-  font-variation-settings: normal;
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans), system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+    /* enable material symbols */
+    font-variation-settings: normal;
   }
 }
 /* banking css ends here */
+/* 
+Theme transition styles */
+.theme-transitioning * {
+  transition: background-color 0.3s ease-in-out, 
+              color 0.3s ease-in-out, 
+              border-color 0.3s ease-in-out,
+              box-shadow 0.3s ease-in-out !important;
+}
+
+/* Sector-specific gradient backgrounds */
+.gradient-bg {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Custom scrollbar for themed components */
+.themed-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.themed-scrollbar::-webkit-scrollbar-track {
+  background: var(--color-background);
+}
+
+.themed-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--color-primary);
+  border-radius: 4px;
+}
+
+.themed-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--color-accent);
+}
+
+/* Sector-specific animations */
+@keyframes sector-pulse {
+  0%, 100% { 
+    box-shadow: 0 0 0 0 var(--color-primary);
+  }
+  50% { 
+    box-shadow: 0 0 0 10px transparent;
+  }
+}
+
+.sector-pulse {
+  animation: sector-pulse 2s infinite;
+}
+
+/* Theme-aware focus styles */
+.theme-focus:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Responsive utilities for sector themes */
+@media (max-width: 768px) {
+  .gradient-text {
+    background: var(--color-primary);
+    -webkit-background-clip: unset;
+    -webkit-text-fill-color: unset;
+    background-clip: unset;
+    color: var(--color-primary);
+  }
+}

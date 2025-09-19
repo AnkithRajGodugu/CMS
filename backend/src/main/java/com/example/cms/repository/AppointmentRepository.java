@@ -1,0 +1,40 @@
+package com.example.cms.repository;
+
+import com.example.cms.entity.Appointment;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+
+@Repository
+public interface AppointmentRepository extends JpaRepository<Appointment, Long> {
+    
+    Optional<Appointment> findByAppointmentId(String appointmentId);
+    
+    List<Appointment> findByPatientNameContainingIgnoreCase(String patientName);
+    
+    List<Appointment> findByDoctorName(String doctorName);
+    
+    List<Appointment> findByStatus(Appointment.AppointmentStatus status);
+    
+    List<Appointment> findByType(Appointment.AppointmentType type);
+    
+    @Query("SELECT a FROM Appointment a WHERE a.appointmentTime BETWEEN :startDate AND :endDate")
+    List<Appointment> findByDateRange(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
+    
+    @Query("SELECT COUNT(a) FROM Appointment a WHERE CAST(a.appointmentTime AS date) = CURRENT_DATE")
+    Long countTodaysAppointments();
+    
+    @Query("SELECT COUNT(a) FROM Appointment a WHERE a.status = 'CONFIRMED' AND CAST(a.appointmentTime AS date) = CURRENT_DATE")
+    Long countTodaysConfirmedAppointments();
+    
+    @Query("SELECT COUNT(a) FROM Appointment a WHERE a.status = 'PENDING' AND CAST(a.appointmentTime AS date) = CURRENT_DATE")
+    Long countTodaysPendingAppointments();
+    
+    @Query("SELECT COUNT(a) FROM Appointment a WHERE a.status = 'URGENT' AND CAST(a.appointmentTime AS date) = CURRENT_DATE")
+    Long countTodaysUrgentAppointments();
+}

@@ -32,7 +32,7 @@ export const isAuthenticated = () => {
     // Basic JWT expiration check (decode payload)
     const payload = JSON.parse(atob(token.split('.')[1]));
     return payload.exp * 1000 > Date.now();
-  } catch (error) {
+  } catch {
     return false;
   }
 };
@@ -44,7 +44,7 @@ export const getAuthHeaders = () => {
 
 export const login = async (username, password) => {
   try {
-    const response = await fetch('http://localhost:8082/api/auth/login', {
+    const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8080'}/api/auth/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -76,9 +76,9 @@ export const login = async (username, password) => {
     } else {
       throw new Error('No token received');
     }
-  } catch (error) {
-    console.error('Login error:', error);
-    throw error;
+  } catch (loginError) {
+    console.error('Login error:', loginError);
+    throw loginError;
   }
 };
 

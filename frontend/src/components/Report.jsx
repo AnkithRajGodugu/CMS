@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import axios from 'axios';
 import { Bar } from 'react-chartjs-2';
+import api from '../services/api';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
@@ -12,12 +12,9 @@ const Report = () => {
 
     const fetchReport = async () => {
         try {
-            const token = localStorage.getItem('token');
-            const response = await axios.get(`http://localhost:8080/api/reports/customers-in-sector-this-month?sectorName=${sectorName}`, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
+            const response = await api.get(`/reports/customers-in-sector-this-month?sectorName=${sectorName}`);
             setCount(response.data);
-        } catch (err) {
+        } catch {
             setError('Failed to fetch report.');
         }
     };

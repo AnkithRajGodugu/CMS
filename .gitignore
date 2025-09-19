@@ -1,6 +1,6 @@
 # VScode 
 .vscode/
-
+.kiro/
 # IntelliJ
 .idea/
 *.iml

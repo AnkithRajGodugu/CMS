@@ -9,12 +9,164 @@ export default {
       fontFamily: {
         'sans': ['Inter', 'system-ui', 'sans-serif'],
       },
+      colors: {
+        // Sector-specific color palettes
+        sector: {
+          banking: {
+            50: '#eff6ff',
+            100: '#dbeafe',
+            200: '#bfdbfe',
+            300: '#93c5fd',
+            400: '#60a5fa',
+            500: '#3b82f6',
+            600: '#2563eb',
+            700: '#1d4ed8',
+            800: '#1e40af',
+            900: '#1e3a8a',
+          },
+          healthcare: {
+            50: '#ecfdf5',
+            100: '#d1fae5',
+            200: '#a7f3d0',
+            300: '#6ee7b7',
+            400: '#34d399',
+            500: '#10b981',
+            600: '#059669',
+            700: '#047857',
+            800: '#065f46',
+            900: '#064e3b',
+          },
+          logistics: {
+            50: '#fff7ed',
+            100: '#ffedd5',
+            200: '#fed7aa',
+            300: '#fdba74',
+            400: '#fb923c',
+            500: '#f97316',
+            600: '#ea580c',
+            700: '#c2410c',
+            800: '#9a3412',
+            900: '#7c2d12',
+          },
+          content: {
+            50: '#faf5ff',
+            100: '#f3e8ff',
+            200: '#e9d5ff',
+            300: '#d8b4fe',
+            400: '#c084fc',
+            500: '#a855f7',
+            600: '#9333ea',
+            700: '#7c3aed',
+            800: '#6b21a8',
+            900: '#581c87',
+          },
+        },
+        // Dynamic theme colors (CSS custom properties)
+        theme: {
+          primary: 'var(--color-primary)',
+          secondary: 'var(--color-secondary)',
+          accent: 'var(--color-accent)',
+          background: 'var(--color-background)',
+          surface: 'var(--color-surface)',
+          text: 'var(--color-text)',
+          'text-secondary': 'var(--color-text-secondary)',
+          border: 'var(--color-border)',
+        }
+      },
+      animation: {
+        'fade-in': 'fadeIn 0.5s ease-in-out',
+        'fade-in-up': 'fadeInUp 0.6s ease-out',
+        'slide-in-right': 'slideInRight 0.4s ease-out',
+        'bounce-gentle': 'bounceGentle 2s infinite',
+        'theme-transition': 'themeTransition 0.3s ease-in-out',
+      },
+      keyframes: {
+        fadeIn: {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' },
+        },
+        fadeInUp: {
+          '0%': { opacity: '0', transform: 'translateY(20px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        slideInRight: {
+          '0%': { opacity: '0', transform: 'translateX(20px)' },
+          '100%': { opacity: '1', transform: 'translateX(0)' },
+        },
+        bounceGentle: {
+          '0%, 20%, 50%, 80%, 100%': { transform: 'translateY(0)' },
+          '40%': { transform: 'translateY(-10px)' },
+          '60%': { transform: 'translateY(-5px)' },
+        },
+        themeTransition: {
+          '0%': { opacity: '0.8' },
+          '50%': { opacity: '0.6' },
+          '100%': { opacity: '1' },
+        },
+      },
     },
   },
   plugins: [require("daisyui")],
   daisyui: {
     themes: [
       {
+        // Banking theme
+        banking: {
+          "primary": "#1e40af",
+          "secondary": "#64748b",
+          "accent": "#f59e0b",
+          "neutral": "#1e293b",
+          "base-100": "#ffffff",
+          "base-200": "#f8fafc",
+          "base-300": "#e2e8f0",
+          "info": "#0ea5e9",
+          "success": "#10b981",
+          "warning": "#f59e0b",
+          "error": "#ef4444",
+        },
+        // Healthcare theme
+        healthcare: {
+          "primary": "#059669",
+          "secondary": "#6b7280",
+          "accent": "#dc2626",
+          "neutral": "#1f2937",
+          "base-100": "#ffffff",
+          "base-200": "#f0fdf4",
+          "base-300": "#d1fae5",
+          "info": "#0ea5e9",
+          "success": "#10b981",
+          "warning": "#f59e0b",
+          "error": "#ef4444",
+        },
+        // Logistics theme
+        logistics: {
+          "primary": "#ea580c",
+          "secondary": "#78716c",
+          "accent": "#eab308",
+          "neutral": "#292524",
+          "base-100": "#ffffff",
+          "base-200": "#fffbeb",
+          "base-300": "#fed7aa",
+          "info": "#0ea5e9",
+          "success": "#10b981",
+          "warning": "#f59e0b",
+          "error": "#ef4444",
+        },
+        // Content creation theme
+        content: {
+          "primary": "#7c3aed",
+          "secondary": "#6b7280",
+          "accent": "#ec4899",
+          "neutral": "#374151",
+          "base-100": "#ffffff",
+          "base-200": "#faf5ff",
+          "base-300": "#e9d5ff",
+          "info": "#0ea5e9",
+          "success": "#10b981",
+          "warning": "#f59e0b",
+          "error": "#f87171",
+        },
+        // Default light theme
         light: {
           "primary": "#3b82f6",
           "secondary": "#64748b", 
@@ -26,6 +178,7 @@ export default {
           "warning": "#f59e0b",
           "error": "#ef4444",
         },
+        // Dark theme
         dark: {
           "primary": "#60a5fa",
           "secondary": "#94a3b8",

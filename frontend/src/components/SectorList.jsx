@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import api from '../services/api';
 
 const SectorList = () => {
     const [sectors, setSectors] = useState([]);
@@ -8,11 +8,7 @@ const SectorList = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        const token = localStorage.getItem('token');
-        axios
-            .get('http://localhost:8080/api/sectors', {
-                headers: { Authorization: `Bearer ${token}` },
-            })
+        api.get('/sectors')
             .then((response) => setSectors(response.data))
             .catch((err) => {
                 setError('Failed to fetch sectors.');

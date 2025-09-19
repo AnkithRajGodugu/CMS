@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import api from '../services/api';
 
 const UserList = () => {
     const [users, setUsers] = useState([]);
@@ -8,11 +8,7 @@ const UserList = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        const token = localStorage.getItem('token');
-        axios
-            .get('http://localhost:8080/api/users', {
-                headers: { Authorization: `Bearer ${token}` },
-            })
+        api.get('/users')
             .then((response) => setUsers(response.data))
             .catch((err) => {
                 setError('Failed to fetch users.');

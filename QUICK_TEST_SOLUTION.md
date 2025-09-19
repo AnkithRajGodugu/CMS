@@ -7,12 +7,14 @@ The server is running but with Kafka warnings. Let me provide you with a **worki
 ## 🎯 **Immediate Working Steps:**
 
 ### 1. **Fixed Port Configuration**
+
 ```properties
 # Set fixed port instead of dynamic
 server.port=8085
 ```
 
 ### 2. **Disable Kafka Completely**
+
 ```properties
 # Disable Kafka to stop warnings
 spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
@@ -23,7 +25,7 @@ spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.kafka.KafkaA
 ```bash
 # Test different ports that might be running
 curl http://localhost:8085/api/health
-curl http://localhost:8086/api/health  
+curl http://localhost:8086/api/health
 curl http://localhost:8087/api/health
 
 # Test login on the working port
@@ -37,13 +39,15 @@ curl -X POST http://localhost:XXXX/api/auth/login \
 Let me implement this fix right now and get you a working API endpoint within 2 minutes!
 
 ## 📊 **What We Know Works:**
+
 - ✅ Database connection (PostgreSQL on 5432)
-- ✅ Spring Boot compilation successful  
+- ✅ Spring Boot compilation successful
 - ✅ Security configuration loaded
 - ✅ Entities fixed (no more circular references)
 - ✅ Server process running (just need to find/fix the port)
 
 ## 🎯 **Next 60 seconds:**
+
 1. Fix port configuration
 2. Disable Kafka warnings
 3. Test API endpoint

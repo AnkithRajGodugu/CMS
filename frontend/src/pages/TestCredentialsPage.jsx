@@ -1,116 +1,101 @@
 import { Link } from 'react-router-dom';
-import Header from '../components/layout/Header';
-import Footer from '../components/layout/Footer';
 
 const TestCredentialsPage = () => {
-  const credentials = [
+  const testCredentials = [
     {
-      sector: 'Banking & Finance',
-      color: 'text-blue-600',
-      users: [
-        { username: 'banking_admin', password: 'password123', role: 'Admin' },
-        { username: 'banking_manager', password: 'password123', role: 'Manager' },
-        { username: 'banking_user', password: 'password123', role: 'User' }
-      ]
+      role: 'Admin',
+      username: 'admin',
+      password: 'admin123',
+      sector: 'All Sectors',
+      description: 'Full system access'
     },
     {
+      role: 'Banking User',
+      username: 'bank_user',
+      password: 'bank123',
+      sector: 'Banking',
+      description: 'Banking sector access'
+    },
+    {
+      role: 'Healthcare User',
+      username: 'health_user',
+      password: 'health123',
       sector: 'Healthcare',
-      color: 'text-green-600',
-      users: [
-        { username: 'healthcare_admin', password: 'password123', role: 'Admin' },
-        { username: 'healthcare_manager', password: 'password123', role: 'Manager' },
-        { username: 'healthcare_user', password: 'password123', role: 'User' }
-      ]
+      description: 'Healthcare sector access'
     },
     {
-      sector: 'Logistics & Supply Chain',
-      color: 'text-orange-600',
-      users: [
-        { username: 'logistics_admin', password: 'password123', role: 'Admin' },
-        { username: 'logistics_manager', password: 'password123', role: 'Manager' },
-        { username: 'logistics_user', password: 'password123', role: 'User' }
-      ]
+      role: 'Logistics User',
+      username: 'logistics_user',
+      password: 'logistics123',
+      sector: 'Logistics',
+      description: 'Logistics sector access'
     },
     {
+      role: 'Content User',
+      username: 'content_user',
+      password: 'content123',
       sector: 'Content Creation',
-      color: 'text-purple-600',
-      users: [
-        { username: 'content_admin', password: 'password123', role: 'Admin' },
-        { username: 'content_manager', password: 'password123', role: 'Manager' },
-        { username: 'content_user', password: 'password123', role: 'User' }
-      ]
+      description: 'Content creation sector access'
     }
   ];
 
   return (
-    <div className="min-h-screen">
-      <Header />
-      
-      <section className="py-20 bg-base-100">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center mb-16">
-            <h1 className="text-4xl md:text-5xl font-bold mb-6">
-              Test Login
-              <span className="gradient-text"> Credentials</span>
-            </h1>
-            <p className="text-xl text-base-content/70 max-w-3xl mx-auto">
-              Use these credentials to test the login functionality for different sectors and roles.
-            </p>
-          </div>
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="container mx-auto px-4">
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-4">Test Credentials</h1>
+          <p className="text-gray-600 mb-6">
+            Use these credentials to test different user roles and access levels
+          </p>
+          <Link to="/login" className="btn btn-primary">
+            Go to Login
+          </Link>
+        </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {credentials.map((sector, index) => (
-              <div key={index} className="card bg-base-100 shadow-xl">
-                <div className="card-body">
-                  <h2 className={`card-title text-2xl mb-6 ${sector.color}`}>
-                    {sector.sector}
-                  </h2>
-                  
-                  <div className="space-y-4">
-                    {sector.users.map((user, userIndex) => (
-                      <div key={userIndex} className="p-4 bg-base-200 rounded-lg">
-                        <div className="flex justify-between items-center mb-2">
-                          <span className="font-semibold">{user.role}</span>
-                          <span className="badge badge-outline">{user.username}</span>
-                        </div>
-                        <div className="text-sm space-y-1">
-                          <div><strong>Username:</strong> {user.username}</div>
-                          <div><strong>Password:</strong> {user.password}</div>
-                        </div>
-                      </div>
-                    ))}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+          {testCredentials.map((cred, index) => (
+            <div key={index} className="card bg-white shadow-lg">
+              <div className="card-body">
+                <h3 className="card-title text-lg font-semibold text-primary">
+                  {cred.role}
+                </h3>
+                <div className="space-y-2">
+                  <div>
+                    <span className="font-medium">Username:</span>
+                    <code className="ml-2 bg-gray-100 px-2 py-1 rounded text-sm">
+                      {cred.username}
+                    </code>
                   </div>
-
-                  <div className="card-actions justify-center mt-6">
-                    <Link to="/login" className="btn btn-primary">
-                      Go to Login
-                    </Link>
+                  <div>
+                    <span className="font-medium">Password:</span>
+                    <code className="ml-2 bg-gray-100 px-2 py-1 rounded text-sm">
+                      {cred.password}
+                    </code>
                   </div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="text-center mt-12">
-            <div className="alert alert-info max-w-2xl mx-auto">
-              <svg className="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <div>
-                <h3 className="font-bold">How to Test:</h3>
-                <div className="text-sm">
-                  1. Choose any username and password from above<br/>
-                  2. Go to the login page<br/>
-                  3. Enter the credentials<br/>
-                  4. You'll be redirected to the appropriate sector dashboard
+                  <div>
+                    <span className="font-medium">Sector:</span>
+                    <span className="ml-2 badge badge-outline">{cred.sector}</span>
+                  </div>
+                  <p className="text-sm text-gray-600 mt-2">{cred.description}</p>
                 </div>
               </div>
             </div>
+          ))}
+        </div>
+
+        <div className="mt-12 max-w-2xl mx-auto">
+          <div className="alert alert-info">
+            <div>
+              <h3 className="font-bold">Note:</h3>
+              <p className="text-sm">
+                These are test credentials for development and demonstration purposes only. 
+                In a production environment, users would register through the signup process 
+                and receive proper authentication tokens.
+              </p>
+            </div>
           </div>
         </div>
-      </section>
-
-      <Footer />
+      </div>
     </div>
   );
 };

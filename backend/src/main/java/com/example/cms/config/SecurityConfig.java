@@ -48,7 +48,8 @@ public class SecurityConfig {
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(authz -> authz
                 // Public endpoints
-                .requestMatchers("/api/auth/**", "/api/health/**").permitAll()
+                .requestMatchers("/api/auth/**", "/api/health/**", "/api/test/**").permitAll()
+                .requestMatchers("/api/admin/init-users", "/api/admin/users", "/api/admin/create-sector-users").permitAll() // Temporary for setup
                 .requestMatchers("/", "/login", "/signup", "/test-credentials", "/sectors/**").permitAll()
                 .requestMatchers("/static/**", "/assets/**", "/*.js", "/*.css", "/*.ico").permitAll()
                 // Protected endpoints

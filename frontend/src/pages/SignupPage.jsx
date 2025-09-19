@@ -1,48 +1,38 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 const SignupPage = () => {
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
+    username: '',
     email: '',
     password: '',
     confirmPassword: '',
-    sector: '',
-    role: 'USER',
-    company: ''
+    role: '',
+    sector: ''
   });
-  const [isLoading, setIsLoading] = useState(false);
-  const navigate = useNavigate();
-
-  const sectors = [
-    { id: 'banking', name: 'Banking & Finance' },
-    { id: 'healthcare', name: 'Healthcare' },
-    { id: 'logistics', name: 'Logistics' },
-    { id: 'content', name: 'Content Creation' }
-  ];
-
-  const roles = [
-    { id: 'USER', name: 'User' },
-    { id: 'MANAGER', name: 'Manager' },
-    { id: 'ADMIN', name: 'Admin' }
-  ];
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
     if (formData.password !== formData.confirmPassword) {
-      alert('Passwords do not match');
+      setError('Passwords do not match');
       return;
     }
 
-    setIsLoading(true);
-    
-    // Simulate API call
-    setTimeout(() => {
-      navigate('/login');
-      setIsLoading(false);
-    }, 1000);
+    setLoading(true);
+    setError('');
+
+    try {
+      // TODO: Implement actual signup API call
+      console.log('Signup data:', formData);
+      setError('Signup functionality not yet implemented');
+    } catch {
+      setError('Signup failed. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleChange = (e) => {
@@ -53,189 +43,128 @@ const SignupPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-base-200 flex items-center justify-center p-4">
-      <div className="max-w-2xl w-full">
-        <div className="text-center mb-8">
-          <Link to="/" className="text-3xl font-bold gradient-text">
-            CMS Platform
-          </Link>
-          <h1 className="text-2xl font-bold mt-4 mb-2">Create Your Account</h1>
-          <p className="text-base-content/70">Join thousands of businesses using our platform</p>
-        </div>
-
-        <div className="card bg-base-100 shadow-xl">
-          <div className="card-body">
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text">First Name</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="firstName"
-                    value={formData.firstName}
-                    onChange={handleChange}
-                    className="input input-bordered"
-                    placeholder="Enter your first name"
-                    required
-                  />
-                </div>
-
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text">Last Name</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="lastName"
-                    value={formData.lastName}
-                    onChange={handleChange}
-                    className="input input-bordered"
-                    placeholder="Enter your last name"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text">Email</span>
-                </label>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  className="input input-bordered"
-                  placeholder="Enter your email"
-                  required
-                />
-              </div>
-
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text">Company</span>
-                </label>
-                <input
-                  type="text"
-                  name="company"
-                  value={formData.company}
-                  onChange={handleChange}
-                  className="input input-bordered"
-                  placeholder="Enter your company name"
-                  required
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text">Sector</span>
-                  </label>
-                  <select
-                    name="sector"
-                    value={formData.sector}
-                    onChange={handleChange}
-                    className="select select-bordered"
-                    required
-                  >
-                    <option value="">Select your sector</option>
-                    {sectors.map((sector) => (
-                      <option key={sector.id} value={sector.id}>
-                        {sector.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text">Role</span>
-                  </label>
-                  <select
-                    name="role"
-                    value={formData.role}
-                    onChange={handleChange}
-                    className="select select-bordered"
-                    required
-                  >
-                    {roles.map((role) => (
-                      <option key={role.id} value={role.id}>
-                        {role.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text">Password</span>
-                  </label>
-                  <input
-                    type="password"
-                    name="password"
-                    value={formData.password}
-                    onChange={handleChange}
-                    className="input input-bordered"
-                    placeholder="Create a password"
-                    required
-                  />
-                </div>
-
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text">Confirm Password</span>
-                  </label>
-                  <input
-                    type="password"
-                    name="confirmPassword"
-                    value={formData.confirmPassword}
-                    onChange={handleChange}
-                    className="input input-bordered"
-                    placeholder="Confirm your password"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="form-control">
-                <label className="cursor-pointer label">
-                  <input type="checkbox" className="checkbox checkbox-primary" required />
-                  <span className="label-text ml-2">
-                    I agree to the{' '}
-                    <Link to="/terms" className="link link-primary">
-                      Terms of Service
-                    </Link>{' '}
-                    and{' '}
-                    <Link to="/privacy" className="link link-primary">
-                      Privacy Policy
-                    </Link>
-                  </span>
-                </label>
-              </div>
-
-              <div className="form-control">
-                <button
-                  type="submit"
-                  className={`btn btn-primary ${isLoading ? 'loading' : ''}`}
-                  disabled={isLoading}
-                >
-                  {isLoading ? 'Creating Account...' : 'Create Account'}
-                </button>
-              </div>
-            </form>
-
-            <div className="text-center mt-6">
-              <p className="text-sm text-base-content/70">
-                Already have an account?{' '}
-                <Link to="/login" className="link link-primary">
-                  Sign in
-                </Link>
-              </p>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="card w-full max-w-md bg-white shadow-xl">
+        <div className="card-body">
+          <h2 className="card-title text-center text-2xl font-bold mb-6">Sign Up</h2>
+          
+          {error && (
+            <div className="alert alert-error mb-4">
+              <span>{error}</span>
             </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text">Username</span>
+              </label>
+              <input
+                type="text"
+                name="username"
+                value={formData.username}
+                onChange={handleChange}
+                className="input input-bordered"
+                required
+              />
+            </div>
+
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text">Email</span>
+              </label>
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                className="input input-bordered"
+                required
+              />
+            </div>
+
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text">Password</span>
+              </label>
+              <input
+                type="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                className="input input-bordered"
+                required
+              />
+            </div>
+
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text">Confirm Password</span>
+              </label>
+              <input
+                type="password"
+                name="confirmPassword"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                className="input input-bordered"
+                required
+              />
+            </div>
+
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text">Role</span>
+              </label>
+              <select
+                name="role"
+                value={formData.role}
+                onChange={handleChange}
+                className="select select-bordered"
+                required
+              >
+                <option value="">Select Role</option>
+                <option value="USER">User</option>
+                <option value="ADMIN">Admin</option>
+              </select>
+            </div>
+
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text">Sector</span>
+              </label>
+              <select
+                name="sector"
+                value={formData.sector}
+                onChange={handleChange}
+                className="select select-bordered"
+                required
+              >
+                <option value="">Select Sector</option>
+                <option value="banking">Banking</option>
+                <option value="healthcare">Healthcare</option>
+                <option value="logistics">Logistics</option>
+                <option value="content">Content Creation</option>
+              </select>
+            </div>
+
+            <div className="form-control mt-6">
+              <button 
+                type="submit" 
+                className={`btn btn-primary ${loading ? 'loading' : ''}`}
+                disabled={loading}
+              >
+                {loading ? 'Signing Up...' : 'Sign Up'}
+              </button>
+            </div>
+          </form>
+
+          <div className="text-center mt-4">
+            <p className="text-sm">
+              Already have an account?{' '}
+              <Link to="/login" className="link link-primary">
+                Sign In
+              </Link>
+            </p>
           </div>
         </div>
       </div>

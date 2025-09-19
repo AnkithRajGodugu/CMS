@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import api from '../services/api';
 
 const CustomerForm = () => {
     const [formData, setFormData] = useState({
@@ -15,23 +15,16 @@ const CustomerForm = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        const token = localStorage.getItem('token');
-        axios
-            .get('http://localhost:8080/api/sectors', {
-                headers: { Authorization: `Bearer ${token}` },
-            })
+        api.get('/sectors')
             .then((response) => setSectors(response.data))
             .catch(() => setError('Failed to fetch sectors.'));
     }, []);
 
     const handleSubmit = async () => {
         try {
-            const token = localStorage.getItem('token');
-            await axios.post('http://localhost:8080/api/customers', formData, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
+            await api.post('/customers', formData);
             navigate('/customers');
-        } catch (err) {
+        } catch {
             setError('Failed to create customer.');
         }
     };
