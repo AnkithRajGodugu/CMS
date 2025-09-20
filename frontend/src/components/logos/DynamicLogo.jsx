@@ -18,12 +18,15 @@ const DynamicLogo = ({
   // Use provided sector or current sector
   const activeSector = sector || currentSector;
   
+  // Ensure we have a valid theme
+  const safeTheme = currentTheme || { primary: '#1e40af' };
+  
   // Show unified logo if requested or during transitions
   if (showUnified || isTransitioning) {
     return (
       <div 
         className={`transition-all duration-300 ${className}`}
-        style={{ color: currentTheme.colors.primary }}
+        style={{ color: safeTheme.primary }}
       >
         <UnifiedLogo size={size} animated={animated} />
       </div>
@@ -51,7 +54,7 @@ const DynamicLogo = ({
   return (
     <div 
       className={`transition-all duration-300 ${isTransitioning ? 'animate-theme-transition' : ''} ${className}`}
-      style={{ color: currentTheme.colors.primary }}
+      style={{ color: safeTheme.primary }}
     >
       {renderSectorLogo()}
     </div>
