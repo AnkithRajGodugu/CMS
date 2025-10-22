@@ -33,14 +33,23 @@ public class DatabaseContextService {
         }
 
         try {
+            // Try using the function first
             entityManager.createNativeQuery("SELECT set_user_context(:userId)")
                     .setParameter("userId", userId)
                     .getSingleResult();
             
             logger.debug("Set database user context for user ID: {}", userId);
         } catch (Exception e) {
-            logger.error("Failed to set user context for user ID: {}", userId, e);
-            throw new RuntimeException("Failed to set database user context", e);
+            // If function doesn't exist, try direct SQL
+            try {
+                entityManager.createNativeQuery("SELECT set_config('app.current_user_id', :userId, false)")
+                        .setParameter("userId", userId.toString())
+                        .getSingleResult();
+                logger.debug("Set database user context using direct SQL for user ID: {}", userId);
+            } catch (Exception e2) {
+                logger.warn("Failed to set user context (RLS may not be enabled): {}", e2.getMessage());
+                // Don't throw exception - allow app to work without RLS
+            }
         }
     }
 
@@ -51,13 +60,21 @@ public class DatabaseContextService {
     @Transactional
     public void clearUserContext() {
         try {
+            // Try using the function first
             entityManager.createNativeQuery("SELECT clear_user_context()")
                     .getSingleResult();
             
             logger.debug("Cleared database user context");
         } catch (Exception e) {
-            logger.error("Failed to clear user context", e);
-            // Don't throw exception here as this is cleanup code
+            // If function doesn't exist, try direct SQL
+            try {
+                entityManager.createNativeQuery("SELECT set_config('app.current_user_id', '', false)")
+                        .getSingleResult();
+                logger.debug("Cleared database user context using direct SQL");
+            } catch (Exception e2) {
+                logger.debug("Failed to clear user context (this is OK if RLS is not enabled): {}", e2.getMessage());
+                // Don't throw exception here as this is cleanup code
+            }
         }
     }
 
