@@ -1,6 +1,7 @@
 package com.example.cms.config;
 
 import com.example.cms.security.JwtAuthenticationFilter;
+import com.example.cms.security.SectorAuthorizationFilter;
 import com.example.cms.service.UserDetailsServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -28,6 +29,7 @@ import java.util.Arrays;
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final SectorAuthorizationFilter sectorAuthorizationFilter;
     private final UserDetailsServiceImpl userDetailsService;
 
     @Bean
@@ -57,7 +59,8 @@ public class SecurityConfig {
                 .requestMatchers("/api/manager/**").hasAnyRole("ADMIN", "MANAGER")
                 .anyRequest().authenticated()
             )
-            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+            .addFilterAfter(sectorAuthorizationFilter, JwtAuthenticationFilter.class);
         
         return http.build();
     }
