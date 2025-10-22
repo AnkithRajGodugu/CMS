@@ -1,5 +1,7 @@
 package com.example.cms.config;
 
+import org.apache.kafka.clients.admin.AdminClientConfig;
+import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -27,6 +29,12 @@ public class KafkaConfig {
 
     @Value("${spring.kafka.consumer.group-id:cms-group}")
     private String groupId;
+
+    @Value("${spring.kafka.topic.partitions:3}")
+    private int defaultPartitions;
+
+    @Value("${spring.kafka.topic.replication-factor:1}")
+    private short defaultReplicationFactor;
 
     // Producer Configuration
     @Bean
@@ -64,5 +72,79 @@ public class KafkaConfig {
         ConcurrentKafkaListenerContainerFactory<String, Object> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory());
         return factory;
+    }
+
+    // Admin Configuration
+    @Bean
+    public KafkaAdmin kafkaAdmin() {
+        Map<String, Object> configs = new HashMap<>();
+        configs.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+        return new KafkaAdmin(configs);
+    }
+
+    // Sector-specific topic configurations
+    
+    /**
+     * Banking sector events topic
+     */
+    @Bean
+    public NewTopic bankingSectorTopic() {
+        return new NewTopic("sector-events-banking", defaultPartitions, defaultReplicationFactor);
+    }
+
+    /**
+     * Healthcare sector events topic
+     */
+    @Bean
+    public NewTopic healthcareSectorTopic() {
+        return new NewTopic("sector-events-healthcare", defaultPartitions, defaultReplicationFactor);
+    }
+
+    /**
+     * Education sector events topic
+     */
+    @Bean
+    public NewTopic educationSectorTopic() {
+        return new NewTopic("sector-events-education", defaultPartitions, defaultReplicationFactor);
+    }
+
+    /**
+     * Retail sector events topic
+     */
+    @Bean
+    public NewTopic retailSectorTopic() {
+        return new NewTopic("sector-events-retail", defaultPartitions, defaultReplicationFactor);
+    }
+
+    /**
+     * Manufacturing sector events topic
+     */
+    @Bean
+    public NewTopic manufacturingSectorTopic() {
+        return new NewTopic("sector-events-manufacturing", defaultPartitions, defaultReplicationFactor);
+    }
+
+    /**
+     * Audit events topic
+     */
+    @Bean
+    public NewTopic auditEventsTopic() {
+        return new NewTopic("audit-events", defaultPartitions, defaultReplicationFactor);
+    }
+
+    /**
+     * Notification events topic
+     */
+    @Bean
+    public NewTopic notificationEventsTopic() {
+        return new NewTopic("notification-events", defaultPartitions, defaultReplicationFactor);
+    }
+
+    /**
+     * Customer events topic (existing)
+     */
+    @Bean
+    public NewTopic customerEventsTopic() {
+        return new NewTopic("customer-events", defaultPartitions, defaultReplicationFactor);
     }
 }
