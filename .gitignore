@@ -2,6 +2,12 @@
 .vscode/
 .vs/
 
+#Kiro
+.kiro/
+
+#Idea
+.idea/
+
 #Docs
 .docs/
 
