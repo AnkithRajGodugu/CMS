@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { lazy, Suspense } from "react";
 import { AuthProvider } from "./context/AuthContext";
+import { SectorThemeProvider } from "./context/SectorThemeProvider";
 import ProtectedRoute from "./components/ProtectedRoute";
 import SafeNavbar from "./components/SafeNavbar";
 
@@ -107,6 +108,7 @@ const UserList = lazy(() => import("./components/UserList"));
 const Report = lazy(() => import("./components/Report"));
 const Counter = lazy(() => import("./components/Counter"));
 const WorkingThemeTest = lazy(() => import("./components/WorkingThemeTest"));
+const ThemeDemo = lazy(() => import("./components/ThemeDemo"));
 
 // Loading component
 const LoadingSpinner = () => (
@@ -118,10 +120,11 @@ const LoadingSpinner = () => (
 function App() {
   return (
     <AuthProvider>
-      <Router>
-        <SafeNavbar />
-        <Suspense fallback={<LoadingSpinner />}>
-          <Routes>
+      <SectorThemeProvider>
+        <Router>
+          <SafeNavbar />
+          <Suspense fallback={<LoadingSpinner />}>
+            <Routes>
             {/* Public Routes (loaded immediately) */}
             <Route path="/" element={<SafeLandingPage />} />
             <Route path="/simple" element={<WorkingLandingPage />} />
@@ -410,6 +413,7 @@ function App() {
             />
             <Route path="/counter" element={<Counter />} />
             <Route path="/theme-test" element={<WorkingThemeTest />} />
+            <Route path="/theme-demo" element={<ThemeDemo />} />
 
             {/* New enhanced pages */}
             <Route path="/about" element={<AboutPage />} />
@@ -418,6 +422,7 @@ function App() {
           </Routes>
         </Suspense>
       </Router>
+      </SectorThemeProvider>
     </AuthProvider>
   );
 }

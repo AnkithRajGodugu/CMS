@@ -19,12 +19,16 @@ const LoginPage = () => {
     setError('');
     
     try {
-      const userData = await authLogin(formData.username, formData.password);
-      login(userData);
+      const loginData = await authLogin(formData.username, formData.password);
+      login(loginData);
       
       // Redirect based on sector
-      const sector = userData.sector?.toLowerCase() || 'banking';
-      navigate(`/dashboard/${sector}`);
+      if (loginData.sector && loginData.sector.routePath) {
+        navigate(loginData.sector.routePath);
+      } else {
+        // No sector assigned, redirect to sector selection
+        navigate('/select-sector');
+      }
     } catch (err) {
       console.error('Login error:', err);
       setError(err.message || 'Login failed. Please check your credentials.');
