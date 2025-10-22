@@ -1,6 +1,7 @@
 // Authentication utilities
 export const AUTH_TOKEN_KEY = 'cms_auth_token';
 export const USER_DATA_KEY = 'cms_user_data';
+export const SECTOR_DATA_KEY = 'cms_sector_data';
 
 export const setAuthToken = (token) => {
   localStorage.setItem(AUTH_TOKEN_KEY, token);
@@ -19,9 +20,19 @@ export const getUserData = () => {
   return userData ? JSON.parse(userData) : null;
 };
 
+export const setSectorData = (sectorData) => {
+  localStorage.setItem(SECTOR_DATA_KEY, JSON.stringify(sectorData));
+};
+
+export const getSectorData = () => {
+  const sectorData = localStorage.getItem(SECTOR_DATA_KEY);
+  return sectorData ? JSON.parse(sectorData) : null;
+};
+
 export const clearAuth = () => {
   localStorage.removeItem(AUTH_TOKEN_KEY);
   localStorage.removeItem(USER_DATA_KEY);
+  localStorage.removeItem(SECTOR_DATA_KEY);
 };
 
 export const isAuthenticated = () => {
@@ -62,17 +73,20 @@ export const login = async (username, password) => {
     if (data.token) {
       setAuthToken(data.token);
       
-      // Decode JWT to get user data
-      const payload = JSON.parse(atob(data.token.split('.')[1]));
-      const userData = {
-        username: payload.sub,
-        role: payload.role,
-        sector: payload.sector,
-        exp: payload.exp
-      };
+      // Store user data from response
+      if (data.user) {
+        setUserData(data.user);
+      }
       
-      setUserData(userData);
-      return userData;
+      // Store sector data from response
+      if (data.sector) {
+        setSectorData(data.sector);
+      }
+      
+      return {
+        user: data.user,
+        sector: data.sector
+      };
     } else {
       throw new Error('No token received');
     }
