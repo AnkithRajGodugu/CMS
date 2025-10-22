@@ -29,6 +29,7 @@ public class AuthController {
     private final AuthService authService;
     private final JwtUtil jwtUtil;
     private final AuthenticationManager authenticationManager;
+    private final com.example.cms.service.KafkaProducerService kafkaProducerService;
     
     // Simple rate limiting (in production, use Redis or proper rate limiting)
     private final Map<String, AtomicInteger> loginAttempts = new ConcurrentHashMap<>();
@@ -37,7 +38,7 @@ public class AuthController {
     private static final long LOCKOUT_TIME = 15 * 60 * 1000; // 15 minutes
 
     @PostMapping("/login")
-    public ResponseEntity<Map<String, Object>> login(@Valid @RequestBody LoginRequest request) {
+    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request) {
         String clientIp = getClientIp();
         
         // Check rate limiting
@@ -49,50 +50,41 @@ public class AuthController {
         }
 
         try {
-            // Authenticate user
-            Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
-            );
-
-            // Get user details
-            Optional<User> userOpt = authService.findByUsername(request.getUsername());
-            if (userOpt.isPresent()) {
-                User user = userOpt.get();
-                
-                // Generate JWT token
-                String token = jwtUtil.generateToken(
-                    user.getUsername(),
-                    user.getRole().toString(),
-                    user.getSector() != null ? user.getSector().getName() : null
-                );
-
+            // Authenticate user using enhanced login method
+            com.example.cms.dto.LoginResponse loginResponse = authService.login(request.getUsername(), request.getPassword());
+            
+            if (loginResponse.isSuccess()) {
                 // Reset failed attempts on successful login
                 loginAttempts.remove(clientIp);
                 lastAttemptTime.remove(clientIp);
-
-                Map<String, Object> response = new HashMap<>();
-                response.put("success", true);
-                response.put("token", token);
-                response.put("user", Map.of(
-                    "id", user.getId(),
-                    "username", user.getUsername(),
-                    "role", user.getRole().toString(),
-                    "sector", user.getSector() != null ? Map.of(
-                        "id", user.getSector().getId(),
-                        "name", user.getSector().getName()
-                    ) : null
-                ));
-                return ResponseEntity.ok(response);
+                
+                return ResponseEntity.ok(loginResponse);
+            } else {
+                // Increment failed attempts
+                incrementFailedAttempts(clientIp);
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(loginResponse);
             }
+        } catch (com.example.cms.exception.SectorNotAssignedException e) {
+            // User has no sector assigned - return special response
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("requiresSectorSelection", true);
+            response.put("message", e.getMessage());
+            return ResponseEntity.status(HttpStatus.PRECONDITION_REQUIRED).body(response);
         } catch (BadCredentialsException e) {
             // Increment failed attempts
             incrementFailedAttempts(clientIp);
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("message", "Invalid credentials");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+        } catch (Exception e) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("message", "Login failed: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("success", false);
-        response.put("message", "Invalid credentials");
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
     }
 
     private String getClientIp() {
@@ -119,6 +111,151 @@ public class AuthController {
     private void incrementFailedAttempts(String clientIp) {
         loginAttempts.computeIfAbsent(clientIp, k -> new AtomicInteger(0)).incrementAndGet();
         lastAttemptTime.put(clientIp, System.currentTimeMillis());
+    }
+
+    /**
+     * Endpoint to get current user's sector information
+     * Requires authentication
+     */
+    @GetMapping("/sector")
+    public ResponseEntity<?> getSectorInfo() {
+        try {
+            // Get current authentication
+            org.springframework.security.core.Authentication authentication = 
+                org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+            
+            if (authentication == null || !authentication.isAuthenticated()) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", false);
+                response.put("message", "User not authenticated");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+            }
+            
+            String username = authentication.getName();
+            Optional<User> userOpt = authService.findByUsername(username);
+            
+            if (userOpt.isEmpty()) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", false);
+                response.put("message", "User not found");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            }
+            
+            User user = userOpt.get();
+            
+            if (user.getSector() == null) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", false);
+                response.put("requiresSectorSelection", true);
+                response.put("message", "User has no sector assigned");
+                return ResponseEntity.status(HttpStatus.PRECONDITION_REQUIRED).body(response);
+            }
+            
+            com.example.cms.entity.Sector sector = user.getSector();
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("sector", Map.of(
+                "id", sector.getId(),
+                "code", sector.getCode(),
+                "name", sector.getName(),
+                "routePath", sector.getRoutePath()
+            ));
+            
+            // Add caching headers for sector data (cache for 5 minutes)
+            return ResponseEntity.ok()
+                    .cacheControl(org.springframework.http.CacheControl.maxAge(5, java.util.concurrent.TimeUnit.MINUTES))
+                    .body(response);
+        } catch (Exception e) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("message", "Failed to retrieve sector information: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+    
+    /**
+     * Endpoint for users to select their sector when not assigned
+     * Requires authentication
+     */
+    @PostMapping("/select-sector")
+    public ResponseEntity<?> selectSector(@Valid @RequestBody com.example.cms.dto.SectorSelectionRequest request) {
+        try {
+            // Get current authentication
+            org.springframework.security.core.Authentication authentication = 
+                org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+            
+            if (authentication == null || !authentication.isAuthenticated()) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", false);
+                response.put("message", "User not authenticated");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+            }
+            
+            String username = authentication.getName();
+            Optional<User> userOpt = authService.findByUsername(username);
+            
+            if (userOpt.isEmpty()) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", false);
+                response.put("message", "User not found");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            }
+            
+            User user = userOpt.get();
+            
+            // Update user's sector
+            User updatedUser = authService.updateUserSector(user.getId(), request.getSectorId());
+            
+            // Publish sector assignment event to Kafka
+            com.example.cms.entity.Sector sector = updatedUser.getSector();
+            
+            Map<String, Object> eventPayload = new HashMap<>();
+            eventPayload.put("username", user.getUsername());
+            eventPayload.put("sectorId", sector.getId());
+            eventPayload.put("sectorCode", sector.getCode());
+            eventPayload.put("sectorName", sector.getName());
+            
+            Map<String, String> eventMetadata = new HashMap<>();
+            eventMetadata.put("source", "auth-service");
+            eventMetadata.put("action", "sector-selection");
+            
+            try {
+                kafkaProducerService.publishSectorEvent(
+                    sector.getCode(),
+                    "SECTOR_ASSIGNED",
+                    user.getId(),
+                    user.getOrganization() != null ? user.getOrganization().getId() : null,
+                    eventPayload,
+                    eventMetadata
+                );
+            } catch (Exception e) {
+                // Log but don't fail the request if Kafka publish fails
+                System.err.println("Failed to publish sector assignment event: " + e.getMessage());
+            }
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "Sector assigned successfully");
+            response.put("sector", Map.of(
+                "id", sector.getId(),
+                "code", sector.getCode(),
+                "name", sector.getName(),
+                "routePath", sector.getRoutePath()
+            ));
+            
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("message", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        } catch (Exception e) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("message", "Failed to assign sector: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
     }
 
     @PostMapping("/register")
