@@ -49,15 +49,24 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(authz -> authz
-                // Public endpoints
-                .requestMatchers("/api/auth/**", "/api/health/**", "/api/test/**").permitAll()
+                // Public endpoints - API
+                .requestMatchers("/api/auth/**", "/api/health/**", "/api/test/**", "/api/public/**").permitAll()
                 .requestMatchers("/api/admin/init-users", "/api/admin/users", "/api/admin/create-sector-users").permitAll() // Temporary for setup
-                .requestMatchers("/", "/login", "/signup", "/test-credentials", "/sectors/**").permitAll()
-                .requestMatchers("/static/**", "/assets/**", "/*.js", "/*.css", "/*.ico").permitAll()
+                
+                // Public endpoints - Frontend routes (for React Router)
+                .requestMatchers("/", "/index.html", "/login", "/signup", "/test-credentials").permitAll()
+                .requestMatchers("/dashboard/**", "/sectors/**", "/banking/**", "/healthcare/**", "/logistics/**", "/content/**").permitAll()
+                .requestMatchers("/about", "/docs", "/documentation").permitAll()
+                
+                // Static resources
+                .requestMatchers("/static/**", "/assets/**", "/*.js", "/*.css", "/*.ico", "/*.svg", "/*.png", "/*.jpg").permitAll()
+                .requestMatchers("/actuator/**").permitAll() // For monitoring
+                
                 // Protected endpoints
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .requestMatchers("/api/manager/**").hasAnyRole("ADMIN", "MANAGER")
-                .anyRequest().authenticated()
+                .requestMatchers("/api/**").authenticated()
+                .anyRequest().permitAll() // Allow all other requests (for frontend)
             )
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
             .addFilterAfter(sectorAuthorizationFilter, JwtAuthenticationFilter.class);
