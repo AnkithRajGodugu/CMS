@@ -219,19 +219,20 @@ public class AuthController {
             eventMetadata.put("source", "auth-service");
             eventMetadata.put("action", "sector-selection");
             
-            try {
-                kafkaProducerService.publishSectorEvent(
-                    sector.getCode(),
-                    "SECTOR_ASSIGNED",
-                    user.getId(),
-                    user.getOrganization() != null ? user.getOrganization().getId() : null,
-                    eventPayload,
-                    eventMetadata
-                );
-            } catch (Exception e) {
-                // Log but don't fail the request if Kafka publish fails
-                System.err.println("Failed to publish sector assignment event: " + e.getMessage());
-            }
+            // TODO: Re-enable Kafka event publishing when Kafka is properly configured
+            // try {
+            //     kafkaProducerService.publishSectorEvent(
+            //         sector.getCode(),
+            //         "SECTOR_ASSIGNED",
+            //         user.getId(),
+            //         user.getOrganization() != null ? user.getOrganization().getId() : null,
+            //         eventPayload,
+            //         eventMetadata
+            //     );
+            // } catch (Exception e) {
+            //     // Log but don't fail the request if Kafka publish fails
+            //     System.err.println("Failed to publish sector assignment event: " + e.getMessage());
+            // }
             
             Map<String, Object> response = new HashMap<>();
             response.put("success", true);
