@@ -1,10 +1,10 @@
 import { Link } from 'react-router-dom';
-import { FaBank, FaHospital, FaTruck, FaEdit, FaCheckCircle, FaShieldAlt, FaChartLine, FaUsers } from 'react-icons/fa';
+import { FaUniversity, FaHospital, FaTruck, FaEdit, FaCheckCircle, FaShieldAlt, FaChartLine, FaUsers } from 'react-icons/fa';
 
 const ProfessionalLandingPage = () => {
   const sectors = [
     {
-      icon: FaBank,
+      icon: FaUniversity,
       title: 'Banking & Finance',
       description: 'Comprehensive customer management for banks and financial institutions',
       color: 'from-blue-500 to-blue-700',
