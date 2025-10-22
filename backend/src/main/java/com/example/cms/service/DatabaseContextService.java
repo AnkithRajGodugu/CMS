@@ -8,8 +8,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Service for managing database session context for row-level security.
- * Sets the current user ID in the database session to enable RLS policies.
+ * Service for managing database session context for row-level security. Sets
+ * the current user ID in the database session to enable RLS policies.
  */
 @Service
 public class DatabaseContextService {
@@ -20,8 +20,8 @@ public class DatabaseContextService {
     private EntityManager entityManager;
 
     /**
-     * Sets the current user context in the database session.
-     * This enables row-level security policies to filter data based on the current user.
+     * Sets the current user context in the database session. This enables
+     * row-level security policies to filter data based on the current user.
      *
      * @param userId The ID of the current user
      */
@@ -37,7 +37,7 @@ public class DatabaseContextService {
             entityManager.createNativeQuery("SELECT set_user_context(:userId)")
                     .setParameter("userId", userId)
                     .getSingleResult();
-            
+
             logger.debug("Set database user context for user ID: {}", userId);
         } catch (Exception e) {
             // If function doesn't exist, try direct SQL
@@ -54,8 +54,8 @@ public class DatabaseContextService {
     }
 
     /**
-     * Clears the current user context from the database session.
-     * Should be called when the user session ends or when switching users.
+     * Clears the current user context from the database session. Should be
+     * called when the user session ends or when switching users.
      */
     @Transactional
     public void clearUserContext() {
@@ -63,7 +63,7 @@ public class DatabaseContextService {
             // Try using the function first
             entityManager.createNativeQuery("SELECT clear_user_context()")
                     .getSingleResult();
-            
+
             logger.debug("Cleared database user context");
         } catch (Exception e) {
             // If function doesn't exist, try direct SQL
@@ -89,11 +89,11 @@ public class DatabaseContextService {
             String result = (String) entityManager
                     .createNativeQuery("SELECT current_setting('app.current_user_id', true)")
                     .getSingleResult();
-            
+
             if (result == null || result.isEmpty()) {
                 return null;
             }
-            
+
             return Long.parseLong(result);
         } catch (Exception e) {
             logger.debug("No user context set or error retrieving it: {}", e.getMessage());
