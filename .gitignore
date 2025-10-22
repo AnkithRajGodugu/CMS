@@ -1,5 +1,10 @@
 # VScode 
 .vscode/
+.vs/
+
+#Docs
+.docs/
+
 # IntelliJ
 .idea/
 *.iml
