@@ -1,11 +1,12 @@
-# 🎉 CMS (Customer Management System)
+# 🎉 CMS Platform - Multi-Sector Customer Management System
 
 [![Status](https://img.shields.io/badge/status-operational-success)](http://localhost:8080)
 [![Backend](https://img.shields.io/badge/backend-Spring%20Boot%203.3-green)](backend/)
 [![Frontend](https://img.shields.io/badge/frontend-React%2019-blue)](frontend/)
 [![Database](https://img.shields.io/badge/database-PostgreSQL%2015-blue)](https://www.postgresql.org/)
+[![Kafka](https://img.shields.io/badge/messaging-Kafka-black)](https://kafka.apache.org/)
 
-A full-stack, multi-sector Customer Management System supporting **Banking**, **Healthcare**, **Logistics**, and **Content Creation** industries.
+A modern, enterprise-grade Customer Management System with **sector-based architecture** supporting **Banking & Finance**, **Healthcare**, **Logistics & Supply Chain**, and **Content Creation** industries.
 
 ---
 
@@ -15,9 +16,25 @@ A full-stack, multi-sector Customer Management System supporting **Banking**, **
 
 ```
 URL: http://localhost:8080
-Username: admin
-Password: admin123
 ```
+
+### Test Credentials (Sector-Specific)
+
+**Banking Sector:**
+- Username: `banking_admin`
+- Password: `password123`
+
+**Healthcare Sector:**
+- Username: `healthcare_admin`
+- Password: `password123`
+
+**Logistics Sector:**
+- Username: `logistics_admin`
+- Password: `password123`
+
+**Content Creation Sector:**
+- Username: `content_admin`
+- Password: `password123`
 
 ### Run with Docker (Recommended)
 
@@ -37,59 +54,89 @@ cd frontend && npm run dev
 
 ---
 
-## ✨ Features
+## ✨ Key Features
+
+### � Sector-Ba sed Architecture
+
+- **Automatic Sector Detection**: Users are automatically redirected to their sector dashboard upon login
+- **Sector-Specific Theming**: Each sector has its own color scheme and branding
+- **Multi-Tenant Support**: Organization-level data isolation with Row-Level Security (RLS)
+- **Sector Authorization**: API-level access control based on user's assigned sector
 
 ### 🏦 Banking & Finance
 
-- Account Management (Checking, Savings, Business, Credit)
-- Transaction Tracking (Deposits, Withdrawals, Transfers)
-- Risk Assessment & Compliance Tools
+- **Account Management**: Checking, Savings, Business, Credit accounts
+- **Transaction Tracking**: Deposits, Withdrawals, Transfers with real-time updates
+- **Risk Assessment**: Automated risk scoring and monitoring
+- **Compliance Tools**: Regulatory compliance tracking and reporting
 
 ### 🏥 Healthcare
 
-- Patient Records Management
-- Appointment Scheduling
-- Medical History Tracking
-- Insurance Management
+- **Patient Records**: Comprehensive patient data management with HIPAA compliance
+- **Appointment Scheduling**: Calendar-based scheduling with reminders
+- **Medical History**: Complete medical history tracking
+- **Insurance Management**: Insurance claims and coverage tracking
 
 ### 🚛 Logistics & Supply Chain
 
-- Shipment Tracking
-- Inventory Management
-- Route Optimization
-- Warehouse & Fleet Management
+- **Shipment Tracking**: Real-time shipment status and location tracking
+- **Inventory Management**: Stock levels, reorder points, and warehouse management
+- **Route Optimization**: AI-powered route planning for efficient delivery
+- **Fleet Management**: Vehicle tracking, maintenance scheduling
+- **Warehouse Management**: Multi-warehouse inventory control
+- **Vendor Relations**: Supplier management and procurement
 
 ### 🎨 Content Creation
 
-- Project Management
-- Client Portal
-- Content Calendar
-- Asset Management & Time Tracking
+- **Project Management**: Task tracking, milestones, and deadlines
+- **Client Portal**: Client collaboration and feedback system
+- **Content Calendar**: Editorial calendar with publishing schedule
+- **Asset Management**: Digital asset library with version control
+- **Time Tracking**: Project time tracking and billing
+- **Collaboration Tools**: Team communication and file sharing
 
 ---
 
 ## 🏗️ Architecture
 
+### System Architecture
+
 ```
-┌─────────────────────────────────────────┐
-│   React Frontend (Port 8080)            │
-│   - DaisyUI + Tailwind CSS              │
-│   - Protected Routes                    │
-│   - JWT Authentication                  │
-└──────────────┬──────────────────────────┘
-               │ REST API
-┌──────────────▼──────────────────────────┐
-│   Spring Boot Backend (Port 8080)       │
-│   - JWT Security                        │
-│   - Role-based Access Control           │
-│   - RESTful APIs                        │
-└──────────────┬──────────────────────────┘
-               │ JDBC
-┌──────────────▼──────────────────────────┐
-│   PostgreSQL Database (Port 5432)       │
-│   - 7 Tables                            │
-│   - Sample Data                         │
-└─────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────┐
+│   React Frontend (Vite + React Router)                  │
+│   - Sector-Specific Dashboards                          │
+│   - Dynamic Theming (Banking/Healthcare/Logistics/...)  │
+│   - Protected Routes with Sector Authorization          │
+│   - Professional Landing Page                           │
+└──────────────────────┬──────────────────────────────────┘
+                       │ REST API (JWT)
+┌──────────────────────▼──────────────────────────────────┐
+│   Spring Boot Backend (Port 8080)                       │
+│   - Sector Detection Service                            │
+│   - Sector Authorization Filter                         │
+│   - JWT + Role-Based Access Control                     │
+│   - Multi-Tenant Security (RLS)                         │
+│   - Audit Logging                                       │
+└──────────┬────────────────────┬─────────────────────────┘
+           │                    │
+           │ JDBC               │ Kafka Events
+           ▼                    ▼
+┌──────────────────────┐  ┌─────────────────────────┐
+│  PostgreSQL (5432)   │  │  Apache Kafka (9092)    │
+│  - Row-Level Security│  │  - Sector Events        │
+│  - Encrypted Fields  │  │  - Audit Events         │
+│  - 10+ Tables        │  │  - Event Sourcing       │
+└──────────────────────┘  └─────────────────────────┘
+```
+
+### Monitoring Stack
+
+```
+┌─────────────────────┐  ┌─────────────────────┐
+│  Prometheus (9090)  │  │  Grafana (3000)     │
+│  - Metrics          │→ │  - Dashboards       │
+│  - Alerts           │  │  - Visualization    │
+└─────────────────────┘  └─────────────────────┘
 ```
 
 ---
@@ -100,23 +147,31 @@ cd frontend && npm run dev
 
 - **Framework**: Spring Boot 3.3.0
 - **Language**: Java 17
-- **Database**: PostgreSQL 15
-- **Security**: JWT + BCrypt
-- **ORM**: JPA/Hibernate
+- **Database**: PostgreSQL 15 with Row-Level Security (RLS)
+- **Security**: JWT + BCrypt + Field-Level Encryption (AES-256)
+- **ORM**: JPA/Hibernate with Liquibase migrations
+- **Messaging**: Apache Kafka 7.4.0 for event-driven architecture
+- **Caching**: Caffeine for sector detection caching
+- **Monitoring**: Micrometer + Prometheus
 
 ### Frontend
 
 - **Framework**: React 19
 - **Build Tool**: Vite 7
-- **UI**: DaisyUI + Tailwind CSS + Radix UI
-- **State**: Redux Toolkit + Context API
-- **Routing**: React Router v7
+- **UI**: DaisyUI + Tailwind CSS + React Icons
+- **State**: React Context API
+- **Routing**: React Router v7 with sector-based routing
+- **HTTP Client**: Axios with interceptors
+- **Notifications**: React Toastify
 
 ### Infrastructure
 
 - **Containerization**: Docker + Docker Compose
-- **Orchestration**: Kubernetes ready
-- **CI/CD**: GitLab CI configured
+- **Orchestration**: Kubernetes ready (manifests in `k8s/`)
+- **CI/CD**: GitLab CI with automated testing and deployment
+- **Monitoring**: Prometheus + Grafana
+- **Database Admin**: pgAdmin 4
+- **Message Monitoring**: Kafka UI
 
 ---
 
@@ -151,13 +206,33 @@ cms/
 
 ## 🔑 Test Credentials
 
-| Username       | Password     | Role       | Access              |
-| -------------- | ------------ | ---------- | ------------------- |
-| admin          | admin123     | ADMIN      | Full system access  |
-| bank_user      | bank123      | BANKING    | Banking features    |
-| health_user    | health123    | HEALTHCARE | Healthcare features |
-| logistics_user | logistics123 | LOGISTICS  | Logistics features  |
-| content_user   | content123   | CONTENT    | Content features    |
+### Banking Sector
+| Username         | Password     | Role    | Access                    |
+|------------------|--------------|---------|---------------------------|
+| banking_admin    | password123  | ADMIN   | Full banking access       |
+| banking_manager  | password123  | MANAGER | Banking management        |
+| banking_user     | password123  | USER    | Banking user access       |
+
+### Healthcare Sector
+| Username           | Password     | Role    | Access                    |
+|--------------------|--------------|---------|---------------------------|
+| healthcare_admin   | password123  | ADMIN   | Full healthcare access    |
+| healthcare_manager | password123  | MANAGER | Healthcare management     |
+| healthcare_user    | password123  | USER    | Healthcare user access    |
+
+### Logistics Sector
+| Username           | Password     | Role    | Access                    |
+|--------------------|--------------|---------|---------------------------|
+| logistics_admin    | password123  | ADMIN   | Full logistics access     |
+| logistics_manager  | password123  | MANAGER | Logistics management      |
+| logistics_user     | password123  | USER    | Logistics user access     |
+
+### Content Creation Sector
+| Username         | Password     | Role    | Access                    |
+|------------------|--------------|---------|---------------------------|
+| content_admin    | password123  | ADMIN   | Full content access       |
+| content_manager  | password123  | MANAGER | Content management        |
+| content_user     | password123  | USER    | Content user access       |
 
 ---
 
@@ -214,13 +289,14 @@ Comprehensive documentation is available in the `.docs/` folder:
 
 ## 🌐 Service URLs
 
-| Service      | URL                              | Description      |
-| ------------ | -------------------------------- | ---------------- |
-| Frontend     | http://localhost:8080            | Main application |
-| Backend API  | http://localhost:8080/api        | REST API         |
-| Health Check | http://localhost:8080/api/health | System health    |
-| Kafka UI     | http://localhost:8081            | Kafka monitoring |
-| pgAdmin      | http://localhost:5050            | Database admin   |
+| Service      | URL                              | Description           | Credentials        |
+|--------------|----------------------------------|-----------------------|--------------------|
+| Frontend     | http://localhost:8080            | Main application      | See test credentials |
+| Backend API  | http://localhost:8080/api        | REST API              | JWT token required |
+| Health Check | http://localhost:8080/api/health | System health status  | Public             |
+| Kafka UI     | http://localhost:8081            | Kafka monitoring      | No auth            |
+| pgAdmin      | http://localhost:5050            | Database admin        | admin@cms.com / admin |
+| Prometheus   | http://localhost:9090            | Metrics collection    | No auth            |
 
 ---
 
@@ -286,19 +362,27 @@ docker-compose up postgres -d
 
 ### Core Tables
 
-- **users** - User authentication and roles
-- **sectors** - Banking, Healthcare, Logistics, Content
-- **customers** - Universal customer records
+- **users** - User authentication, roles, and sector assignment
+- **sectors** - Sector definitions with routing and configuration
+- **organizations** - Multi-tenant organization management
+- **customers** - Universal customer records across sectors
+- **audit_log** - Comprehensive audit trail for compliance
 
 ### Banking Tables
 
-- **bank_accounts** - Account management
-- **transactions** - Transaction tracking
+- **bank_accounts** - Account management with types and balances
+- **transactions** - Transaction tracking with audit trail
 
 ### Healthcare Tables
 
-- **patients** - Patient records
-- **appointments** - Appointment scheduling
+- **patients** - Patient records with medical information
+- **appointments** - Appointment scheduling and management
+
+### Security Features
+
+- **Row-Level Security (RLS)**: Database-level multi-tenancy
+- **Field-Level Encryption**: AES-256 encryption for sensitive data
+- **Audit Logging**: All actions logged with user context
 
 ---
 
@@ -332,26 +416,60 @@ KAFKA_BOOTSTRAP_SERVERS=kafka:9092
 
 ### Authentication
 
-- `POST /api/auth/login` - User login
+- `POST /api/auth/login` - User login with sector detection
 - `POST /api/auth/register` - User registration
+- `GET /api/auth/sector` - Get current user's sector information
+- `POST /api/auth/select-sector` - Assign sector to user
 
-### Banking
+### Public Endpoints
 
-- `GET /api/banking/accounts` - List accounts
+- `GET /api/public/sectors` - List all available sectors
+- `GET /api/health` - System health check
+
+### Banking Sector
+
+- `GET /api/banking/accounts` - List bank accounts
 - `POST /api/banking/accounts` - Create account
 - `GET /api/banking/transactions` - List transactions
+- `GET /api/banking/risk-assessment` - Risk assessment data
+- `GET /api/banking/compliance` - Compliance reports
 
-### Healthcare
+### Healthcare Sector
 
 - `GET /api/healthcare/patients` - List patients
-- `POST /api/healthcare/patients` - Create patient
+- `POST /api/healthcare/patients` - Create patient record
 - `GET /api/healthcare/appointments` - List appointments
+- `POST /api/healthcare/appointments` - Schedule appointment
+- `GET /api/healthcare/medical-history/{id}` - Patient medical history
 
-### Customer Management
+### Logistics Sector
 
-- `GET /api/customers` - List customers
-- `POST /api/customers` - Create customer
-- `PUT /api/customers/{id}` - Update customer
+- `GET /api/logistics/shipments` - List shipments
+- `POST /api/logistics/shipments` - Create shipment
+- `GET /api/logistics/inventory` - Inventory levels
+- `GET /api/logistics/fleet` - Fleet management
+- `GET /api/logistics/routes` - Route optimization
+
+### Content Creation Sector
+
+- `GET /api/content/projects` - List projects
+- `POST /api/content/projects` - Create project
+- `GET /api/content/clients` - List clients
+- `GET /api/content/calendar` - Content calendar
+- `GET /api/content/assets` - Digital assets
+
+### Organization Management
+
+- `GET /api/organizations` - List organizations
+- `POST /api/organizations` - Create organization
+- `PUT /api/organizations/{id}` - Update organization
+- `PATCH /api/organizations/{id}/settings` - Update settings
+
+### Monitoring
+
+- `GET /api/metrics/health` - Detailed health check
+- `GET /api/metrics/performance` - Performance metrics
+- `GET /actuator/prometheus` - Prometheus metrics
 
 ---
 
@@ -382,19 +500,57 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-## ✨ Status
+## ✨ System Status
 
-- ✅ Backend: Operational (Port 8080)
-- ✅ Frontend: Accessible
-- ✅ Database: Connected (7 tables)
-- ✅ Authentication: Working (JWT)
-- ✅ Sample Data: Loaded
-- ✅ Documentation: Complete (19 files)
+### Services
+- ✅ **Backend API**: Operational (Port 8080)
+- ✅ **Frontend**: Accessible and responsive
+- ✅ **Database**: Connected (PostgreSQL with 10+ tables)
+- ✅ **Kafka**: Running (Event streaming)
+- ✅ **Prometheus**: Collecting metrics
+- ✅ **pgAdmin**: Database management UI
 
-**System is ready to use!** 🚀
+### Features
+- ✅ **Authentication**: JWT-based with sector detection
+- ✅ **Sector Routing**: Automatic redirect to sector dashboards
+- ✅ **Multi-Tenancy**: Row-level security enabled
+- ✅ **Audit Logging**: All actions tracked
+- ✅ **Monitoring**: Prometheus + Grafana ready
+- ✅ **Sample Data**: 4 sectors with test users loaded
+
+### Security
+- ✅ **Encryption**: AES-256 field-level encryption
+- ✅ **Row-Level Security**: Database-level isolation
+- ✅ **JWT Tokens**: Secure authentication
+- ✅ **CORS**: Configured for production
+- ✅ **Audit Trail**: Comprehensive logging
+
+**System is production-ready!** 🚀
 
 ---
 
-**Last Updated**: October 22, 2025  
-**Version**: 1.0.0  
-**Status**: ✅ Operational
+## 🎨 Screenshots
+
+### Landing Page
+Professional enterprise landing page with sector showcase
+
+### Sector Dashboards
+- **Banking Dashboard**: Account overview, transactions, risk metrics
+- **Healthcare Dashboard**: Patient stats, appointments, medical records
+- **Logistics Dashboard**: Shipment tracking, inventory, fleet status
+- **Content Dashboard**: Project overview, client portal, content calendar
+
+---
+
+## 📚 Additional Documentation
+
+For detailed documentation, see:
+- **[FIXES_APPLIED.md](FIXES_APPLIED.md)** - Recent fixes and improvements
+- **[FINAL_STATUS.md](FINAL_STATUS.md)** - Complete system status
+- **[FEATURE_STATUS.md](FEATURE_STATUS.md)** - Feature implementation status
+
+---
+
+**Last Updated**: October 23, 2025  
+**Version**: 2.0.0  
+**Status**: ✅ Operational with Sector Architecture
