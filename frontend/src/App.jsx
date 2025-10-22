@@ -8,6 +8,7 @@ import SafeNavbar from "./components/SafeNavbar";
 // Core pages (loaded immediately)
 import WorkingLandingPage from "./pages/WorkingLandingPage";
 import SafeLandingPage from "./pages/SafeLandingPage";
+import ProfessionalLandingPage from "./pages/ProfessionalLandingPage";
 // Lazy load other pages to avoid loading issues
 const LoginPage = lazy(() => import("./pages/LoginPage"));
 const SignupPage = lazy(() => import("./pages/SignupPage"));
@@ -38,6 +39,15 @@ const TimeTrackingPage = lazy(() =>
 );
 const BankingDashboard = lazy(() =>
   import("./pages/dashboard/BankingDashboard")
+);
+const HealthcareDashboard = lazy(() =>
+  import("./pages/dashboard/HealthcareDashboard")
+);
+const LogisticsDashboard = lazy(() =>
+  import("./pages/dashboard/LogisticsDashboard")
+);
+const ContentDashboard = lazy(() =>
+  import("./pages/dashboard/ContentDashboard")
 );
 const SectorsOverviewPage = lazy(() => import("./pages/SectorsOverviewPage"));
 const BankingSectorPage = lazy(() =>
@@ -126,7 +136,8 @@ function App() {
           <Suspense fallback={<LoadingSpinner />}>
             <Routes>
             {/* Public Routes (loaded immediately) */}
-            <Route path="/" element={<SafeLandingPage />} />
+            <Route path="/" element={<ProfessionalLandingPage />} />
+            <Route path="/old-landing" element={<SafeLandingPage />} />
             <Route path="/simple" element={<WorkingLandingPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
@@ -350,7 +361,7 @@ function App() {
               path="/dashboard/healthcare"
               element={
                 <ProtectedRoute>
-                  <BankingDashboard />
+                  <HealthcareDashboard />
                 </ProtectedRoute>
               }
             />
@@ -358,7 +369,7 @@ function App() {
               path="/dashboard/logistics"
               element={
                 <ProtectedRoute>
-                  <BankingDashboard />
+                  <LogisticsDashboard />
                 </ProtectedRoute>
               }
             />
@@ -366,7 +377,7 @@ function App() {
               path="/dashboard/content"
               element={
                 <ProtectedRoute>
-                  <BankingDashboard />
+                  <ContentDashboard />
                 </ProtectedRoute>
               }
             />

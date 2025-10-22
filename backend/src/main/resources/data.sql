@@ -1,12 +1,12 @@
 -- Insert Sectors with enhanced fields
 INSERT INTO sectors (id, code, name, description, icon, route_path, configuration, enabled, display_order) VALUES 
-(1, 'BANKING', 'Banking & Finance', 'Comprehensive customer management for banks, credit unions, and financial institutions', 'bank', '/banking', '{"features": ["accounts", "transactions", "loans"], "modules": ["retail", "corporate"]}', true, 1),
-(2, 'HEALTHCARE', 'Healthcare', 'Patient management system designed for hospitals, clinics, and healthcare providers', 'hospital', '/healthcare', '{"features": ["appointments", "patients", "prescriptions"], "modules": ["clinic", "pharmacy"]}', true, 2),
-(3, 'LOGISTICS', 'Logistics & Supply Chain', 'Streamline operations for shipping, warehousing, and supply chain management', 'truck', '/logistics', '{"features": ["shipments", "inventory", "tracking"], "modules": ["warehouse", "delivery"]}', true, 3),
-(4, 'CONTENT', 'Content Creation', 'Manage clients, projects, and content workflows for creative agencies and freelancers', 'edit', '/content', '{"features": ["projects", "clients", "workflows"], "modules": ["creative", "publishing"]}', true, 4),
-(5, 'EDUCATION', 'Education', 'Educational institution and student management', 'school', '/education', '{"features": ["students", "courses", "grades"], "modules": ["academic", "administration"]}', true, 5),
-(6, 'RETAIL', 'Retail', 'Retail operations and inventory management', 'shopping-cart', '/retail', '{"features": ["inventory", "orders", "customers"], "modules": ["pos", "ecommerce"]}', true, 6),
-(7, 'MANUFACTURING', 'Manufacturing', 'Manufacturing and production management', 'factory', '/manufacturing', '{"features": ["production", "quality", "inventory"], "modules": ["planning", "execution"]}', true, 7)
+(1, 'BANKING', 'Banking & Finance', 'Comprehensive customer management for banks, credit unions, and financial institutions', 'bank', '/dashboard/banking', '{"features": ["accounts", "transactions", "loans"], "modules": ["retail", "corporate"]}', true, 1),
+(2, 'HEALTHCARE', 'Healthcare', 'Patient management system designed for hospitals, clinics, and healthcare providers', 'hospital', '/dashboard/healthcare', '{"features": ["appointments", "patients", "prescriptions"], "modules": ["clinic", "pharmacy"]}', true, 2),
+(3, 'LOGISTICS', 'Logistics & Supply Chain', 'Streamline operations for shipping, warehousing, and supply chain management', 'truck', '/dashboard/logistics', '{"features": ["shipments", "inventory", "tracking"], "modules": ["warehouse", "delivery"]}', true, 3),
+(4, 'CONTENT', 'Content Creation', 'Manage clients, projects, and content workflows for creative agencies and freelancers', 'edit', '/dashboard/content', '{"features": ["projects", "clients", "workflows"], "modules": ["creative", "publishing"]}', true, 4),
+(5, 'EDUCATION', 'Education', 'Educational institution and student management', 'school', '/dashboard/education', '{"features": ["students", "courses", "grades"], "modules": ["academic", "administration"]}', true, 5),
+(6, 'RETAIL', 'Retail', 'Retail operations and inventory management', 'shopping-cart', '/dashboard/retail', '{"features": ["inventory", "orders", "customers"], "modules": ["pos", "ecommerce"]}', true, 6),
+(7, 'MANUFACTURING', 'Manufacturing', 'Manufacturing and production management', 'factory', '/dashboard/manufacturing', '{"features": ["production", "quality", "inventory"], "modules": ["planning", "execution"]}', true, 7)
 ON CONFLICT (id) DO NOTHING;
 
 -- Insert Sample Organizations
