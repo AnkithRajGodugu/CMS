@@ -21,18 +21,22 @@ URL: http://localhost:8080
 ### Test Credentials (Sector-Specific)
 
 **Banking Sector:**
+
 - Username: `banking_admin`
 - Password: `password123`
 
 **Healthcare Sector:**
+
 - Username: `healthcare_admin`
 - Password: `password123`
 
 **Logistics Sector:**
+
 - Username: `logistics_admin`
 - Password: `password123`
 
 **Content Creation Sector:**
+
 - Username: `content_admin`
 - Password: `password123`
 
@@ -207,32 +211,36 @@ cms/
 ## 🔑 Test Credentials
 
 ### Banking Sector
-| Username         | Password     | Role    | Access                    |
-|------------------|--------------|---------|---------------------------|
-| banking_admin    | password123  | ADMIN   | Full banking access       |
-| banking_manager  | password123  | MANAGER | Banking management        |
-| banking_user     | password123  | USER    | Banking user access       |
+
+| Username        | Password    | Role    | Access              |
+| --------------- | ----------- | ------- | ------------------- |
+| banking_admin   | password123 | ADMIN   | Full banking access |
+| banking_manager | password123 | MANAGER | Banking management  |
+| banking_user    | password123 | USER    | Banking user access |
 
 ### Healthcare Sector
-| Username           | Password     | Role    | Access                    |
-|--------------------|--------------|---------|---------------------------|
-| healthcare_admin   | password123  | ADMIN   | Full healthcare access    |
-| healthcare_manager | password123  | MANAGER | Healthcare management     |
-| healthcare_user    | password123  | USER    | Healthcare user access    |
+
+| Username           | Password    | Role    | Access                 |
+| ------------------ | ----------- | ------- | ---------------------- |
+| healthcare_admin   | password123 | ADMIN   | Full healthcare access |
+| healthcare_manager | password123 | MANAGER | Healthcare management  |
+| healthcare_user    | password123 | USER    | Healthcare user access |
 
 ### Logistics Sector
-| Username           | Password     | Role    | Access                    |
-|--------------------|--------------|---------|---------------------------|
-| logistics_admin    | password123  | ADMIN   | Full logistics access     |
-| logistics_manager  | password123  | MANAGER | Logistics management      |
-| logistics_user     | password123  | USER    | Logistics user access     |
+
+| Username          | Password    | Role    | Access                |
+| ----------------- | ----------- | ------- | --------------------- |
+| logistics_admin   | password123 | ADMIN   | Full logistics access |
+| logistics_manager | password123 | MANAGER | Logistics management  |
+| logistics_user    | password123 | USER    | Logistics user access |
 
 ### Content Creation Sector
-| Username         | Password     | Role    | Access                    |
-|------------------|--------------|---------|---------------------------|
-| content_admin    | password123  | ADMIN   | Full content access       |
-| content_manager  | password123  | MANAGER | Content management        |
-| content_user     | password123  | USER    | Content user access       |
+
+| Username        | Password    | Role    | Access              |
+| --------------- | ----------- | ------- | ------------------- |
+| content_admin   | password123 | ADMIN   | Full content access |
+| content_manager | password123 | MANAGER | Content management  |
+| content_user    | password123 | USER    | Content user access |
 
 ---
 
@@ -289,14 +297,14 @@ Comprehensive documentation is available in the `.docs/` folder:
 
 ## 🌐 Service URLs
 
-| Service      | URL                              | Description           | Credentials        |
-|--------------|----------------------------------|-----------------------|--------------------|
-| Frontend     | http://localhost:8080            | Main application      | See test credentials |
-| Backend API  | http://localhost:8080/api        | REST API              | JWT token required |
-| Health Check | http://localhost:8080/api/health | System health status  | Public             |
-| Kafka UI     | http://localhost:8081            | Kafka monitoring      | No auth            |
-| pgAdmin      | http://localhost:5050            | Database admin        | admin@cms.com / admin |
-| Prometheus   | http://localhost:9090            | Metrics collection    | No auth            |
+| Service      | URL                              | Description          | Credentials           |
+| ------------ | -------------------------------- | -------------------- | --------------------- |
+| Frontend     | http://localhost:8080            | Main application     | See test credentials  |
+| Backend API  | http://localhost:8080/api        | REST API             | JWT token required    |
+| Health Check | http://localhost:8080/api/health | System health status | Public                |
+| Kafka UI     | http://localhost:8081            | Kafka monitoring     | No auth               |
+| pgAdmin      | http://localhost:5050            | Database admin       | admin@cms.com / admin |
+| Prometheus   | http://localhost:9090            | Metrics collection   | No auth               |
 
 ---
 
@@ -503,6 +511,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## ✨ System Status
 
 ### Services
+
 - ✅ **Backend API**: Operational (Port 8080)
 - ✅ **Frontend**: Accessible and responsive
 - ✅ **Database**: Connected (PostgreSQL with 10+ tables)
@@ -511,6 +520,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - ✅ **pgAdmin**: Database management UI
 
 ### Features
+
 - ✅ **Authentication**: JWT-based with sector detection
 - ✅ **Sector Routing**: Automatic redirect to sector dashboards
 - ✅ **Multi-Tenancy**: Row-level security enabled
@@ -519,6 +529,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - ✅ **Sample Data**: 4 sectors with test users loaded
 
 ### Security
+
 - ✅ **Encryption**: AES-256 field-level encryption
 - ✅ **Row-Level Security**: Database-level isolation
 - ✅ **JWT Tokens**: Secure authentication
@@ -532,9 +543,11 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🎨 Screenshots
 
 ### Landing Page
+
 Professional enterprise landing page with sector showcase
 
 ### Sector Dashboards
+
 - **Banking Dashboard**: Account overview, transactions, risk metrics
 - **Healthcare Dashboard**: Patient stats, appointments, medical records
 - **Logistics Dashboard**: Shipment tracking, inventory, fleet status
@@ -545,6 +558,7 @@ Professional enterprise landing page with sector showcase
 ## 📚 Additional Documentation
 
 For detailed documentation, see:
+
 - **[FIXES_APPLIED.md](FIXES_APPLIED.md)** - Recent fixes and improvements
 - **[FINAL_STATUS.md](FINAL_STATUS.md)** - Complete system status
 - **[FEATURE_STATUS.md](FEATURE_STATUS.md)** - Feature implementation status
