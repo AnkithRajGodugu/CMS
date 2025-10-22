@@ -4,9 +4,12 @@ import com.example.cms.entity.Sector;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface SectorRepository extends JpaRepository<Sector, Long> {
     Optional<Sector> findByName(String name);
+    Optional<Sector> findByCode(String code);
+    List<Sector> findByEnabledTrueOrderByDisplayOrderAsc();
 }
