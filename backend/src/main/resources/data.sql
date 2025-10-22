@@ -1,32 +1,43 @@
--- Insert Sectors
-INSERT INTO sectors (id, name, description) VALUES 
-(1, 'Banking & Finance', 'Comprehensive customer management for banks, credit unions, and financial institutions'),
-(2, 'Healthcare', 'Patient management system designed for hospitals, clinics, and healthcare providers'),
-(3, 'Logistics & Supply Chain', 'Streamline operations for shipping, warehousing, and supply chain management'),
-(4, 'Content Creation', 'Manage clients, projects, and content workflows for creative agencies and freelancers')
+-- Insert Sectors with enhanced fields
+INSERT INTO sectors (id, code, name, description, icon, route_path, configuration, enabled, display_order) VALUES 
+(1, 'BANKING', 'Banking & Finance', 'Comprehensive customer management for banks, credit unions, and financial institutions', 'bank', '/banking', '{"features": ["accounts", "transactions", "loans"], "modules": ["retail", "corporate"]}', true, 1),
+(2, 'HEALTHCARE', 'Healthcare', 'Patient management system designed for hospitals, clinics, and healthcare providers', 'hospital', '/healthcare', '{"features": ["appointments", "patients", "prescriptions"], "modules": ["clinic", "pharmacy"]}', true, 2),
+(3, 'LOGISTICS', 'Logistics & Supply Chain', 'Streamline operations for shipping, warehousing, and supply chain management', 'truck', '/logistics', '{"features": ["shipments", "inventory", "tracking"], "modules": ["warehouse", "delivery"]}', true, 3),
+(4, 'CONTENT', 'Content Creation', 'Manage clients, projects, and content workflows for creative agencies and freelancers', 'edit', '/content', '{"features": ["projects", "clients", "workflows"], "modules": ["creative", "publishing"]}', true, 4),
+(5, 'EDUCATION', 'Education', 'Educational institution and student management', 'school', '/education', '{"features": ["students", "courses", "grades"], "modules": ["academic", "administration"]}', true, 5),
+(6, 'RETAIL', 'Retail', 'Retail operations and inventory management', 'shopping-cart', '/retail', '{"features": ["inventory", "orders", "customers"], "modules": ["pos", "ecommerce"]}', true, 6),
+(7, 'MANUFACTURING', 'Manufacturing', 'Manufacturing and production management', 'factory', '/manufacturing', '{"features": ["production", "quality", "inventory"], "modules": ["planning", "execution"]}', true, 7)
 ON CONFLICT (id) DO NOTHING;
 
--- Insert Users (password is 'password123' encoded with BCrypt)
-INSERT INTO users (id, username, password, role, sector_id) VALUES 
+-- Insert Sample Organizations
+INSERT INTO organizations (id, name, domain, sector_id, settings, active, created_at) VALUES
+(1, 'First National Bank', 'firstnational.com', 1, '{"branchCount": 50, "region": "North America"}', true, NOW()),
+(2, 'City General Hospital', 'cityhospital.com', 2, '{"bedCount": 500, "departments": ["Emergency", "Surgery", "Pediatrics"]}', true, NOW()),
+(3, 'Global Logistics Inc', 'globallogistics.com', 3, '{"warehouseCount": 20, "fleetSize": 100}', true, NOW()),
+(4, 'Creative Media Agency', 'creativemedia.com', 4, '{"teamSize": 25, "specialties": ["Video", "Design", "Copy"]}', true, NOW())
+ON CONFLICT (id) DO NOTHING;
+
+-- Insert Users with enhanced fields (password is 'password123' encoded with BCrypt)
+INSERT INTO users (id, username, email, password, role, user_type, sector_id, enabled, created_at) VALUES 
 -- Banking Users
-(1, 'banking_admin', '$2a$10$N.zmdr9k7uOLQvQHbh/Ta.4hy/Xx6oUH5Hx8fzMOn9O1k7Ej7.K2e', 'ADMIN', 1),
-(2, 'banking_manager', '$2a$10$N.zmdr9k7uOLQvQHbh/Ta.4hy/Xx6oUH5Hx8fzMOn9O1k7Ej7.K2e', 'MANAGER', 1),
-(3, 'banking_user', '$2a$10$N.zmdr9k7uOLQvQHbh/Ta.4hy/Xx6oUH5Hx8fzMOn9O1k7Ej7.K2e', 'USER', 1),
+(1, 'banking_admin', 'banking_admin@example.com', '$2a$10$N.zmdr9k7uOLQvQHbh/Ta.4hy/Xx6oUH5Hx8fzMOn9O1k7Ej7.K2e', 'ADMIN', 'INDIVIDUAL', 1, true, NOW()),
+(2, 'banking_manager', 'banking_manager@example.com', '$2a$10$N.zmdr9k7uOLQvQHbh/Ta.4hy/Xx6oUH5Hx8fzMOn9O1k7Ej7.K2e', 'MANAGER', 'INDIVIDUAL', 1, true, NOW()),
+(3, 'banking_user', 'banking_user@example.com', '$2a$10$N.zmdr9k7uOLQvQHbh/Ta.4hy/Xx6oUH5Hx8fzMOn9O1k7Ej7.K2e', 'USER', 'INDIVIDUAL', 1, true, NOW()),
 
 -- Healthcare Users
-(4, 'healthcare_admin', '$2a$10$N.zmdr9k7uOLQvQHbh/Ta.4hy/Xx6oUH5Hx8fzMOn9O1k7Ej7.K2e', 'ADMIN', 2),
-(5, 'healthcare_manager', '$2a$10$N.zmdr9k7uOLQvQHbh/Ta.4hy/Xx6oUH5Hx8fzMOn9O1k7Ej7.K2e', 'MANAGER', 2),
-(6, 'healthcare_user', '$2a$10$N.zmdr9k7uOLQvQHbh/Ta.4hy/Xx6oUH5Hx8fzMOn9O1k7Ej7.K2e', 'USER', 2),
+(4, 'healthcare_admin', 'healthcare_admin@example.com', '$2a$10$N.zmdr9k7uOLQvQHbh/Ta.4hy/Xx6oUH5Hx8fzMOn9O1k7Ej7.K2e', 'ADMIN', 'INDIVIDUAL', 2, true, NOW()),
+(5, 'healthcare_manager', 'healthcare_manager@example.com', '$2a$10$N.zmdr9k7uOLQvQHbh/Ta.4hy/Xx6oUH5Hx8fzMOn9O1k7Ej7.K2e', 'MANAGER', 'INDIVIDUAL', 2, true, NOW()),
+(6, 'healthcare_user', 'healthcare_user@example.com', '$2a$10$N.zmdr9k7uOLQvQHbh/Ta.4hy/Xx6oUH5Hx8fzMOn9O1k7Ej7.K2e', 'USER', 'INDIVIDUAL', 2, true, NOW()),
 
 -- Logistics Users
-(7, 'logistics_admin', '$2a$10$N.zmdr9k7uOLQvQHbh/Ta.4hy/Xx6oUH5Hx8fzMOn9O1k7Ej7.K2e', 'ADMIN', 3),
-(8, 'logistics_manager', '$2a$10$N.zmdr9k7uOLQvQHbh/Ta.4hy/Xx6oUH5Hx8fzMOn9O1k7Ej7.K2e', 'MANAGER', 3),
-(9, 'logistics_user', '$2a$10$N.zmdr9k7uOLQvQHbh/Ta.4hy/Xx6oUH5Hx8fzMOn9O1k7Ej7.K2e', 'USER', 3),
+(7, 'logistics_admin', 'logistics_admin@example.com', '$2a$10$N.zmdr9k7uOLQvQHbh/Ta.4hy/Xx6oUH5Hx8fzMOn9O1k7Ej7.K2e', 'ADMIN', 'INDIVIDUAL', 3, true, NOW()),
+(8, 'logistics_manager', 'logistics_manager@example.com', '$2a$10$N.zmdr9k7uOLQvQHbh/Ta.4hy/Xx6oUH5Hx8fzMOn9O1k7Ej7.K2e', 'MANAGER', 'INDIVIDUAL', 3, true, NOW()),
+(9, 'logistics_user', 'logistics_user@example.com', '$2a$10$N.zmdr9k7uOLQvQHbh/Ta.4hy/Xx6oUH5Hx8fzMOn9O1k7Ej7.K2e', 'USER', 'INDIVIDUAL', 3, true, NOW()),
 
 -- Content Creation Users
-(10, 'content_admin', '$2a$10$N.zmdr9k7uOLQvQHbh/Ta.4hy/Xx6oUH5Hx8fzMOn9O1k7Ej7.K2e', 'ADMIN', 4),
-(11, 'content_manager', '$2a$10$N.zmdr9k7uOLQvQHbh/Ta.4hy/Xx6oUH5Hx8fzMOn9O1k7Ej7.K2e', 'MANAGER', 4),
-(12, 'content_user', '$2a$10$N.zmdr9k7uOLQvQHbh/Ta.4hy/Xx6oUH5Hx8fzMOn9O1k7Ej7.K2e', 'USER', 4)
+(10, 'content_admin', 'content_admin@example.com', '$2a$10$N.zmdr9k7uOLQvQHbh/Ta.4hy/Xx6oUH5Hx8fzMOn9O1k7Ej7.K2e', 'ADMIN', 'INDIVIDUAL', 4, true, NOW()),
+(11, 'content_manager', 'content_manager@example.com', '$2a$10$N.zmdr9k7uOLQvQHbh/Ta.4hy/Xx6oUH5Hx8fzMOn9O1k7Ej7.K2e', 'MANAGER', 'INDIVIDUAL', 4, true, NOW()),
+(12, 'content_user', 'content_user@example.com', '$2a$10$N.zmdr9k7uOLQvQHbh/Ta.4hy/Xx6oUH5Hx8fzMOn9O1k7Ej7.K2e', 'USER', 'INDIVIDUAL', 4, true, NOW())
 ON CONFLICT (id) DO NOTHING;
 
 -- Insert Sample Customers for each sector
@@ -62,5 +73,6 @@ ON CONFLICT (id) DO NOTHING;
 
 -- Reset sequences to avoid conflicts
 SELECT setval('sectors_id_seq', (SELECT MAX(id) FROM sectors));
+SELECT setval('organizations_id_seq', (SELECT MAX(id) FROM organizations));
 SELECT setval('users_id_seq', (SELECT MAX(id) FROM users));
 SELECT setval('customers_id_seq', (SELECT MAX(id) FROM customers));

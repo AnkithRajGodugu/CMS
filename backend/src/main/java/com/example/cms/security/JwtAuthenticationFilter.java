@@ -1,5 +1,8 @@
 package com.example.cms.security;
 
+import com.example.cms.entity.User;
+import com.example.cms.repository.UserRepository;
+import com.example.cms.service.DatabaseContextService;
 import com.example.cms.service.UserDetailsServiceImpl;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -15,12 +18,18 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+/**
+ * JWT Authentication Filter that validates JWT tokens and sets up security context.
+ * Also sets the database user context for row-level security policies.
+ */
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
     private final UserDetailsServiceImpl userDetailsService;
+    private final UserRepository userRepository;
+    private final DatabaseContextService databaseContextService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, 
@@ -41,7 +50,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
         }
 
-        // Validate token
+        // Validate token and set security context
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
@@ -51,8 +60,35 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         userDetails, null, userDetails.getAuthorities());
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
+                
+                // Set database context for row-level security
+                try {
+                    User user = userRepository.findByUsername(username);
+                    if (user != null && user.getId() != null) {
+                        databaseContextService.setUserContext(user.getId());
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("Set database context for user: " + username + " (ID: " + user.getId() + ")");
+                        }
+                    }
+                } catch (Exception e) {
+                    logger.error("Failed to set database context for user: " + username, e);
+                    // Continue processing even if database context setting fails
+                }
             }
         }
-        filterChain.doFilter(request, response);
+        
+        try {
+            filterChain.doFilter(request, response);
+        } finally {
+            // Clear database context after request processing
+            // This ensures context doesn't leak between requests
+            try {
+                databaseContextService.clearUserContext();
+            } catch (Exception e) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Error clearing database context: " + e.getMessage());
+                }
+            }
+        }
     }
 }
