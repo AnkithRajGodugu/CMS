@@ -26,7 +26,7 @@ public class User {
     private Sector sector;
 
     public enum Role {
-        ADMIN, MANAGER, USER, banking, healthcare, logistics, content
+        ADMIN, MANAGER, USER, BANKING, HEALTHCARE, LOGISTICS, CONTENT
     }
 
     // Constructors

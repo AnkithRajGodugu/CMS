@@ -65,28 +65,28 @@ public class DataInitializer implements CommandLineRunner {
             userRepository.save(admin);
 
             // Create sector-specific users
-            User bankingUser = new User("bank_user", passwordEncoder.encode("bank123"), User.Role.banking);
+            User bankingUser = new User("bank_user", passwordEncoder.encode("bank123"), User.Role.BANKING);
             bankingUser.setSector(bankingSector);
             userRepository.save(bankingUser);
 
-            User healthcareUser = new User("health_user", passwordEncoder.encode("health123"), User.Role.healthcare);
+            User healthcareUser = new User("health_user", passwordEncoder.encode("health123"), User.Role.HEALTHCARE);
             healthcareUser.setSector(healthcareSector);
             userRepository.save(healthcareUser);
 
-            User logisticsUser = new User("logistics_user", passwordEncoder.encode("logistics123"), User.Role.logistics);
+            User logisticsUser = new User("logistics_user", passwordEncoder.encode("logistics123"), User.Role.LOGISTICS);
             logisticsUser.setSector(logisticsSector);
             userRepository.save(logisticsUser);
 
-            User contentUser = new User("content_user", passwordEncoder.encode("content123"), User.Role.content);
+            User contentUser = new User("content_user", passwordEncoder.encode("content123"), User.Role.CONTENT);
             contentUser.setSector(contentSector);
             userRepository.save(contentUser);
 
             System.out.println("✅ Test users initialized:");
             System.out.println("   - admin / admin123 (ADMIN)");
-            System.out.println("   - bank_user / bank123 (banking)");
-            System.out.println("   - health_user / health123 (healthcare)");
-            System.out.println("   - logistics_user / logistics123 (logistics)");
-            System.out.println("   - content_user / content123 (content)");
+            System.out.println("   - bank_user / bank123 (BANKING)");
+            System.out.println("   - health_user / health123 (HEALTHCARE)");
+            System.out.println("   - logistics_user / logistics123 (LOGISTICS)");
+            System.out.println("   - content_user / content123 (CONTENT)");
         }
 
         // Initialize sample banking data

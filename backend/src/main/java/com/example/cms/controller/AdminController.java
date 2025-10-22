@@ -1,15 +1,19 @@
 package com.example.cms.controller;
 
-import com.example.cms.entity.User;
-import com.example.cms.entity.Sector;
-import com.example.cms.repository.UserRepository;
-import com.example.cms.repository.SectorRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.*;
-
 import java.util.HashMap;
 import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.example.cms.entity.Sector;
+import com.example.cms.entity.User;
+import com.example.cms.repository.SectorRepository;
+import com.example.cms.repository.UserRepository;
 
 @RestController
 @RequestMapping("/api/admin")
@@ -60,19 +64,19 @@ public class AdminController {
                 admin.setSector(bankingSector);
                 userRepository.save(admin);
 
-                User bankingUser = new User("bank_user", passwordEncoder.encode("bank123"), User.Role.banking);
+                User bankingUser = new User("bank_user", passwordEncoder.encode("bank123"), User.Role.BANKING);
                 bankingUser.setSector(bankingSector);
                 userRepository.save(bankingUser);
 
-                User healthcareUser = new User("health_user", passwordEncoder.encode("health123"), User.Role.healthcare);
+                User healthcareUser = new User("health_user", passwordEncoder.encode("health123"), User.Role.HEALTHCARE);
                 healthcareUser.setSector(healthcareSector);
                 userRepository.save(healthcareUser);
 
-                User logisticsUser = new User("logistics_user", passwordEncoder.encode("logistics123"), User.Role.logistics);
+                User logisticsUser = new User("logistics_user", passwordEncoder.encode("logistics123"), User.Role.LOGISTICS);
                 logisticsUser.setSector(logisticsSector);
                 userRepository.save(logisticsUser);
 
-                User contentUser = new User("content_user", passwordEncoder.encode("content123"), User.Role.content);
+                User contentUser = new User("content_user", passwordEncoder.encode("content123"), User.Role.CONTENT);
                 contentUser.setSector(contentSector);
                 userRepository.save(contentUser);
 
