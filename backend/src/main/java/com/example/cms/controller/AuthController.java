@@ -29,7 +29,6 @@ public class AuthController {
     private final AuthService authService;
     private final JwtUtil jwtUtil;
     private final AuthenticationManager authenticationManager;
-    private final com.example.cms.service.KafkaProducerService kafkaProducerService;
     
     // Simple rate limiting (in production, use Redis or proper rate limiting)
     private final Map<String, AtomicInteger> loginAttempts = new ConcurrentHashMap<>();
