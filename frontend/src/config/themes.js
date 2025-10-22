@@ -47,6 +47,58 @@ export const SECTOR_THEMES = {
       primary: 'Inter, system-ui, sans-serif',
       secondary: 'Georgia, serif'
     },
+    typography: {
+      fontSizes: {
+        xs: '0.75rem',    // 12px
+        sm: '0.875rem',   // 14px
+        base: '1rem',     // 16px
+        lg: '1.125rem',   // 18px
+        xl: '1.25rem',    // 20px
+        '2xl': '1.5rem',  // 24px
+        '3xl': '1.875rem', // 30px
+        '4xl': '2.25rem', // 36px
+        '5xl': '3rem'     // 48px
+      },
+      fontWeights: {
+        light: '300',
+        normal: '400',
+        medium: '500',
+        semibold: '600',
+        bold: '700',
+        extrabold: '800'
+      },
+      lineHeights: {
+        tight: '1.25',
+        normal: '1.5',
+        relaxed: '1.75',
+        loose: '2'
+      },
+      letterSpacing: {
+        tight: '-0.025em',
+        normal: '0',
+        wide: '0.025em',
+        wider: '0.05em'
+      }
+    },
+    spacing: {
+      xs: '0.25rem',   // 4px
+      sm: '0.5rem',    // 8px
+      md: '1rem',      // 16px
+      lg: '1.5rem',    // 24px
+      xl: '2rem',      // 32px
+      '2xl': '3rem',   // 48px
+      '3xl': '4rem',   // 64px
+      '4xl': '6rem'    // 96px
+    },
+    borderRadius: {
+      none: '0',
+      sm: '0.125rem',  // 2px
+      md: '0.375rem',  // 6px
+      lg: '0.5rem',    // 8px
+      xl: '0.75rem',   // 12px
+      '2xl': '1rem',   // 16px
+      full: '9999px'
+    },
     logo: 'banking',
     icon: '🏦',
     daisyTheme: 'banking'
@@ -85,6 +137,58 @@ export const SECTOR_THEMES = {
     fonts: {
       primary: 'Inter, system-ui, sans-serif',
       secondary: 'system-ui, sans-serif'
+    },
+    typography: {
+      fontSizes: {
+        xs: '0.75rem',
+        sm: '0.875rem',
+        base: '1rem',
+        lg: '1.125rem',
+        xl: '1.25rem',
+        '2xl': '1.5rem',
+        '3xl': '1.875rem',
+        '4xl': '2.25rem',
+        '5xl': '3rem'
+      },
+      fontWeights: {
+        light: '300',
+        normal: '400',
+        medium: '500',
+        semibold: '600',
+        bold: '700',
+        extrabold: '800'
+      },
+      lineHeights: {
+        tight: '1.25',
+        normal: '1.5',
+        relaxed: '1.75',
+        loose: '2'
+      },
+      letterSpacing: {
+        tight: '-0.025em',
+        normal: '0',
+        wide: '0.025em',
+        wider: '0.05em'
+      }
+    },
+    spacing: {
+      xs: '0.25rem',
+      sm: '0.5rem',
+      md: '1rem',
+      lg: '1.5rem',
+      xl: '2rem',
+      '2xl': '3rem',
+      '3xl': '4rem',
+      '4xl': '6rem'
+    },
+    borderRadius: {
+      none: '0',
+      sm: '0.125rem',
+      md: '0.375rem',
+      lg: '0.5rem',
+      xl: '0.75rem',
+      '2xl': '1rem',
+      full: '9999px'
     },
     logo: 'healthcare',
     icon: '🏥',
@@ -125,6 +229,58 @@ export const SECTOR_THEMES = {
       primary: 'Inter, system-ui, sans-serif',
       secondary: 'system-ui, sans-serif'
     },
+    typography: {
+      fontSizes: {
+        xs: '0.75rem',
+        sm: '0.875rem',
+        base: '1rem',
+        lg: '1.125rem',
+        xl: '1.25rem',
+        '2xl': '1.5rem',
+        '3xl': '1.875rem',
+        '4xl': '2.25rem',
+        '5xl': '3rem'
+      },
+      fontWeights: {
+        light: '300',
+        normal: '400',
+        medium: '500',
+        semibold: '600',
+        bold: '700',
+        extrabold: '800'
+      },
+      lineHeights: {
+        tight: '1.25',
+        normal: '1.5',
+        relaxed: '1.75',
+        loose: '2'
+      },
+      letterSpacing: {
+        tight: '-0.025em',
+        normal: '0',
+        wide: '0.025em',
+        wider: '0.05em'
+      }
+    },
+    spacing: {
+      xs: '0.25rem',
+      sm: '0.5rem',
+      md: '1rem',
+      lg: '1.5rem',
+      xl: '2rem',
+      '2xl': '3rem',
+      '3xl': '4rem',
+      '4xl': '6rem'
+    },
+    borderRadius: {
+      none: '0',
+      sm: '0.125rem',
+      md: '0.375rem',
+      lg: '0.5rem',
+      xl: '0.75rem',
+      '2xl': '1rem',
+      full: '9999px'
+    },
     logo: 'logistics',
     icon: '🚚',
     daisyTheme: 'logistics'
@@ -163,6 +319,58 @@ export const SECTOR_THEMES = {
     fonts: {
       primary: 'Inter, system-ui, sans-serif',
       secondary: 'system-ui, sans-serif'
+    },
+    typography: {
+      fontSizes: {
+        xs: '0.75rem',
+        sm: '0.875rem',
+        base: '1rem',
+        lg: '1.125rem',
+        xl: '1.25rem',
+        '2xl': '1.5rem',
+        '3xl': '1.875rem',
+        '4xl': '2.25rem',
+        '5xl': '3rem'
+      },
+      fontWeights: {
+        light: '300',
+        normal: '400',
+        medium: '500',
+        semibold: '600',
+        bold: '700',
+        extrabold: '800'
+      },
+      lineHeights: {
+        tight: '1.25',
+        normal: '1.5',
+        relaxed: '1.75',
+        loose: '2'
+      },
+      letterSpacing: {
+        tight: '-0.025em',
+        normal: '0',
+        wide: '0.025em',
+        wider: '0.05em'
+      }
+    },
+    spacing: {
+      xs: '0.25rem',
+      sm: '0.5rem',
+      md: '1rem',
+      lg: '1.5rem',
+      xl: '2rem',
+      '2xl': '3rem',
+      '3xl': '4rem',
+      '4xl': '6rem'
+    },
+    borderRadius: {
+      none: '0',
+      sm: '0.125rem',
+      md: '0.375rem',
+      lg: '0.5rem',
+      xl: '0.75rem',
+      '2xl': '1rem',
+      full: '9999px'
     },
     logo: 'content',
     icon: '🎨',
@@ -211,6 +419,131 @@ export const ANIMATION_DURATIONS = {
   MODAL: 250
 };
 
+// Theme utility functions
+
+/**
+ * Apply theme colors to CSS custom properties
+ * @param {Object} theme - Theme object from SECTOR_THEMES
+ */
+export const applyThemeColors = (theme) => {
+  if (!theme || !theme.colors) return;
+  
+  const root = document.documentElement;
+  root.style.setProperty(CSS_VARIABLES.PRIMARY, theme.colors.primary);
+  root.style.setProperty(CSS_VARIABLES.SECONDARY, theme.colors.secondary);
+  root.style.setProperty(CSS_VARIABLES.ACCENT, theme.colors.accent);
+  root.style.setProperty(CSS_VARIABLES.BACKGROUND, theme.colors.background);
+  root.style.setProperty(CSS_VARIABLES.SURFACE, theme.colors.surface);
+  root.style.setProperty(CSS_VARIABLES.TEXT, theme.colors.text);
+  root.style.setProperty(CSS_VARIABLES.TEXT_SECONDARY, theme.colors.textSecondary);
+  root.style.setProperty(CSS_VARIABLES.BORDER, theme.colors.border);
+};
+
+/**
+ * Get color value from theme
+ * @param {string} sector - Sector identifier
+ * @param {string} colorKey - Color key (e.g., 'primary', 'secondary')
+ * @returns {string} Color value
+ */
+export const getThemeColor = (sector, colorKey) => {
+  const theme = getTheme(sector);
+  return theme.colors[colorKey] || theme.colors.primary;
+};
+
+/**
+ * Get gradient class from theme
+ * @param {string} sector - Sector identifier
+ * @param {string} gradientKey - Gradient key (e.g., 'primary', 'hero')
+ * @returns {string} Tailwind gradient classes
+ */
+export const getThemeGradient = (sector, gradientKey = 'primary') => {
+  const theme = getTheme(sector);
+  return theme.gradients[gradientKey] || theme.gradients.primary;
+};
+
+/**
+ * Get typography value from theme
+ * @param {string} sector - Sector identifier
+ * @param {string} category - Typography category (e.g., 'fontSizes', 'fontWeights')
+ * @param {string} key - Specific key within category
+ * @returns {string} Typography value
+ */
+export const getTypography = (sector, category, key) => {
+  const theme = getTheme(sector);
+  return theme.typography?.[category]?.[key] || '';
+};
+
+/**
+ * Get spacing value from theme
+ * @param {string} sector - Sector identifier
+ * @param {string} size - Spacing size (e.g., 'sm', 'md', 'lg')
+ * @returns {string} Spacing value
+ */
+export const getSpacing = (sector, size) => {
+  const theme = getTheme(sector);
+  return theme.spacing?.[size] || theme.spacing?.md || '1rem';
+};
+
+/**
+ * Get border radius value from theme
+ * @param {string} sector - Sector identifier
+ * @param {string} size - Border radius size (e.g., 'sm', 'md', 'lg')
+ * @returns {string} Border radius value
+ */
+export const getBorderRadius = (sector, size) => {
+  const theme = getTheme(sector);
+  return theme.borderRadius?.[size] || theme.borderRadius?.md || '0.375rem';
+};
+
+/**
+ * Get shadow value from theme
+ * @param {string} sector - Sector identifier
+ * @param {string} size - Shadow size (e.g., 'sm', 'md', 'lg')
+ * @returns {string} Shadow value
+ */
+export const getShadow = (sector, size) => {
+  const theme = getTheme(sector);
+  return theme.shadows?.[size] || theme.shadows?.md || '';
+};
+
+/**
+ * Check if a sector exists
+ * @param {string} sector - Sector identifier
+ * @returns {boolean} True if sector exists
+ */
+export const isSectorValid = (sector) => {
+  return sector && Object.prototype.hasOwnProperty.call(SECTOR_THEMES, sector);
+};
+
+/**
+ * Get DaisyUI theme name for sector
+ * @param {string} sector - Sector identifier
+ * @returns {string} DaisyUI theme name
+ */
+export const getDaisyTheme = (sector) => {
+  const theme = getTheme(sector);
+  return theme.daisyTheme || 'light';
+};
+
+/**
+ * Generate inline styles object from theme
+ * @param {string} sector - Sector identifier
+ * @returns {Object} Inline styles object
+ */
+export const getThemeStyles = (sector) => {
+  const theme = getTheme(sector);
+  return {
+    '--color-primary': theme.colors.primary,
+    '--color-secondary': theme.colors.secondary,
+    '--color-accent': theme.colors.accent,
+    '--color-background': theme.colors.background,
+    '--color-surface': theme.colors.surface,
+    '--color-text': theme.colors.text,
+    '--color-text-secondary': theme.colors.textSecondary,
+    '--color-border': theme.colors.border
+  };
+};
+
 export default {
   SECTORS,
   SECTOR_THEMES,
@@ -220,5 +553,15 @@ export default {
   getAllSectors,
   getSectorNames,
   CSS_VARIABLES,
-  ANIMATION_DURATIONS
+  ANIMATION_DURATIONS,
+  applyThemeColors,
+  getThemeColor,
+  getThemeGradient,
+  getTypography,
+  getSpacing,
+  getBorderRadius,
+  getShadow,
+  isSectorValid,
+  getDaisyTheme,
+  getThemeStyles
 };

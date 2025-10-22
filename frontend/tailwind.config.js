@@ -8,6 +8,8 @@ export default {
     extend: {
       fontFamily: {
         'sans': ['Inter', 'system-ui', 'sans-serif'],
+        'primary': ['Inter', 'system-ui', 'sans-serif'],
+        'secondary': ['Georgia', 'serif'],
       },
       colors: {
         // Sector-specific color palettes
