@@ -2,8 +2,11 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: backend-deployment
+  labels:
+    app: backend
+    version: v1
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: backend
@@ -11,25 +14,72 @@ spec:
     metadata:
       labels:
         app: backend
+        version: v1
     spec:
       containers:
       - name: backend
         image: backend:latest # Replace with your backend image name
+        imagePullPolicy: Always
         ports:
-        - containerPort: 8080
+        - name: http
+          containerPort: 8080
+          protocol: TCP
         env:
         - name: SPRING_DATASOURCE_URL
-          value: "jdbc:postgresql://postgres-service:5432/cms_db"
+          valueFrom:
+            configMapKeyRef:
+              name: backend-config
+              key: database.url
         - name: SPRING_DATASOURCE_USERNAME
-          value: "postgres"
+          valueFrom:
+            secretKeyRef:
+              name: backend-secrets
+              key: database.username
         - name: SPRING_DATASOURCE_PASSWORD
-          value: "Hello@123!"
+          valueFrom:
+            secretKeyRef:
+              name: backend-secrets
+              key: database.password
         - name: KAFKA_BOOTSTRAP_SERVERS
-          value: "kafka-service:9092"
+          valueFrom:
+            configMapKeyRef:
+              name: backend-config
+              key: kafka.bootstrap.servers
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: backend-secrets
+              key: jwt.secret
+        - name: JAVA_OPTS
+          value: "-Xms512m -Xmx1024m -XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0"
         resources:
           requests:
-            memory: "512Mi"
+            memory: "768Mi"
             cpu: "500m"
           limits:
-            memory: "1Gi"
-            cpu: "1000m"
+            memory: "1536Mi"
+            cpu: "1500m"
+        livenessProbe:
+          httpGet:
+            path: /actuator/health/liveness
+            port: 8080
+          initialDelaySeconds: 90
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /actuator/health/readiness
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        startupProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 12

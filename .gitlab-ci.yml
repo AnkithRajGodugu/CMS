@@ -1,7 +1,10 @@
 stages:
   - build
   - test
+  - security
   - docker
+  - migrate
+  - deploy
 
 # =========================
 # 1. Build JAR with Maven
@@ -22,21 +25,26 @@ build:
     policy: pull-push
 
 # =========================
-# 2. Run Tests with Testcontainers
+# 2. Run Unit Tests
 # =========================
-test:
+unit-test:
   stage: test
   image: maven:3.9.6-eclipse-temurin-17
   variables:
-    SPRING_PROFILES_ACTIVE: test   # Ensures application-test.yml is used
+    SPRING_PROFILES_ACTIVE: test
     MAVEN_OPTS: "-Djava.net.preferIPv4Stack=true"
   before_script:
     - cd backend
   script:
     - echo "⚡ Running unit tests"
-    - mvn clean test -Dtest=CustomerServiceTest
-    - echo "⚡ Building application"
-    - mvn clean package -DskipTests
+    - mvn clean test -Dtest=*Test
+  artifacts:
+    when: always
+    reports:
+      junit:
+        - backend/target/surefire-reports/TEST-*.xml
+    paths:
+      - backend/target/surefire-reports/
   cache:
     key: ${CI_COMMIT_REF_SLUG}
     paths:
@@ -49,7 +57,88 @@ test:
       - stuck_or_timeout_failure
 
 # =========================
-# 3. Build & Push Docker Image
+# 3. Run Integration Tests
+# =========================
+integration-test:
+  stage: test
+  image: maven:3.9.6-eclipse-temurin-17
+  services:
+    - docker:dind
+  variables:
+    SPRING_PROFILES_ACTIVE: test
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ""
+  before_script:
+    - cd backend
+  script:
+    - echo "⚡ Running integration tests"
+    - mvn verify -Dtest=*IntegrationTest
+  artifacts:
+    when: always
+    reports:
+      junit:
+        - backend/target/failsafe-reports/TEST-*.xml
+    paths:
+      - backend/target/failsafe-reports/
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - backend/.m2/repository
+    policy: pull
+  allow_failure: true
+  retry:
+    max: 2
+    when:
+      - runner_system_failure
+      - stuck_or_timeout_failure
+
+# =========================
+# 4. Frontend Tests
+# =========================
+frontend-test:
+  stage: test
+  image: node:20-alpine
+  before_script:
+    - cd frontend
+    - npm ci --legacy-peer-deps --silent
+  script:
+    - echo "⚡ Running frontend tests"
+    - npm run test -- --run
+  artifacts:
+    when: always
+    paths:
+      - frontend/coverage/
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}-frontend
+    paths:
+      - frontend/node_modules/
+    policy: pull-push
+  allow_failure: true
+
+# =========================
+# 5. Security Scanning
+# =========================
+dependency-check:
+  stage: security
+  image: maven:3.9.6-eclipse-temurin-17
+  before_script:
+    - cd backend
+  script:
+    - echo "⚡ Checking for vulnerable dependencies"
+    - mvn dependency:tree
+    - mvn versions:display-dependency-updates
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - backend/.m2/repository
+    policy: pull
+  allow_failure: true
+  only:
+    - main
+    - develop
+
+# =========================
+# 6. Build & Push Docker Image
 # =========================
 docker-build:
   stage: docker
@@ -59,11 +148,152 @@ docker-build:
   variables:
     DOCKER_TLS_CERTDIR: ""
     DOCKER_HOST: tcp://docker:2375
+    IMAGE_TAG: ${CI_COMMIT_SHORT_SHA}
   script:
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" $CI_REGISTRY --password-stdin
-    - docker build -t $CI_REGISTRY_IMAGE:latest .
+    - docker build -t $CI_REGISTRY_IMAGE:$IMAGE_TAG -t $CI_REGISTRY_IMAGE:latest .
+    - docker push $CI_REGISTRY_IMAGE:$IMAGE_TAG
     - docker push $CI_REGISTRY_IMAGE:latest
   only:
     - main
+    - develop
   dependencies:
     - build
+
+# =========================
+# 7. Database Migration
+# =========================
+db-migrate:
+  stage: migrate
+  image: maven:3.9.6-eclipse-temurin-17
+  variables:
+    SPRING_PROFILES_ACTIVE: staging
+  before_script:
+    - cd backend
+  script:
+    - echo "⚡ Running database migrations"
+    - |
+      mvn liquibase:update \
+        -Dliquibase.url=${STAGING_DB_URL} \
+        -Dliquibase.username=${STAGING_DB_USERNAME} \
+        -Dliquibase.password=${STAGING_DB_PASSWORD}
+  only:
+    - main
+  when: manual
+  environment:
+    name: staging
+  allow_failure: false
+
+# =========================
+# 8. Deploy to Staging
+# =========================
+deploy-staging:
+  stage: deploy
+  image: bitnami/kubectl:latest
+  variables:
+    KUBE_NAMESPACE: cms-staging
+    IMAGE_TAG: ${CI_COMMIT_SHORT_SHA}
+  script:
+    - echo "⚡ Deploying to staging environment"
+    - kubectl config use-context ${KUBE_CONTEXT}
+    - kubectl config set-context --current --namespace=${KUBE_NAMESPACE}
+    
+    # Apply ConfigMaps and Secrets
+    - kubectl apply -f k8s/namespace.yaml
+    - kubectl apply -f k8s/backend-configmap.yaml -n ${KUBE_NAMESPACE}
+    - kubectl apply -f k8s/backend-secrets.yaml -n ${KUBE_NAMESPACE}
+    
+    # Apply Database
+    - kubectl apply -f k8s/postgres-pvc.yaml -n ${KUBE_NAMESPACE}
+    - kubectl apply -f k8s/postgres-deployment.yaml -n ${KUBE_NAMESPACE}
+    
+    # Apply Kafka/Zookeeper
+    - kubectl apply -f k8s/zookeeper-deployment.yaml -n ${KUBE_NAMESPACE}
+    - kubectl apply -f k8s/kafka-deployment.yaml -n ${KUBE_NAMESPACE}
+    
+    # Update backend deployment with new image
+    - kubectl set image deployment/backend-deployment backend=$CI_REGISTRY_IMAGE:$IMAGE_TAG -n ${KUBE_NAMESPACE}
+    - kubectl apply -f k8s/backend-deployment.yaml -n ${KUBE_NAMESPACE}
+    - kubectl apply -f k8s/backend-service.yaml -n ${KUBE_NAMESPACE}
+    - kubectl apply -f k8s/backend-hpa.yaml -n ${KUBE_NAMESPACE}
+    
+    # Apply frontend
+    - kubectl apply -f k8s/frontend-deployment.yaml -n ${KUBE_NAMESPACE}
+    - kubectl apply -f k8s/frontend-service.yaml -n ${KUBE_NAMESPACE}
+    - kubectl apply -f k8s/frontend-hpa.yaml -n ${KUBE_NAMESPACE}
+    
+    # Apply Ingress
+    - kubectl apply -f k8s/ingress.yaml -n ${KUBE_NAMESPACE}
+    
+    # Wait for rollout
+    - kubectl rollout status deployment/backend-deployment -n ${KUBE_NAMESPACE} --timeout=5m
+    - kubectl rollout status deployment/frontend-deployment -n ${KUBE_NAMESPACE} --timeout=5m
+    
+    - echo "✅ Deployment to staging completed"
+  environment:
+    name: staging
+    url: https://staging.cms.example.com
+    on_stop: stop-staging
+  only:
+    - main
+  when: manual
+
+# =========================
+# 9. Deploy to Production
+# =========================
+deploy-production:
+  stage: deploy
+  image: bitnami/kubectl:latest
+  variables:
+    KUBE_NAMESPACE: cms-production
+    IMAGE_TAG: ${CI_COMMIT_SHORT_SHA}
+  script:
+    - echo "⚡ Deploying to production environment"
+    - kubectl config use-context ${KUBE_CONTEXT}
+    - kubectl config set-context --current --namespace=${KUBE_NAMESPACE}
+    
+    # Apply ConfigMaps and Secrets
+    - kubectl apply -f k8s/namespace.yaml
+    - kubectl apply -f k8s/backend-configmap.yaml -n ${KUBE_NAMESPACE}
+    - kubectl apply -f k8s/backend-secrets.yaml -n ${KUBE_NAMESPACE}
+    
+    # Update backend deployment with new image
+    - kubectl set image deployment/backend-deployment backend=$CI_REGISTRY_IMAGE:$IMAGE_TAG -n ${KUBE_NAMESPACE}
+    - kubectl apply -f k8s/backend-deployment.yaml -n ${KUBE_NAMESPACE}
+    - kubectl apply -f k8s/backend-hpa.yaml -n ${KUBE_NAMESPACE}
+    
+    # Update frontend deployment
+    - kubectl apply -f k8s/frontend-deployment.yaml -n ${KUBE_NAMESPACE}
+    - kubectl apply -f k8s/frontend-hpa.yaml -n ${KUBE_NAMESPACE}
+    
+    # Wait for rollout
+    - kubectl rollout status deployment/backend-deployment -n ${KUBE_NAMESPACE} --timeout=10m
+    - kubectl rollout status deployment/frontend-deployment -n ${KUBE_NAMESPACE} --timeout=5m
+    
+    - echo "✅ Deployment to production completed"
+  environment:
+    name: production
+    url: https://cms.example.com
+  only:
+    - main
+  when: manual
+
+# =========================
+# 10. Stop Staging Environment
+# =========================
+stop-staging:
+  stage: deploy
+  image: bitnami/kubectl:latest
+  variables:
+    KUBE_NAMESPACE: cms-staging
+  script:
+    - echo "⚡ Stopping staging environment"
+    - kubectl config use-context ${KUBE_CONTEXT}
+    - kubectl scale deployment --all --replicas=0 -n ${KUBE_NAMESPACE}
+    - echo "✅ Staging environment stopped"
+  environment:
+    name: staging
+    action: stop
+  only:
+    - main
+  when: manual
