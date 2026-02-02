@@ -1,0 +1,37 @@
+### Health check
+
+GET http://localhost:8082/actuator/health
+
+###
+
+### Get all sectors (ADMIN only)
+@token = eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoiQURNSU4iLCJzZWN0b3IiOiJCYW5raW5nIiwic3ViIjoiYWRtaW4iLCJpYXQiOjE3NzAwMjM0ODQsImV4cCI6MTc3MDEwOTg4NH0.XIXvR_T7IgR-_B8dbXbj1Y2zmOIhOvQZ9fFUT6ONxz8
+GET http://localhost:8082/api/sectors
+Authorization: Bearer {{token}}
+###
+GET http://localhost:8082/api/sectors/banking/accounts
+Authorization: Bearer {{token}}
+###
+GET http://localhost:8082/api/sectors/healthcare/patients
+Authorization: Bearer {{token}}
+
+### Login as admin
+POST http://localhost:8082/api/auth/login
+Content-Type: application/json
+
+
+{
+  "username": "admin",
+  "password": "admin123"
+}
+
+
+###
+POST http://localhost:8082/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "bank_user",
+  "password": "bank123"
+}
+
