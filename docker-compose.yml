@@ -12,7 +12,6 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: Hello@123!
       POSTGRES_DB: cms_db
-      POSTGRES_INITDB_ARGS: "-E UTF8"
     ports:
       - "5432:5432"
     volumes:
@@ -26,7 +25,7 @@ services:
       - cms-network
 
   # =====================
-  # pgAdmin (DB UI - optional)
+  # pgAdmin
   # =====================
   pgadmin:
     image: dpage/pgadmin4
@@ -44,7 +43,7 @@ services:
       - cms-network
 
   # =====================
-  # Zookeeper (Kafka dependency)
+  # Zookeeper
   # =====================
   zookeeper:
     image: confluentinc/cp-zookeeper:7.4.0
@@ -55,54 +54,47 @@ services:
       ZOOKEEPER_TICK_TIME: 2000
     ports:
       - "2181:2181"
-    healthcheck:
-      test: ["CMD", "nc", "-z", "localhost", "2181"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
     networks:
       - cms-network
 
   # =====================
-  # Kafka Message Broker
+  # Kafka (STABLE CONFIG)
   # =====================
   kafka:
     image: confluentinc/cp-kafka:7.4.0
     container_name: cms-kafka
     restart: always
     depends_on:
-      zookeeper:
-        condition: service_healthy
+      - zookeeper
     ports:
-      - "9092:9092"
+      - "29092:29092"
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:9093
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+
+      # LISTENERS
+      KAFKA_LISTENERS: INTERNAL://0.0.0.0:9092,EXTERNAL://0.0.0.0:29092
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9092,EXTERNAL://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+
+      # SINGLE NODE SETTINGS
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
-      KAFKA_AUTO_CREATE_TOPICS_ENABLE: true
-    healthcheck:
-      test: ["CMD", "kafka-broker-api-versions", "--bootstrap-server", "localhost:9092"]
-      interval: 10s
-      timeout: 10s
-      retries: 5
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
     networks:
       - cms-network
 
   # =====================
-  # Kafka UI (optional - for monitoring)
+  # Kafka UI
   # =====================
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
     container_name: cms-kafka-ui
     restart: always
     depends_on:
-      kafka:
-        condition: service_healthy
+      - kafka
     ports:
       - "8081:8080"
     environment:
@@ -112,21 +104,19 @@ services:
       - cms-network
 
   # =====================
-  # Backend + Frontend (Spring Boot + React build)
+  # Backend (Spring Boot)
   # =====================
   backend:
     build:
       context: .
       dockerfile: Dockerfile
-      args:
-        VITE_API_URL: http://backend:8080   # 🔥 dynamic API URL for frontend build
     container_name: cms-backend
     restart: always
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/cms_db
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: Hello@123!
-      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_HIBERNATE_DDL_AUTO: create-drop
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       JAVA_OPTS: "-Xms512m -Xmx1024m"
     ports:
@@ -135,57 +125,30 @@ services:
       postgres:
         condition: service_healthy
       kafka:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
+        condition: service_started
     networks:
       - cms-network
 
   # =====================
-  # Prometheus (Metrics Collection)
+  # Prometheus
   # =====================
   prometheus:
     image: prom/prometheus:latest
     container_name: cms-prometheus
     restart: always
     ports:
-      - "9090:9090"
+      - "19090:9090"
     volumes:
       - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus_data:/prometheus
     command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--storage.tsdb.path=/prometheus'
+      - "--config.file=/etc/prometheus/prometheus.yml"
     networks:
       - cms-network
-
-  # =====================
-  # Grafana (Metrics Visualization)
-  # =====================
-  # grafana:
-  #   image: grafana/grafana:latest
-  #   container_name: cms-grafana
-  #   restart: always
-  #   ports:
-  #     - "3000:3000"
-  #   environment:
-  #     GF_SECURITY_ADMIN_USER: admin
-  #     GF_SECURITY_ADMIN_PASSWORD: admin
-  #   volumes:
-  #     - grafana_data:/var/lib/grafana
-  #   depends_on:
-  #     - prometheus
-  #   networks:
-  #     - cms-network
 
 volumes:
   postgres_data:
   prometheus_data:
-  grafana_data:
 
 networks:
   cms-network:

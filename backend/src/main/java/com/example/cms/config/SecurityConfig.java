@@ -2,7 +2,6 @@ package com.example.cms.config;
 
 import com.example.cms.security.JwtAuthenticationFilter;
 import com.example.cms.security.SectorAuthorizationFilter;
-import com.example.cms.service.UserDetailsServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,6 +20,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -30,62 +30,114 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final SectorAuthorizationFilter sectorAuthorizationFilter;
-    private final UserDetailsServiceImpl userDetailsService;
 
+    // ===================== Password Encoder =====================
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder(12); // Stronger hashing
+        return new BCryptPasswordEncoder(12);
     }
 
+    // ===================== Authentication Manager =====================
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
-        return config.getAuthenticationManager();
+    public AuthenticationManager authenticationManager(
+            AuthenticationConfiguration configuration) throws Exception {
+        return configuration.getAuthenticationManager();
     }
 
+    // ===================== Security Filter Chain =====================
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+
         http
-            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-            .csrf(csrf -> csrf.disable())
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(authz -> authz
-                // Public endpoints - API
-                .requestMatchers("/api/auth/**", "/api/health/**", "/api/test/**", "/api/public/**").permitAll()
-                .requestMatchers("/api/admin/init-users", "/api/admin/users", "/api/admin/create-sector-users").permitAll() // Temporary for setup
-                
-                // Public endpoints - Frontend routes (for React Router)
-                .requestMatchers("/", "/index.html", "/login", "/signup", "/test-credentials").permitAll()
-                .requestMatchers("/dashboard/**", "/sectors/**", "/banking/**", "/healthcare/**", "/logistics/**", "/content/**").permitAll()
-                .requestMatchers("/about", "/docs", "/documentation").permitAll()
-                
-                // Static resources
-                .requestMatchers("/static/**", "/assets/**", "/*.js", "/*.css", "/*.ico", "/*.svg", "/*.png", "/*.jpg").permitAll()
-                .requestMatchers("/actuator/**").permitAll() // For monitoring
-                
-                // Protected endpoints
-                .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                .requestMatchers("/api/manager/**").hasAnyRole("ADMIN", "MANAGER")
-                .requestMatchers("/api/**").authenticated()
-                .anyRequest().permitAll() // Allow all other requests (for frontend)
-            )
-            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-            .addFilterAfter(sectorAuthorizationFilter, JwtAuthenticationFilter.class);
-        
+                // -------- CORS / CSRF --------
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .csrf(csrf -> csrf.disable())
+
+                // -------- Stateless API --------
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
+
+                // -------- Authorization --------
+                .authorizeHttpRequests(auth -> auth
+
+                        // --- Public API endpoints ---
+                        .requestMatchers(
+                                "/api/auth/**",
+                                "/api/health",
+                                "/api/test",
+                                "/api/public/**"
+                        ).permitAll()
+
+                        // --- Actuator / Monitoring ---
+                        .requestMatchers("/actuator/**").permitAll()
+
+                        // --- Admin-only APIs ---
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+
+                        // --- Sector-scoped APIs (MAIN DESIGN) ---
+                        .requestMatchers("/api/sectors/**").authenticated()
+
+                        // --- Any other API must be authenticated ---
+                        .requestMatchers("/api/**").authenticated()
+
+                        // --- Frontend (React) routes ---
+                        .requestMatchers(
+                                "/",
+                                "/index.html",
+                                "/login",
+                                "/signup",
+                                "/dashboard/**",
+                                "/about",
+                                "/docs",
+                                "/documentation",
+                                "/assets/**",
+                                "/static/**",
+                                "/*.js",
+                                "/*.css",
+                                "/*.ico",
+                                "/*.svg",
+                                "/*.png",
+                                "/*.jpg"
+                        ).permitAll()
+
+                        // --- Everything else ---
+                        .anyRequest().permitAll()
+                )
+
+                // -------- Filters --------
+                .addFilterBefore(
+                        jwtAuthenticationFilter,
+                        UsernamePasswordAuthenticationFilter.class
+                )
+                .addFilterAfter(
+                        sectorAuthorizationFilter,
+                        JwtAuthenticationFilter.class
+                );
+
         return http.build();
     }
 
+    // ===================== CORS =====================
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        // More restrictive CORS - only allow specific origins in production
-        configuration.setAllowedOriginPatterns(Arrays.asList("http://localhost:*", "https://yourdomain.com"));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With"));
-        configuration.setAllowCredentials(true);
-        configuration.setMaxAge(3600L); // Cache preflight for 1 hour
-        
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/api/**", configuration);
+        CorsConfiguration config = new CorsConfiguration();
+
+        config.setAllowedOriginPatterns(
+                List.of("http://localhost:*", "https://yourdomain.com")
+        );
+        config.setAllowedMethods(
+                Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS")
+        );
+        config.setAllowedHeaders(
+                Arrays.asList("Authorization", "Content-Type", "X-Requested-With")
+        );
+        config.setAllowCredentials(true);
+        config.setMaxAge(3600L);
+
+        UrlBasedCorsConfigurationSource source =
+                new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
         return source;
     }
 }

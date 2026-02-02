@@ -1,10 +1,13 @@
 package com.example.cms.entity;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Entity
 @Table(name = "sectors", indexes = {
@@ -35,9 +38,10 @@ public class Sector {
     
     @Column(name = "route_path", nullable = false)
     private String routePath;
-    
+
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
-    private String configuration;
+    private JsonNode configuration;
     
     @Column(nullable = false)
     @Builder.Default
