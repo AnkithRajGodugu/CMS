@@ -1,70 +1,143 @@
 package com.example.cms.controller;
 
+import com.example.cms.util.CustomerSortFields;
+import com.example.cms.dto.CustomerResponse;
+import com.example.cms.dto.PagedResponse;
 import com.example.cms.entity.Customer;
+import com.example.cms.mapper.CustomerMapper;
+import com.example.cms.model.SectorContext;
 import com.example.cms.service.CustomerService;
+import com.example.cms.util.PageUtils;
+import com.example.cms.util.SortWhitelistUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 
-import java.security.Principal;
+
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/sectors/customers")
+@RequiredArgsConstructor
 public class CustomerController {
 
-    @Autowired
-    private CustomerService customerService;
+    private final CustomerService customerService;
 
-    @PostMapping
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
-    public ResponseEntity<Customer> createCustomer(@Valid @RequestBody Customer customer, Principal principal) {
-        return ResponseEntity.ok(customerService.createCustomer(customer, principal));
+    private SectorContext sector(HttpServletRequest request) {
+        return (SectorContext) request.getAttribute("sectorContext");
     }
 
+    /* =========================
+       READ
+    ========================== */
+
     @GetMapping
-    public ResponseEntity<List<Customer>> getAllCustomers(Principal principal) {
-        List<Customer> customers = customerService.getCustomersForUser(principal);
-        return customers.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(customers);
+    public ResponseEntity<List<Customer>> getAll(HttpServletRequest request) {
+        return ResponseEntity.ok(
+                customerService.getAllCustomers(sector(request))
+        );
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Customer> getCustomerById(@PathVariable Long id, Principal principal) {
-        return customerService.getCustomerById(id, principal)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<Customer> get(@PathVariable Long id,
+                                        HttpServletRequest request) {
+        return ResponseEntity.ok(
+                customerService.getCustomer(id, sector(request))
+        );
+    }
+
+    /* =========================
+   PAGINATED READ
+========================== */
+
+    @GetMapping("/paged")
+    public ResponseEntity<PagedResponse<CustomerResponse>> getPaged(
+            @RequestParam(required = false) String search,
+            @PageableDefault(size = 20, sort = "id") Pageable pageable,
+            HttpServletRequest request
+    ) {
+        pageable.getSort().forEach(order -> {
+            if (!CustomerSortFields.isAllowed(order.getProperty())) {
+                throw new IllegalArgumentException(
+                        "Sorting by '" + order.getProperty() + "' is not allowed"
+                );
+            }
+        });
+
+        Page<Customer> page =
+                customerService.getCustomersPaged(
+                        sector(request),
+                        search,
+                        pageable
+                );
+
+        Page<CustomerResponse> dtoPage =
+                page.map(CustomerMapper::toResponse);
+
+        return ResponseEntity.ok(PageUtils.from(dtoPage));
+    }
+
+
+
+    /* =========================
+       CRUD
+    ========================== */
+
+    @PostMapping
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    public ResponseEntity<Customer> create(@Valid @RequestBody Customer customer,
+                                           HttpServletRequest request) {
+        return ResponseEntity.ok(
+                customerService.createCustomer(customer, sector(request))
+        );
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
-    public ResponseEntity<Customer> updateCustomer(@PathVariable Long id, @Valid @RequestBody Customer customerDetails, Principal principal) {
-        return customerService.updateCustomer(id, customerDetails, principal)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<Customer> update(@PathVariable Long id,
+                                           @Valid @RequestBody Customer customer,
+                                           HttpServletRequest request) {
+        return ResponseEntity.ok(
+                customerService.updateCustomer(id, customer, sector(request))
+        );
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
-    public ResponseEntity<Void> deleteCustomer(@PathVariable Long id, Principal principal) {
-        if (customerService.deleteCustomer(id, principal)) {
-            return ResponseEntity.ok().build();
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> delete(@PathVariable Long id,
+                                       HttpServletRequest request) {
+        customerService.deleteCustomer(id, sector(request));
+        return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/search")
-    public ResponseEntity<List<Customer>> searchCustomers(@RequestParam(required = false) String name, @RequestParam(required = false) String email, Principal principal) {
-        List<Customer> customers = customerService.searchCustomersForUser(name, email, principal);
-        return customers.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(customers);
-    }
+    /* =========================
+       BULK CSV
+    ========================== */
 
     @PostMapping("/bulk")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
-    public ResponseEntity<List<Customer>> createBulkCustomers(@Valid @RequestBody List<Customer> customers, Principal principal) {
-        List<Customer> savedCustomers = customerService.createBulkCustomers(customers, principal);
-        return ResponseEntity.ok(savedCustomers);
+    public ResponseEntity<Map<String, Object>> bulkCreate(
+            @RequestParam("file") MultipartFile file,
+            HttpServletRequest request
+    ) {
+        int created = customerService.bulkCreateFromCsv(
+                file,
+                sector(request)
+        );
+
+        return ResponseEntity.ok(
+                Map.of(
+                        "created", created,
+                        "status", "SUCCESS"
+                )
+        );
     }
 }

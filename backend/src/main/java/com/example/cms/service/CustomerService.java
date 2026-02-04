@@ -1,153 +1,266 @@
 package com.example.cms.service;
 
 import com.example.cms.entity.Customer;
-import com.example.cms.entity.User;
-import com.example.cms.event.CustomerEvent;
+import com.example.cms.entity.Sector;
+import com.example.cms.model.SectorContext;
 import com.example.cms.repository.CustomerRepository;
-import com.example.cms.repository.UserRepository;
-import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PostAuthorize;
-import org.springframework.security.access.prepost.PreAuthorize;
+import com.example.cms.repository.SectorRepository;
+import com.example.cms.util.SecurityUtils;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+//import com.example.cms.dto.CustomerResponse;
+//import com.example.cms.mapper.CustomerMapper;
 
-import java.security.Principal;
-import java.time.LocalDateTime;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
 
 @Service
+@RequiredArgsConstructor
+@Transactional
 public class CustomerService {
 
     private final CustomerRepository customerRepository;
-    private final UserRepository userRepository;
-    private final KafkaProducerService kafkaProducerService;
+    private final SectorRepository sectorRepository;
+    private final AuditService auditService;
 
-    public CustomerService(CustomerRepository customerRepository,
-            UserRepository userRepository,
-            @Autowired(required = false) KafkaProducerService kafkaProducerService) {
-        this.customerRepository = customerRepository;
-        this.userRepository = userRepository;
-        this.kafkaProducerService = kafkaProducerService;
+    /* =========================
+       READ
+    ========================== */
+
+    public List<Customer> getAllCustomers(SectorContext ctx) {
+
+        List<Customer> customers =
+                customerRepository.findBySectorId(ctx.getSectorId());
+
+        auditService.logDataAccess(
+                SecurityUtils.currentUserId(),
+                ctx.getSectorId(),
+                null,
+                "CUSTOMER",
+                "ALL",
+                "READ",
+                SecurityUtils.clientIp()
+        );
+
+        return customers;
     }
 
-    private User getUserFromPrincipal(Principal principal) {
-        return userRepository.findByUsername(principal.getName());
+    public Customer getCustomer(Long id, SectorContext ctx) {
+
+        Customer customer = customerRepository
+                .findByIdAndSectorId(id, ctx.getSectorId())
+                .orElseThrow(() -> new RuntimeException("Customer not found"));
+
+        auditService.logDataAccess(
+                SecurityUtils.currentUserId(),
+                ctx.getSectorId(),
+                null,
+                "CUSTOMER",
+                id.toString(),
+                "READ",
+                SecurityUtils.clientIp()
+        );
+
+        return customer;
     }
+    /* =========================
+   PAGINATION + SEARCH
+========================== */
+    public Page<Customer> getCustomersPaged(
+            SectorContext ctx,
+            String search,
+            Pageable pageable
+    ) {
 
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
-    public Customer createCustomer(Customer customer, Principal principal) {
-        User currentUser = getUserFromPrincipal(principal);
-        if (currentUser.getRole() == User.Role.MANAGER) {
-            customer.setSector(currentUser.getSector());
-        }
-        Customer savedCustomer = customerRepository.save(customer);
-
-        // Publish customer creation event
-        publishCustomerEvent(savedCustomer, "CREATED", currentUser.getUsername());
-
-        return savedCustomer;
-    }
-
-    public List<Customer> getCustomersForUser(Principal principal) {
-        User currentUser = getUserFromPrincipal(principal);
-        if (currentUser.getRole() == User.Role.ADMIN) {
-            return customerRepository.findAll();
-        } else {
-            return customerRepository.findBySector(currentUser.getSector());
-        }
-    }
-
-    @PostAuthorize("hasRole('ADMIN') or @authz.isManagerOfCustomer(principal, returnObject.get().id)")
-    public Optional<Customer> getCustomerById(Long id, Principal principal) {
-        return customerRepository.findById(id);
-    }
-
-    @PreAuthorize("hasRole('ADMIN') or @authz.isManagerOfCustomer(principal, #id)")
-    public Optional<Customer> updateCustomer(Long id, Customer customerDetails, Principal principal) {
-        User currentUser = getUserFromPrincipal(principal);
-        return customerRepository.findById(id).map(customer -> {
-            if (currentUser.getRole() == User.Role.MANAGER && customerDetails.getSector() != null && !customerDetails.getSector().equals(currentUser.getSector())) {
-                // Manager can't change sector
-                return null;
-            }
-            customer.setFirstName(customerDetails.getFirstName());
-            customer.setLastName(customerDetails.getLastName());
-            customer.setEmail(customerDetails.getEmail());
-            customer.setPhone(customerDetails.getPhone());
-            customer.setSector(customerDetails.getSector());
-            Customer updatedCustomer = customerRepository.save(customer);
-
-            // Publish customer update event
-            publishCustomerEvent(updatedCustomer, "UPDATED", currentUser.getUsername());
-
-            return updatedCustomer;
-        });
-    }
-
-    @PreAuthorize("hasRole('ADMIN') or @authz.isManagerOfCustomer(principal, #id)")
-    public boolean deleteCustomer(Long id, Principal principal) {
-        Optional<Customer> customerOpt = customerRepository.findById(id);
-        if (customerOpt.isPresent()) {
-            Customer customer = customerOpt.get();
-            User currentUser = getUserFromPrincipal(principal);
-
-            customerRepository.deleteById(id);
-
-            // Publish customer deletion event
-            publishCustomerEvent(customer, "DELETED", currentUser.getUsername());
-
-            return true;
-        }
-        return false;
-    }
-
-    public List<Customer> searchCustomersForUser(String name, String email, Principal principal) {
-        User currentUser = getUserFromPrincipal(principal);
-        if (currentUser.getRole() == User.Role.ADMIN) {
-            return customerRepository.searchAllCustomers(name, email);
-        } else {
-            return customerRepository.searchCustomersInSector(currentUser.getSector(), name, email);
-        }
-    }
-
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
-    public List<Customer> createBulkCustomers(@Valid List<Customer> customers, Principal principal) {
-        User currentUser = getUserFromPrincipal(principal);
-        if (currentUser.getRole() == User.Role.MANAGER) {
-            for (Customer customer : customers) {
-                customer.setSector(currentUser.getSector());
-            }
-        }
-        List<Customer> savedCustomers = customerRepository.saveAll(customers);
-
-        // Publish bulk creation events
-        for (Customer customer : savedCustomers) {
-            publishCustomerEvent(customer, "CREATED", currentUser.getUsername());
-        }
-
-        return savedCustomers;
-    }
-
-    private void publishCustomerEvent(Customer customer, String eventType, String performedBy) {
-        if (kafkaProducerService != null) {
-            try {
-                CustomerEvent event = new CustomerEvent(
-                        customer.getId(),
-                        eventType,
-                        customer.getFirstName(),
-                        customer.getLastName(),
-                        customer.getEmail(),
-                        customer.getPhone(),
-                        customer.getSector() != null ? customer.getSector().getName() : null,
-                        LocalDateTime.now(),
-                        performedBy
+        Page<Customer> page =
+                customerRepository.findBySectorWithSearch(
+                        ctx.getSectorId(),
+                        search,
+                        pageable
                 );
-                kafkaProducerService.sendCustomerEvent(event);
-            } catch (Exception e) {
-                // Log error but don't fail the main operation
-                System.err.println("Failed to publish customer event: " + e.getMessage());
-            }
-        }
+
+        auditService.logDataAccess(
+                SecurityUtils.currentUserId(),
+                ctx.getSectorId(),
+                null,
+                "CUSTOMER",
+                "PAGE",
+                "READ",
+                SecurityUtils.clientIp()
+        );
+
+        return page;
     }
+
+
+    /* =========================
+       CREATE
+    ========================== */
+
+    public Customer createCustomer(Customer customer, SectorContext ctx) {
+
+        Sector sector = sectorRepository.findById(ctx.getSectorId())
+                .orElseThrow(() -> new RuntimeException("Sector not found"));
+
+        Long userId = SecurityUtils.currentUserId();
+
+        customer.setSector(sector);
+        customer.setCreatedBy(userId);
+        customer.setUpdatedBy(userId);
+
+        Customer saved = customerRepository.save(customer);
+
+        String customerId =
+                saved.getId() != null ? saved.getId().toString() : "N/A";
+
+        // ✅ THIS is the code you were asking about
+        Map<String, Object> details = new HashMap<>();
+        details.put("firstName", saved.getFirstName());
+        details.put("lastName", saved.getLastName());
+
+        if (saved.getEmail() != null) {
+            details.put("email", saved.getEmail());
+        }
+
+        auditService.logAction(
+                userId,
+                ctx.getSectorId(),
+                null,
+                "CREATE_CUSTOMER",
+                "CUSTOMER",
+                customerId,
+                details,
+                SecurityUtils.clientIp()
+        );
+
+        return saved;
+    }
+
+    /* =========================
+       UPDATE
+    ========================== */
+
+    public Customer updateCustomer(Long id, Customer updated, SectorContext ctx) {
+
+        Customer existing = getCustomer(id, ctx);
+
+        existing.setFirstName(updated.getFirstName());
+        existing.setLastName(updated.getLastName());
+        existing.setEmail(updated.getEmail());
+        existing.setPhone(updated.getPhone());
+        existing.setUpdatedBy(SecurityUtils.currentUserId());
+
+        Customer saved = customerRepository.save(existing);
+
+        auditService.logAction(
+                SecurityUtils.currentUserId(),
+                ctx.getSectorId(),
+                null,
+                "UPDATE_CUSTOMER",
+                "CUSTOMER",
+                saved.getId().toString(),
+                null,
+                SecurityUtils.clientIp()
+        );
+
+        return saved;
+    }
+
+    /* =========================
+       DELETE
+    ========================== */
+
+    public void deleteCustomer(Long id, SectorContext ctx) {
+
+        if (!customerRepository.existsByIdAndSectorId(id, ctx.getSectorId())) {
+            throw new RuntimeException("Customer not found");
+        }
+
+        customerRepository.deleteById(id);
+
+        auditService.logAction(
+                SecurityUtils.currentUserId(),
+                ctx.getSectorId(),
+                null,
+                "DELETE_CUSTOMER",
+                "CUSTOMER",
+                id.toString(),
+                null,
+                SecurityUtils.clientIp()
+        );
+    }
+
+    /* =========================
+       BULK CSV
+    ========================== */
+
+    public int bulkCreateFromCsv(MultipartFile file, SectorContext ctx) {
+
+        if (file.isEmpty()) {
+            throw new RuntimeException("CSV file is empty");
+        }
+
+        Sector sector = sectorRepository.findById(ctx.getSectorId())
+                .orElseThrow(() -> new RuntimeException("Sector not found"));
+
+        List<Customer> customers = new ArrayList<>();
+        Long userId = SecurityUtils.currentUserId();
+
+        try (BufferedReader reader =
+                     new BufferedReader(new InputStreamReader(file.getInputStream()))) {
+
+            String line;
+            boolean header = true;
+
+            while ((line = reader.readLine()) != null) {
+
+                if (header) {
+                    header = false;
+                    continue;
+                }
+
+                String[] f = line.split(",");
+
+                Customer c = new Customer();
+                c.setFirstName(f[0].trim());
+                c.setLastName(f[1].trim());
+                c.setEmail(f.length > 2 ? f[2].trim() : null);
+                c.setPhone(f.length > 3 ? f[3].trim() : null);
+                c.setSector(sector);
+                c.setCreatedBy(userId);
+                c.setUpdatedBy(userId);
+
+                customers.add(c);
+            }
+
+        } catch (Exception e) {
+            throw new RuntimeException("Invalid CSV format", e);
+        }
+
+        customerRepository.saveAll(customers);
+
+        auditService.logAction(
+                userId,
+                ctx.getSectorId(),
+                null,
+                "BULK_CREATE_CUSTOMERS",
+                "CUSTOMER",
+                "CSV_UPLOAD",
+                Map.of("count", customers.size()),
+                SecurityUtils.clientIp()
+        );
+
+        return customers.size();
+    }
+
 }
+

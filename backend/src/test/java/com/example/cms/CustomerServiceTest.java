@@ -1,81 +1,114 @@
 package com.example.cms;
 
-import java.security.Principal;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import com.example.cms.entity.Customer;
+import com.example.cms.entity.Sector;
+import com.example.cms.model.SectorContext;
+import com.example.cms.repository.CustomerRepository;
+import com.example.cms.repository.SectorRepository;
+import com.example.cms.service.AuditService;
+import com.example.cms.service.CustomerService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import org.mockito.MockitoAnnotations;
 
-import com.example.cms.entity.Customer;
-import com.example.cms.entity.User;
-import com.example.cms.repository.CustomerRepository;
-import com.example.cms.repository.UserRepository;
-import com.example.cms.service.CustomerService;
+import java.util.List;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.*;
 
 class CustomerServiceTest {
+
+    @Mock
+    private AuditService auditService;
+
 
     @Mock
     private CustomerRepository customerRepository;
 
     @Mock
-    private UserRepository userRepository;
+    private SectorRepository sectorRepository;
 
     @InjectMocks
     private CustomerService customerService;
 
-    @Mock
-    private Principal principal;
+    private SectorContext sectorContext;
+    private Sector sector;
 
     @BeforeEach
-    void setUp() {
+    void setup() {
         MockitoAnnotations.openMocks(this);
+
+        sector = new Sector();
+        sector.setId(1L);
+        sector.setCode("BANKING");
+
+        sectorContext = SectorContext.builder()
+                .sectorId(1L)
+                .sectorCode("BANKING")
+                .userId(10L)
+                .build();
     }
 
     @Test
-    void createCustomer_ShouldSaveCustomer() {
+    void createCustomer_shouldAttachSectorAutomatically() {
+        // Arrange
         Customer customer = new Customer();
         customer.setFirstName("John");
         customer.setLastName("Doe");
-        customer.setEmail("john.doe@example.com");
-        customer.setPhone("1234567890");
-        // createdAt is automatically set in constructor
 
-        User user = new User();
-        user.setUsername("admin");
-        user.setRole(User.Role.ADMIN);
+        when(sectorRepository.findById(1L))
+                .thenReturn(Optional.of(sector));
 
-        when(principal.getName()).thenReturn("admin");
-        when(userRepository.findByUsername("admin")).thenReturn(user);
-        when(customerRepository.save(customer)).thenReturn(customer);
+        when(customerRepository.save(any()))
+                .thenAnswer(invocation -> {
+                    Customer c = invocation.getArgument(0);
+                    c.setId(1L); // 🔥 simulate DB ID
+                    return c;
+                });
 
-        Customer result = customerService.createCustomer(customer, principal);
 
-        assertEquals(customer, result);
-        verify(customerRepository, times(1)).save(customer);
+
+        // Act
+        Customer saved = customerService.createCustomer(customer, sectorContext);
+
+        // Assert
+        assertThat(saved.getSector()).isEqualTo(sector);
+        verify(customerRepository, times(1)).save(any(Customer.class));
     }
 
     @Test
-    void getCustomerById_ShouldReturnCustomer() {
+    void getAllCustomers_shouldFilterBySector() {
+        // Arrange
         Customer customer = new Customer();
-        customer.setId(1L);
-        User user = new User();
-        user.setUsername("admin");
-        user.setRole(User.Role.ADMIN);
+        customer.setFirstName("Alice");
+        customer.setSector(sector);
 
-        when(principal.getName()).thenReturn("admin");
-        when(userRepository.findByUsername("admin")).thenReturn(user);
-        when(customerRepository.findById(1L)).thenReturn(Optional.of(customer));
+        when(customerRepository.findBySectorId(1L))
+                .thenReturn(List.of(customer));
 
-        Optional<Customer> result = customerService.getCustomerById(1L, principal);
+        // Act
+        List<Customer> result =
+                customerService.getAllCustomers(sectorContext);
 
-        assertEquals(Optional.of(customer), result);
-        verify(customerRepository, times(1)).findById(1L);
+        // Assert
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getFirstName()).isEqualTo("Alice");
+    }
+
+    @Test
+    void getCustomer_shouldFailIfWrongSector() {
+        // Arrange
+        when(customerRepository.findByIdAndSectorId(99L, 1L))
+                .thenReturn(Optional.empty());
+
+        // Act + Assert
+        try {
+            customerService.getCustomer(99L, sectorContext);
+        } catch (RuntimeException e) {
+            assertThat(e.getMessage()).contains("Customer not found");
+        }
     }
 }

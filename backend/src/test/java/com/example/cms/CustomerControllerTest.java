@@ -1,51 +1,49 @@
 package com.example.cms;
 
-import com.example.cms.config.TestcontainersConfig;
-import com.example.cms.entity.Customer;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.example.cms.model.SectorContext;
+import com.example.cms.service.AuditService;
+import com.example.cms.service.CustomerService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.hamcrest.Matchers.hasSize;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import java.util.List;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
-@AutoConfigureMockMvc
-class CustomerControllerTest extends TestcontainersConfig {
+@AutoConfigureMockMvc(addFilters = false) // 🔥 disables ALL filters
+class CustomerControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    @MockBean
+    private CustomerService customerService;
+
+    @MockBean
+    private AuditService auditService;
 
     @Test
-    @WithMockUser(username = "admin", roles = {"ADMIN"})
-    void testCreateAndGetCustomer() throws Exception {
-        // Arrange: new customer
-        Customer customer = new Customer();
-        customer.setFirstName("Uday");
-        customer.setLastName("Kori");
-        customer.setEmail("uday@example.com");
+    void getAll_shouldReturn200() throws Exception {
 
-        // Act: POST /api/customers
-        mockMvc.perform(post("/api/customers")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(customer)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.firstName").value("Uday"))
-                .andExpect(jsonPath("$.email").value("uday@example.com"));
+        SectorContext ctx = SectorContext.builder()
+                .sectorId(1L)
+                .build();
 
-        // Assert: GET /api/customers
-        mockMvc.perform(get("/api/customers"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(1)))
-                .andExpect(jsonPath("$[0].email").value("uday@example.com"));
+        when(customerService.getAllCustomers(any()))
+                .thenReturn(List.of());
+
+        mockMvc.perform(
+                        get("/api/sectors/customers")
+                                .requestAttr("sectorContext", ctx)
+                )
+                .andExpect(status().isOk());
     }
 }

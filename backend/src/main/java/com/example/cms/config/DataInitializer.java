@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
@@ -14,6 +15,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Component
+@Profile("!test") // 🔥 DO NOT RUN IN TESTS
 public class DataInitializer implements CommandLineRunner {
 
     @Autowired
@@ -40,40 +42,17 @@ public class DataInitializer implements CommandLineRunner {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
-    public void run(String... args) throws Exception {
+    public void run(String... args) {
 
         /* =========================
            SECTOR INITIALIZATION
         ========================== */
         if (sectorRepository.count() == 0) {
 
-            Sector banking = createSector(
-                    "Banking",
-                    "Banking & Finance",
-                    "banking",
-                    "/banking"
-            );
-
-            Sector healthcare = createSector(
-                    "Healthcare",
-                    "Healthcare Services",
-                    "healthcare",
-                    "/healthcare"
-            );
-
-            Sector logistics = createSector(
-                    "Logistics",
-                    "Logistics & Supply Chain",
-                    "logistics",
-                    "/logistics"
-            );
-
-            Sector content = createSector(
-                    "Content",
-                    "Content Creation",
-                    "content",
-                    "/content"
-            );
+            Sector banking = createSector("Banking", "Banking & Finance", "BANKING", "/banking");
+            Sector healthcare = createSector("Healthcare", "Healthcare Services", "HEALTHCARE", "/healthcare");
+            Sector logistics = createSector("Logistics", "Logistics & Supply Chain", "LOGISTICS", "/logistics");
+            Sector content = createSector("Content", "Content Creation", "CONTENT", "/content");
 
             sectorRepository.save(banking);
             sectorRepository.save(healthcare);
@@ -93,43 +72,23 @@ public class DataInitializer implements CommandLineRunner {
             Sector logisticsSector = sectorRepository.findByName("Logistics").orElseThrow();
             Sector contentSector = sectorRepository.findByName("Content").orElseThrow();
 
-            User admin = new User(
-                    "admin",
-                    passwordEncoder.encode("admin123"),
-                    User.Role.ADMIN
-            );
+            User admin = new User("admin", passwordEncoder.encode("admin123"), User.Role.ADMIN);
             admin.setSector(bankingSector);
             userRepository.save(admin);
 
-            User bankingUser = new User(
-                    "bank_user",
-                    passwordEncoder.encode("bank123"),
-                    User.Role.BANKING
-            );
+            User bankingUser = new User("bank_user", passwordEncoder.encode("bank123"), User.Role.BANKING);
             bankingUser.setSector(bankingSector);
             userRepository.save(bankingUser);
 
-            User healthcareUser = new User(
-                    "health_user",
-                    passwordEncoder.encode("health123"),
-                    User.Role.HEALTHCARE
-            );
+            User healthcareUser = new User("health_user", passwordEncoder.encode("health123"), User.Role.HEALTHCARE);
             healthcareUser.setSector(healthcareSector);
             userRepository.save(healthcareUser);
 
-            User logisticsUser = new User(
-                    "logistics_user",
-                    passwordEncoder.encode("logistics123"),
-                    User.Role.LOGISTICS
-            );
+            User logisticsUser = new User("logistics_user", passwordEncoder.encode("logistics123"), User.Role.LOGISTICS);
             logisticsUser.setSector(logisticsSector);
             userRepository.save(logisticsUser);
 
-            User contentUser = new User(
-                    "content_user",
-                    passwordEncoder.encode("content123"),
-                    User.Role.CONTENT
-            );
+            User contentUser = new User("content_user", passwordEncoder.encode("content123"), User.Role.CONTENT);
             contentUser.setSector(contentSector);
             userRepository.save(contentUser);
 
@@ -154,18 +113,22 @@ public class DataInitializer implements CommandLineRunner {
         ========================== */
         if (transactionRepository.count() == 0) {
 
-            Transaction txn1 = new Transaction("TXN001",
+            Transaction txn1 = new Transaction(
+                    "TXN001",
                     Transaction.TransactionType.DEPOSIT,
                     new BigDecimal("2500.00"),
-                    "ACC001");
+                    "ACC001"
+            );
             txn1.setStatus(Transaction.TransactionStatus.COMPLETED);
             txn1.setDescription("Salary deposit");
             transactionRepository.save(txn1);
 
-            Transaction txn2 = new Transaction("TXN002",
+            Transaction txn2 = new Transaction(
+                    "TXN002",
                     Transaction.TransactionType.WITHDRAWAL,
                     new BigDecimal("150.00"),
-                    "ACC002");
+                    "ACC002"
+            );
             txn2.setStatus(Transaction.TransactionStatus.COMPLETED);
             txn2.setDescription("ATM withdrawal");
             transactionRepository.save(txn2);
@@ -220,7 +183,7 @@ public class DataInitializer implements CommandLineRunner {
         Sector sector = new Sector();
         sector.setName(name);
         sector.setDescription(description);
-        sector.setCode(code.toUpperCase());
+        sector.setCode(code);
         sector.setRoutePath(route);
         sector.setConfiguration(config);
         sector.setEnabled(true);
