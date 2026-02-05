@@ -1,5 +1,6 @@
 package com.example.cms.controller;
 
+import com.example.cms.dto.MonthlyCustomerCountResponse;
 import com.example.cms.util.CustomerSortFields;
 import com.example.cms.dto.CustomerResponse;
 import com.example.cms.dto.PagedResponse;
@@ -20,6 +21,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.format.annotation.DateTimeFormat;
+
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 
@@ -85,6 +88,29 @@ public class CustomerController {
 
         return ResponseEntity.ok(PageUtils.from(dtoPage));
     }
+
+    /* =========================
+       reporting
+    ========================== */
+
+    @GetMapping("/reports/monthly")
+    @PreAuthorize("hasAnyRole('ADMIN','MANAGER')")
+    public ResponseEntity<List<MonthlyCustomerCountResponse>> getMonthlyCustomerReport(
+            @RequestParam LocalDate start,
+            @RequestParam LocalDate end,
+            HttpServletRequest request
+    ) {
+
+        List<MonthlyCustomerCountResponse> report =
+                customerService.getMonthlyCustomerReport(
+                        sector(request),
+                        start.atStartOfDay(),
+                        end.atTime(23, 59, 59)
+                );
+
+        return ResponseEntity.ok(report);
+    }
+
 
     /* =========================
        CRUD

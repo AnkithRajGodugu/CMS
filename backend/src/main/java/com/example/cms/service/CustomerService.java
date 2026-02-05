@@ -13,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import java.time.LocalDateTime;
+import com.example.cms.dto.MonthlyCustomerCountResponse;
 //import org.springframework.data.domain.Page;
 //import org.springframework.data.domain.Pageable;
 //import com.example.cms.dto.CustomerResponse;
@@ -109,6 +110,42 @@ public class CustomerService {
 
         return page;
     }
+
+    /* =========================
+       reporting logic
+    ========================== */
+
+    @Transactional(readOnly = true)
+    public List<MonthlyCustomerCountResponse> getMonthlyCustomerReport(
+            SectorContext ctx,
+            LocalDateTime start,
+            LocalDateTime end
+    ) {
+
+        if (start == null || end == null) {
+            throw new IllegalArgumentException("Start date and end date are required");
+        }
+
+        List<MonthlyCustomerCountResponse> report =
+                customerRepository.getMonthlyCustomerCounts(
+                        ctx.getSectorId(),
+                        start,
+                        end
+                );
+
+        auditService.logDataAccess(
+                SecurityUtils.currentUserId(),
+                ctx.getSectorId(),
+                null,
+                "CUSTOMER_REPORT",
+                "MONTHLY_COUNT",
+                "READ",
+                SecurityUtils.clientIp()
+        );
+
+        return report;
+    }
+
 
 
     /* =========================

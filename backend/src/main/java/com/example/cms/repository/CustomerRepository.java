@@ -1,5 +1,6 @@
 package com.example.cms.repository;
 
+import com.example.cms.dto.MonthlyCustomerCountResponse;
 import com.example.cms.entity.Customer;
 import com.example.cms.entity.Sector;
 import org.springframework.data.domain.Page;
@@ -71,4 +72,22 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
             LocalDateTime start,
             LocalDateTime end
     );
+    @Query("""
+    SELECT new com.example.cms.dto.MonthlyCustomerCountResponse(
+        YEAR(c.createdAt),
+        MONTH(c.createdAt),
+        COUNT(c.id)
+    )
+    FROM Customer c
+    WHERE c.sector.id = :sectorId
+      AND c.createdAt BETWEEN :start AND :end
+    GROUP BY YEAR(c.createdAt), MONTH(c.createdAt)
+    ORDER BY YEAR(c.createdAt), MONTH(c.createdAt)
+""")
+    List<MonthlyCustomerCountResponse> getMonthlyCustomerCounts(
+            @Param("sectorId") Long sectorId,
+            @Param("start") LocalDateTime start,
+            @Param("end") LocalDateTime end
+    );
+
 }
