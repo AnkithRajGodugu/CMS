@@ -20,7 +20,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
-@AutoConfigureMockMvc(addFilters = false) // 🔥 IMPORTANT
+@AutoConfigureMockMvc(addFilters = false)
 class CustomerPaginationTest {
 
     @Autowired
@@ -71,17 +71,17 @@ class CustomerPaginationTest {
                 .build();
 
         mockMvc.perform(
-                        get("/api/sectors/customers/paged")
+                        get("/api/v1/sectors/customers/paged")
                                 .param("size", "2")
                                 .requestAttr("sectorContext", ctx)
                 )
                 .andExpect(status().isOk())
-                .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data", hasSize(2)))
-                .andExpect(jsonPath("$.totalElements").value(5))
                 .andExpect(jsonPath("$.page").value(0))
                 .andExpect(jsonPath("$.size").value(2))
-                .andExpect(jsonPath("$.hasNext").value(true));
-
+                .andExpect(jsonPath("$.totalElements").value(5))
+                .andExpect(jsonPath("$.totalPages").value(3))
+                .andExpect(jsonPath("$.hasNext").value(true))
+                .andExpect(jsonPath("$.hasPrevious").value(false));
     }
 }

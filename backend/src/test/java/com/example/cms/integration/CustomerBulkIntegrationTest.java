@@ -1,5 +1,6 @@
 package com.example.cms.integration;
 
+import com.example.cms.config.NoSecurityConfig;
 import com.example.cms.entity.Sector;
 import com.example.cms.entity.UserType;
 import com.example.cms.model.SectorContext;
@@ -10,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -23,6 +25,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc(addFilters = false)
+@Import(NoSecurityConfig.class)
+
+
 class CustomerBulkIntegrationTest {
 
     @Autowired
@@ -41,18 +46,19 @@ class CustomerBulkIntegrationTest {
         customerRepository.deleteAll();
         sectorRepository.deleteAll();
 
-        sector = new Sector();
-        sector.setName("Banking");
-        sector.setCode("BANKING");
-        sector.setRoutePath("/banking");
-        sector.setEnabled(true);
-        sector.setDisplayOrder(1);
+        sector = Sector.builder()
+                .name("Banking")
+                .code("BANKING")
+                .routePath("/banking")
+                .enabled(true)
+                .displayOrder(1)
+                .build();
 
         sector = sectorRepository.save(sector);
     }
 
     @Test
-    @WithMockUser(username = "admin", roles = {"ADMIN"})
+    @WithMockUser(roles = "ADMIN")
     void bulkCreateCustomers_shouldCreateCustomersAndReturn200() throws Exception {
 
         String csv = """
@@ -72,13 +78,12 @@ class CustomerBulkIntegrationTest {
                 .sectorId(sector.getId())
                 .sectorCode("BANKING")
                 .userId(1L)
-                .organizationId(null)
                 .userType(UserType.INDIVIDUAL)
                 .roles(Set.of("ROLE_ADMIN"))
                 .build();
 
         mockMvc.perform(
-                        multipart("/api/sectors/customers/bulk")
+                        multipart("/api/v1/sectors/customers/bulk")
                                 .file(file)
                                 .requestAttr("sectorContext", ctx)
                 )

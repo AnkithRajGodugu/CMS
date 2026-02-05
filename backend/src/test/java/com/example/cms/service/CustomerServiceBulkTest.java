@@ -76,7 +76,7 @@ class CustomerServiceBulkTest {
 
         verify(auditService).logAction(
                 any(),
-                eq(1L),
+                eq(sector.getId()),
                 isNull(),
                 eq("BULK_CREATE_CUSTOMERS"),
                 eq("CUSTOMER"),
@@ -84,5 +84,7 @@ class CustomerServiceBulkTest {
                 any(),
                 any()
         );
+
+
     }
 }

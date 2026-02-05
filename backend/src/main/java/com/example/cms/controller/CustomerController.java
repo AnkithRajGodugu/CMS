@@ -42,7 +42,7 @@ public class CustomerController {
     }
 
     /* =========================
-       READ
+       BASIC READ
     ========================== */
 
     @GetMapping
@@ -53,31 +53,28 @@ public class CustomerController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Customer> get(@PathVariable Long id,
-                                        HttpServletRequest request) {
+    public ResponseEntity<Customer> getById(
+            @PathVariable Long id,
+            HttpServletRequest request
+    ) {
         return ResponseEntity.ok(
                 customerService.getCustomer(id, sector(request))
         );
     }
 
     /* =========================
-   PAGINATED READ
-========================== */
-
-
+       PAGINATED READ
+    ========================== */
 
     @GetMapping("/paged")
     public ResponseEntity<PagedResponse<CustomerResponse>> getPaged(
             @RequestParam(required = false) String search,
-
             @RequestParam(required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
             LocalDateTime from,
-
             @RequestParam(required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
             LocalDateTime to,
-
             @PageableDefault(size = 20, sort = "id") Pageable pageable,
             HttpServletRequest request
     ) {
@@ -91,30 +88,51 @@ public class CustomerController {
     }
 
     /* =========================
-       reporting
+       REPORTS
     ========================== */
 
     @GetMapping("/reports/monthly")
     @PreAuthorize("hasAnyRole('ADMIN','MANAGER')")
-    public ResponseEntity<List<MonthlyCustomerCountResponse>> getMonthlyCustomerReport(
+    public ResponseEntity<List<MonthlyCustomerCountResponse>> monthlyReport(
             @RequestParam LocalDate start,
             @RequestParam LocalDate end,
             HttpServletRequest request
     ) {
+        SectorContext ctx = sector(request);
 
-        List<MonthlyCustomerCountResponse> report =
+        // ADMIN → cross-sector
+        if (ctx == null || ctx.getRoles().contains("ROLE_ADMIN")) {
+            return ResponseEntity.ok(
+                    customerService
+                            .getAdminMonthlyCustomerReport(
+                                    start.atStartOfDay(),
+                                    end.atTime(23, 59, 59)
+                            )
+                            .stream()
+                            .map(r -> new MonthlyCustomerCountResponse(
+                                    r.getYear(),
+                                    r.getMonth(),
+                                    r.getCount()
+                            ))
+
+                            .toList()
+            );
+        }
+
+        // MANAGER → sector-bound
+        return ResponseEntity.ok(
                 customerService.getMonthlyCustomerReport(
-                        sector(request),
+                        ctx,
                         start.atStartOfDay(),
                         end.atTime(23, 59, 59)
-                );
-
-        return ResponseEntity.ok(report);
+                )
+        );
     }
+
 
     @GetMapping("/reports/admin/monthly")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<SectorMonthlyCustomerCountResponse>> getAdminMonthlyReport(
+    public ResponseEntity<List<SectorMonthlyCustomerCountResponse>> adminMonthlyReport(
             @RequestParam LocalDate start,
             @RequestParam LocalDate end
     ) {
@@ -126,26 +144,28 @@ public class CustomerController {
         );
     }
 
-
-
     /* =========================
        CRUD
     ========================== */
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
-    public ResponseEntity<Customer> create(@Valid @RequestBody Customer customer,
-                                           HttpServletRequest request) {
+    @PreAuthorize("hasAnyRole('ADMIN','MANAGER')")
+    public ResponseEntity<Customer> create(
+            @Valid @RequestBody Customer customer,
+            HttpServletRequest request
+    ) {
         return ResponseEntity.ok(
                 customerService.createCustomer(customer, sector(request))
         );
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
-    public ResponseEntity<Customer> update(@PathVariable Long id,
-                                           @Valid @RequestBody Customer customer,
-                                           HttpServletRequest request) {
+    @PreAuthorize("hasAnyRole('ADMIN','MANAGER')")
+    public ResponseEntity<Customer> update(
+            @PathVariable Long id,
+            @Valid @RequestBody Customer customer,
+            HttpServletRequest request
+    ) {
         return ResponseEntity.ok(
                 customerService.updateCustomer(id, customer, sector(request))
         );
@@ -153,8 +173,10 @@ public class CustomerController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Void> delete(@PathVariable Long id,
-                                       HttpServletRequest request) {
+    public ResponseEntity<Void> delete(
+            @PathVariable Long id,
+            HttpServletRequest request
+    ) {
         customerService.deleteCustomer(id, sector(request));
         return ResponseEntity.noContent().build();
     }
@@ -164,21 +186,12 @@ public class CustomerController {
     ========================== */
 
     @PostMapping("/bulk")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN','MANAGER')")
     public ResponseEntity<Map<String, Object>> bulkCreate(
             @RequestParam("file") MultipartFile file,
             HttpServletRequest request
     ) {
-        int created = customerService.bulkCreateFromCsv(
-                file,
-                sector(request)
-        );
-
-        return ResponseEntity.ok(
-                Map.of(
-                        "created", created,
-                        "status", "SUCCESS"
-                )
-        );
+        int count = customerService.bulkCreateFromCsv(file, sector(request));
+        return ResponseEntity.ok(Map.of("created", count));
     }
 }

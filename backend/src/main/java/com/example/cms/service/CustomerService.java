@@ -1,5 +1,6 @@
 package com.example.cms.service;
 
+import com.example.cms.dto.MonthlyCustomerCountResponse;
 import com.example.cms.dto.SectorMonthlyCustomerCountResponse;
 import com.example.cms.entity.Customer;
 import com.example.cms.entity.Sector;
@@ -8,25 +9,16 @@ import com.example.cms.repository.CustomerRepository;
 import com.example.cms.repository.SectorRepository;
 import com.example.cms.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import java.time.LocalDateTime;
-import com.example.cms.dto.MonthlyCustomerCountResponse;
-//import org.springframework.data.domain.Page;
-//import org.springframework.data.domain.Pageable;
-//import com.example.cms.dto.CustomerResponse;
-//import com.example.cms.mapper.CustomerMapper;
-
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.LocalDateTime;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -42,7 +34,6 @@ public class CustomerService {
     ========================== */
 
     public List<Customer> getAllCustomers(SectorContext ctx) {
-
         List<Customer> customers =
                 customerRepository.findBySectorId(ctx.getSectorId());
 
@@ -55,12 +46,10 @@ public class CustomerService {
                 "READ",
                 SecurityUtils.clientIp()
         );
-
         return customers;
     }
 
     public Customer getCustomer(Long id, SectorContext ctx) {
-
         Customer customer = customerRepository
                 .findByIdAndSectorId(id, ctx.getSectorId())
                 .orElseThrow(() -> new RuntimeException("Customer not found"));
@@ -74,13 +63,12 @@ public class CustomerService {
                 "READ",
                 SecurityUtils.clientIp()
         );
-
         return customer;
     }
-    /* =========================
-   PAGINATION + SEARCH
-========================== */
 
+    /* =========================
+       PAGINATION
+    ========================== */
 
     public Page<Customer> getCustomersPaged(
             SectorContext ctx,
@@ -89,31 +77,13 @@ public class CustomerService {
             LocalDateTime to,
             Pageable pageable
     ) {
-
-        Page<Customer> page =
-                customerRepository.findBySectorWithSearchAndDateRange(
-                        ctx.getSectorId(),
-                        search,
-                        from,
-                        to,
-                        pageable
-                );
-
-        auditService.logDataAccess(
-                SecurityUtils.currentUserId(),
-                ctx.getSectorId(),
-                null,
-                "CUSTOMER",
-                "PAGE_DATE_RANGE",
-                "READ",
-                SecurityUtils.clientIp()
+        return customerRepository.findBySectorWithSearchAndDateRange(
+                ctx.getSectorId(), search, from, to, pageable
         );
-
-        return page;
     }
 
     /* =========================
-       reporting logic
+       REPORTING
     ========================== */
 
     @Transactional(readOnly = true)
@@ -122,29 +92,15 @@ public class CustomerService {
             LocalDateTime start,
             LocalDateTime end
     ) {
-
         if (start == null || end == null) {
-            throw new IllegalArgumentException("Start date and end date are required");
+            throw new IllegalArgumentException("Start and end dates are required");
         }
 
-        List<MonthlyCustomerCountResponse> report =
-                customerRepository.getMonthlyCustomerCounts(
-                        ctx.getSectorId(),
-                        start,
-                        end
-                );
-
-        auditService.logDataAccess(
-                SecurityUtils.currentUserId(),
+        return customerRepository.getMonthlyCustomerCounts(
                 ctx.getSectorId(),
-                null,
-                "CUSTOMER_REPORT",
-                "MONTHLY_COUNT",
-                "READ",
-                SecurityUtils.clientIp()
+                start,
+                end
         );
-
-        return report;
     }
 
     @Transactional(readOnly = true)
@@ -152,53 +108,34 @@ public class CustomerService {
             LocalDateTime start,
             LocalDateTime end
     ) {
-
-        List<SectorMonthlyCustomerCountResponse> report =
-                customerRepository.getMonthlyCustomerCountsAllSectors(start, end);
-
-        auditService.logDataAccess(
-                SecurityUtils.currentUserId(),
-                null,
-                null,
-                "ADMIN_CUSTOMER_REPORT",
-                "CROSS_SECTOR_MONTHLY",
-                "READ",
-                SecurityUtils.clientIp()
-        );
-
-        return report;
+        return customerRepository.getMonthlyCustomerCountsAllSectors(start, end);
     }
 
-
-
-
     /* =========================
-       CREATE
+       CRUD
     ========================== */
 
     public Customer createCustomer(Customer customer, SectorContext ctx) {
 
+        if (ctx == null || ctx.getSectorId() == null) {
+            throw new IllegalArgumentException("Sector context is required");
+        }
+
         Sector sector = sectorRepository.findById(ctx.getSectorId())
                 .orElseThrow(() -> new RuntimeException("Sector not found"));
 
-        Long userId = SecurityUtils.currentUserId();
+        Long userId = Optional.ofNullable(SecurityUtils.currentUserId()).orElse(0L);
 
         customer.setSector(sector);
         customer.setCreatedBy(userId);
         customer.setUpdatedBy(userId);
 
+
         Customer saved = customerRepository.save(customer);
 
-        String customerId =
-                saved.getId() != null ? saved.getId().toString() : "N/A";
-
-        // ✅ THIS is the code you were asking about
-        Map<String, Object> details = new HashMap<>();
-        details.put("firstName", saved.getFirstName());
-        details.put("lastName", saved.getLastName());
-
+        Map<String, Object> metadata = new HashMap<>();
         if (saved.getEmail() != null) {
-            details.put("email", saved.getEmail());
+            metadata.put("email", saved.getEmail());
         }
 
         auditService.logAction(
@@ -207,20 +144,16 @@ public class CustomerService {
                 null,
                 "CREATE_CUSTOMER",
                 "CUSTOMER",
-                customerId,
-                details,
+                saved.getId().toString(),
+                metadata.isEmpty() ? null : metadata,
                 SecurityUtils.clientIp()
         );
+
 
         return saved;
     }
 
-    /* =========================
-       UPDATE
-    ========================== */
-
     public Customer updateCustomer(Long id, Customer updated, SectorContext ctx) {
-
         Customer existing = getCustomer(id, ctx);
 
         existing.setFirstName(updated.getFirstName());
@@ -245,12 +178,7 @@ public class CustomerService {
         return saved;
     }
 
-    /* =========================
-       DELETE
-    ========================== */
-
     public void deleteCustomer(Long id, SectorContext ctx) {
-
         if (!customerRepository.existsByIdAndSectorId(id, ctx.getSectorId())) {
             throw new RuntimeException("Customer not found");
         }
@@ -275,29 +203,19 @@ public class CustomerService {
 
     public int bulkCreateFromCsv(MultipartFile file, SectorContext ctx) {
 
-        if (file.isEmpty()) {
-            throw new RuntimeException("CSV file is empty");
-        }
-
         Sector sector = sectorRepository.findById(ctx.getSectorId())
                 .orElseThrow(() -> new RuntimeException("Sector not found"));
 
-        List<Customer> customers = new ArrayList<>();
         Long userId = SecurityUtils.currentUserId();
+        List<Customer> customers = new ArrayList<>();
 
         try (BufferedReader reader =
                      new BufferedReader(new InputStreamReader(file.getInputStream()))) {
 
+            reader.readLine(); // skip header
             String line;
-            boolean header = true;
 
             while ((line = reader.readLine()) != null) {
-
-                if (header) {
-                    header = false;
-                    continue;
-                }
-
                 String[] f = line.split(",");
 
                 Customer c = new Customer();
@@ -311,7 +229,6 @@ public class CustomerService {
 
                 customers.add(c);
             }
-
         } catch (Exception e) {
             throw new RuntimeException("Invalid CSV format", e);
         }
@@ -331,6 +248,4 @@ public class CustomerService {
 
         return customers.size();
     }
-
 }
-
