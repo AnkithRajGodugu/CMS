@@ -1,5 +1,6 @@
 package com.example.cms.service;
 
+import com.example.cms.dto.SectorMonthlyCustomerCountResponse;
 import com.example.cms.entity.Customer;
 import com.example.cms.entity.Sector;
 import com.example.cms.model.SectorContext;
@@ -145,6 +146,29 @@ public class CustomerService {
 
         return report;
     }
+
+    @Transactional(readOnly = true)
+    public List<SectorMonthlyCustomerCountResponse> getAdminMonthlyCustomerReport(
+            LocalDateTime start,
+            LocalDateTime end
+    ) {
+
+        List<SectorMonthlyCustomerCountResponse> report =
+                customerRepository.getMonthlyCustomerCountsAllSectors(start, end);
+
+        auditService.logDataAccess(
+                SecurityUtils.currentUserId(),
+                null,
+                null,
+                "ADMIN_CUSTOMER_REPORT",
+                "CROSS_SECTOR_MONTHLY",
+                "READ",
+                SecurityUtils.clientIp()
+        );
+
+        return report;
+    }
+
 
 
 

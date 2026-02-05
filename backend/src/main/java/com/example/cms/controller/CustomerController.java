@@ -1,6 +1,7 @@
 package com.example.cms.controller;
 
 import com.example.cms.dto.MonthlyCustomerCountResponse;
+import com.example.cms.dto.SectorMonthlyCustomerCountResponse;
 import com.example.cms.util.CustomerSortFields;
 import com.example.cms.dto.CustomerResponse;
 import com.example.cms.dto.PagedResponse;
@@ -110,6 +111,21 @@ public class CustomerController {
 
         return ResponseEntity.ok(report);
     }
+
+    @GetMapping("/reports/admin/monthly")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<SectorMonthlyCustomerCountResponse>> getAdminMonthlyReport(
+            @RequestParam LocalDate start,
+            @RequestParam LocalDate end
+    ) {
+        return ResponseEntity.ok(
+                customerService.getAdminMonthlyCustomerReport(
+                        start.atStartOfDay(),
+                        end.atTime(23, 59, 59)
+                )
+        );
+    }
+
 
 
     /* =========================
