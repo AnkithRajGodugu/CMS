@@ -42,6 +42,28 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
             Pageable pageable
     );
 
+    /* ---------- Pagination + search + date range (Phase 4.5) ---------- */
+
+    @Query("""
+        SELECT c FROM Customer c
+        WHERE c.sector.id = :sectorId
+          AND (
+                :search IS NULL OR
+                LOWER(c.firstName) LIKE LOWER(CONCAT('%', :search, '%')) OR
+                LOWER(c.lastName) LIKE LOWER(CONCAT('%', :search, '%')) OR
+                LOWER(c.email) LIKE LOWER(CONCAT('%', :search, '%'))
+          )
+          AND (:from IS NULL OR c.createdAt >= :from)
+          AND (:to IS NULL OR c.createdAt <= :to)
+    """)
+    Page<Customer> findBySectorWithSearchAndDateRange(
+            @Param("sectorId") Long sectorId,
+            @Param("search") String search,
+            @Param("from") LocalDateTime from,
+            @Param("to") LocalDateTime to,
+            Pageable pageable
+    );
+
     /* ---------- Reporting ---------- */
 
     long countBySectorAndCreatedAtBetween(

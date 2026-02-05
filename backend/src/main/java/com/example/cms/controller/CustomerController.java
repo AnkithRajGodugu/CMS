@@ -19,13 +19,15 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.format.annotation.DateTimeFormat;
+import java.time.LocalDateTime;
 
 
 import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/sectors/customers")
+@RequestMapping("/api/v1/sectors/customers")
 @RequiredArgsConstructor
 public class CustomerController {
 
@@ -58,34 +60,31 @@ public class CustomerController {
    PAGINATED READ
 ========================== */
 
+
+
     @GetMapping("/paged")
     public ResponseEntity<PagedResponse<CustomerResponse>> getPaged(
             @RequestParam(required = false) String search,
+
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+            LocalDateTime from,
+
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+            LocalDateTime to,
+
             @PageableDefault(size = 20, sort = "id") Pageable pageable,
             HttpServletRequest request
     ) {
-        pageable.getSort().forEach(order -> {
-            if (!CustomerSortFields.isAllowed(order.getProperty())) {
-                throw new IllegalArgumentException(
-                        "Sorting by '" + order.getProperty() + "' is not allowed"
-                );
-            }
-        });
-
-        Page<Customer> page =
-                customerService.getCustomersPaged(
-                        sector(request),
-                        search,
-                        pageable
-                );
 
         Page<CustomerResponse> dtoPage =
-                page.map(CustomerMapper::toResponse);
+                customerService
+                        .getCustomersPaged(sector(request), search, from, to, pageable)
+                        .map(CustomerMapper::toResponse);
 
         return ResponseEntity.ok(PageUtils.from(dtoPage));
     }
-
-
 
     /* =========================
        CRUD

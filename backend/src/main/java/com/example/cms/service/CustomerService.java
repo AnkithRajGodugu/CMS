@@ -12,6 +12,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import java.time.LocalDateTime;
+//import org.springframework.data.domain.Page;
+//import org.springframework.data.domain.Pageable;
 //import com.example.cms.dto.CustomerResponse;
 //import com.example.cms.mapper.CustomerMapper;
 
@@ -75,16 +78,22 @@ public class CustomerService {
     /* =========================
    PAGINATION + SEARCH
 ========================== */
+
+
     public Page<Customer> getCustomersPaged(
             SectorContext ctx,
             String search,
+            LocalDateTime from,
+            LocalDateTime to,
             Pageable pageable
     ) {
 
         Page<Customer> page =
-                customerRepository.findBySectorWithSearch(
+                customerRepository.findBySectorWithSearchAndDateRange(
                         ctx.getSectorId(),
                         search,
+                        from,
+                        to,
                         pageable
                 );
 
@@ -93,7 +102,7 @@ public class CustomerService {
                 ctx.getSectorId(),
                 null,
                 "CUSTOMER",
-                "PAGE",
+                "PAGE_DATE_RANGE",
                 "READ",
                 SecurityUtils.clientIp()
         );
