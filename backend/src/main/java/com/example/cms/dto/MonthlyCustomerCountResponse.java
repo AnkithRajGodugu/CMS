@@ -1,13 +1,8 @@
 package com.example.cms.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
+public record MonthlyCustomerCountResponse(
+        int year,
+        int month,
+        long count
+) {}
 
-@Data
-@AllArgsConstructor
-public class MonthlyCustomerCountResponse {
-
-    private int year;
-    private int month;
-    private long count;
-}

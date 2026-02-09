@@ -4,11 +4,16 @@ import com.example.cms.dto.MonthlyCustomerCountResponse;
 import com.example.cms.dto.SectorMonthlyCustomerCountResponse;
 import com.example.cms.entity.Customer;
 import com.example.cms.entity.Sector;
+import com.example.cms.event.CustomerEvent;
+import com.example.cms.event.CustomerEventType;
+import com.example.cms.kafka.CustomerEventPublisher;
 import com.example.cms.model.SectorContext;
 import com.example.cms.repository.CustomerRepository;
 import com.example.cms.repository.SectorRepository;
 import com.example.cms.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -28,6 +33,7 @@ public class CustomerService {
     private final CustomerRepository customerRepository;
     private final SectorRepository sectorRepository;
     private final AuditService auditService;
+    private final CustomerEventPublisher customerEventPublisher; // ✅ NEW
 
     /* =========================
        READ
@@ -70,6 +76,7 @@ public class CustomerService {
        PAGINATION
     ========================== */
 
+    @Transactional(readOnly = true)
     public Page<Customer> getCustomersPaged(
             SectorContext ctx,
             String search,
@@ -83,19 +90,19 @@ public class CustomerService {
     }
 
     /* =========================
-       REPORTING
+       REPORTING (CACHED)
     ========================== */
 
+    @Cacheable(
+            value = "monthlyCustomerReport",
+            key = "#ctx.sectorId + ':' + #start + ':' + #end"
+    )
     @Transactional(readOnly = true)
     public List<MonthlyCustomerCountResponse> getMonthlyCustomerReport(
             SectorContext ctx,
             LocalDateTime start,
             LocalDateTime end
     ) {
-        if (start == null || end == null) {
-            throw new IllegalArgumentException("Start and end dates are required");
-        }
-
         return customerRepository.getMonthlyCustomerCounts(
                 ctx.getSectorId(),
                 start,
@@ -103,6 +110,10 @@ public class CustomerService {
         );
     }
 
+    @Cacheable(
+            value = "adminMonthlyCustomerReport",
+            key = "#start + ':' + #end"
+    )
     @Transactional(readOnly = true)
     public List<SectorMonthlyCustomerCountResponse> getAdminMonthlyCustomerReport(
             LocalDateTime start,
@@ -112,14 +123,14 @@ public class CustomerService {
     }
 
     /* =========================
-       CRUD
+       CRUD (CACHE EVICT + EVENTS)
     ========================== */
 
+    @CacheEvict(
+            value = {"monthlyCustomerReport", "adminMonthlyCustomerReport"},
+            allEntries = true
+    )
     public Customer createCustomer(Customer customer, SectorContext ctx) {
-
-        if (ctx == null || ctx.getSectorId() == null) {
-            throw new IllegalArgumentException("Sector context is required");
-        }
 
         Sector sector = sectorRepository.findById(ctx.getSectorId())
                 .orElseThrow(() -> new RuntimeException("Sector not found"));
@@ -130,13 +141,7 @@ public class CustomerService {
         customer.setCreatedBy(userId);
         customer.setUpdatedBy(userId);
 
-
         Customer saved = customerRepository.save(customer);
-
-        Map<String, Object> metadata = new HashMap<>();
-        if (saved.getEmail() != null) {
-            metadata.put("email", saved.getEmail());
-        }
 
         auditService.logAction(
                 userId,
@@ -145,15 +150,34 @@ public class CustomerService {
                 "CREATE_CUSTOMER",
                 "CUSTOMER",
                 saved.getId().toString(),
-                metadata.isEmpty() ? null : metadata,
+                Map.of("email", saved.getEmail()),
                 SecurityUtils.clientIp()
         );
 
+        // ✅ KAFKA EVENT
+        customerEventPublisher.publish(
+                new CustomerEvent(
+                        saved.getId(),
+                        CustomerEventType.CREATED,
+                        saved.getFirstName(),
+                        saved.getLastName(),
+                        saved.getEmail(),
+                        saved.getPhone(),
+                        sector.getCode(),
+                        userId,
+                        LocalDateTime.now()
+                )
+        );
 
         return saved;
     }
 
+    @CacheEvict(
+            value = {"monthlyCustomerReport", "adminMonthlyCustomerReport"},
+            allEntries = true
+    )
     public Customer updateCustomer(Long id, Customer updated, SectorContext ctx) {
+
         Customer existing = getCustomer(id, ctx);
 
         existing.setFirstName(updated.getFirstName());
@@ -175,10 +199,30 @@ public class CustomerService {
                 SecurityUtils.clientIp()
         );
 
+        // ✅ KAFKA EVENT
+        customerEventPublisher.publish(
+                new CustomerEvent(
+                        saved.getId(),
+                        CustomerEventType.UPDATED,
+                        saved.getFirstName(),
+                        saved.getLastName(),
+                        saved.getEmail(),
+                        saved.getPhone(),
+                        saved.getSector().getCode(),
+                        SecurityUtils.currentUserId(),
+                        LocalDateTime.now()
+                )
+        );
+
         return saved;
     }
 
+    @CacheEvict(
+            value = {"monthlyCustomerReport", "adminMonthlyCustomerReport"},
+            allEntries = true
+    )
     public void deleteCustomer(Long id, SectorContext ctx) {
+
         if (!customerRepository.existsByIdAndSectorId(id, ctx.getSectorId())) {
             throw new RuntimeException("Customer not found");
         }
@@ -195,12 +239,31 @@ public class CustomerService {
                 null,
                 SecurityUtils.clientIp()
         );
+
+        // ✅ KAFKA EVENT
+        customerEventPublisher.publish(
+                new CustomerEvent(
+                        id,
+                        CustomerEventType.DELETED,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        SecurityUtils.currentUserId(),
+                        LocalDateTime.now()
+                )
+        );
     }
 
     /* =========================
-       BULK CSV
+       BULK CSV (CACHE EVICT + EVENT)
     ========================== */
 
+    @CacheEvict(
+            value = {"monthlyCustomerReport", "adminMonthlyCustomerReport"},
+            allEntries = true
+    )
     public int bulkCreateFromCsv(MultipartFile file, SectorContext ctx) {
 
         Sector sector = sectorRepository.findById(ctx.getSectorId())
@@ -212,7 +275,7 @@ public class CustomerService {
         try (BufferedReader reader =
                      new BufferedReader(new InputStreamReader(file.getInputStream()))) {
 
-            reader.readLine(); // skip header
+            reader.readLine(); // header
             String line;
 
             while ((line = reader.readLine()) != null) {
@@ -244,6 +307,21 @@ public class CustomerService {
                 "CSV_UPLOAD",
                 Map.of("count", customers.size()),
                 SecurityUtils.clientIp()
+        );
+
+        // ✅ BULK EVENT (summary)
+        customerEventPublisher.publish(
+                new CustomerEvent(
+                        null,
+                        CustomerEventType.BULK_CREATED,
+                        null,
+                        null,
+                        null,
+                        null,
+                        sector.getCode(),
+                        userId,
+                        LocalDateTime.now()
+                )
         );
 
         return customers.size();

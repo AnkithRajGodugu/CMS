@@ -2,15 +2,14 @@ package com.example.cms.controller;
 
 import com.example.cms.dto.MonthlyCustomerCountResponse;
 import com.example.cms.dto.SectorMonthlyCustomerCountResponse;
-import com.example.cms.util.CustomerSortFields;
 import com.example.cms.dto.CustomerResponse;
 import com.example.cms.dto.PagedResponse;
 import com.example.cms.entity.Customer;
+import com.example.cms.kafka.CustomerEventPublisher;
 import com.example.cms.mapper.CustomerMapper;
 import com.example.cms.model.SectorContext;
 import com.example.cms.service.CustomerService;
 import com.example.cms.util.PageUtils;
-import com.example.cms.util.SortWhitelistUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -25,8 +24,6 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-
-
 import java.util.List;
 import java.util.Map;
 
@@ -88,7 +85,7 @@ public class CustomerController {
     }
 
     /* =========================
-       REPORTS
+       REPORTS (ETAG)
     ========================== */
 
     @GetMapping("/reports/monthly")
@@ -100,48 +97,34 @@ public class CustomerController {
     ) {
         SectorContext ctx = sector(request);
 
-        // ADMIN → cross-sector
-        if (ctx == null || ctx.getRoles().contains("ROLE_ADMIN")) {
-            return ResponseEntity.ok(
-                    customerService
-                            .getAdminMonthlyCustomerReport(
-                                    start.atStartOfDay(),
-                                    end.atTime(23, 59, 59)
-                            )
-                            .stream()
-                            .map(r -> new MonthlyCustomerCountResponse(
-                                    r.getYear(),
-                                    r.getMonth(),
-                                    r.getCount()
-                            ))
-
-                            .toList()
-            );
-        }
-
-        // MANAGER → sector-bound
-        return ResponseEntity.ok(
-                customerService.getMonthlyCustomerReport(
+        List<MonthlyCustomerCountResponse> result =
+                (ctx == null || ctx.getRoles().contains("ROLE_ADMIN"))
+                        ? customerService
+                        .getAdminMonthlyCustomerReport(
+                                start.atStartOfDay(),
+                                end.atTime(23, 59, 59)
+                        )
+                        .stream()
+                        .map(r -> new MonthlyCustomerCountResponse(
+                                r.year(),
+                                r.month(),
+                                r.count()
+                        ))
+                        .toList()
+                        : customerService.getMonthlyCustomerReport(
                         ctx,
                         start.atStartOfDay(),
                         end.atTime(23, 59, 59)
-                )
-        );
-    }
+                );
 
+        String eTag = Integer.toHexString(result.hashCode());
+        String ifNoneMatch = request.getHeader("If-None-Match");
 
-    @GetMapping("/reports/admin/monthly")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<SectorMonthlyCustomerCountResponse>> adminMonthlyReport(
-            @RequestParam LocalDate start,
-            @RequestParam LocalDate end
-    ) {
-        return ResponseEntity.ok(
-                customerService.getAdminMonthlyCustomerReport(
-                        start.atStartOfDay(),
-                        end.atTime(23, 59, 59)
-                )
-        );
+        if (eTag.equals(ifNoneMatch)) {
+            return ResponseEntity.status(304).eTag(eTag).build();
+        }
+
+        return ResponseEntity.ok().eTag(eTag).body(result);
     }
 
     /* =========================
@@ -194,4 +177,6 @@ public class CustomerController {
         int count = customerService.bulkCreateFromCsv(file, sector(request));
         return ResponseEntity.ok(Map.of("created", count));
     }
+    private final CustomerEventPublisher customerEventPublisher;
+
 }

@@ -7,17 +7,17 @@ services:
   postgres:
     image: postgres:15-alpine
     container_name: cms-postgres
-    restart: always
+    restart: unless-stopped
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: Hello@123!
-      POSTGRES_DB: cms_db
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -28,12 +28,12 @@ services:
   # pgAdmin
   # =====================
   pgadmin:
-    image: dpage/pgadmin4
+    image: dpage/pgadmin4:latest
     container_name: cms-pgadmin
-    restart: always
+    restart: unless-stopped
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@cms.com
-      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
     ports:
       - "5050:80"
     depends_on:
@@ -48,7 +48,7 @@ services:
   zookeeper:
     image: confluentinc/cp-zookeeper:7.4.0
     container_name: cms-zookeeper
-    restart: always
+    restart: unless-stopped
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
@@ -58,12 +58,12 @@ services:
       - cms-network
 
   # =====================
-  # Kafka (STABLE CONFIG)
+  # Kafka
   # =====================
   kafka:
     image: confluentinc/cp-kafka:7.4.0
     container_name: cms-kafka
-    restart: always
+    restart: unless-stopped
     depends_on:
       - zookeeper
     ports:
@@ -72,13 +72,11 @@ services:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
 
-      # LISTENERS
       KAFKA_LISTENERS: INTERNAL://0.0.0.0:9092,EXTERNAL://0.0.0.0:29092
       KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9092,EXTERNAL://localhost:29092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
 
-      # SINGLE NODE SETTINGS
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
@@ -92,7 +90,7 @@ services:
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
     container_name: cms-kafka-ui
-    restart: always
+    restart: unless-stopped
     depends_on:
       - kafka
     ports:
@@ -111,12 +109,13 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: cms-backend
-    restart: always
+    restart: unless-stopped
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/cms_db
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: Hello@123!
-      SPRING_JPA_HIBERNATE_DDL_AUTO: create-drop
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${DB_NAME}
+      SPRING_DATASOURCE_USERNAME: ${DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: validate
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       JAVA_OPTS: "-Xms512m -Xmx1024m"
     ports:
@@ -135,7 +134,7 @@ services:
   prometheus:
     image: prom/prometheus:latest
     container_name: cms-prometheus
-    restart: always
+    restart: unless-stopped
     ports:
       - "19090:9090"
     volumes:
@@ -143,6 +142,8 @@ services:
       - prometheus_data:/prometheus
     command:
       - "--config.file=/etc/prometheus/prometheus.yml"
+    depends_on:
+      - backend
     networks:
       - cms-network
 
