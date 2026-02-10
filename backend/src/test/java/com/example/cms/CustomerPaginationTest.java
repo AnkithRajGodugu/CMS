@@ -1,5 +1,9 @@
 package com.example.cms;
 
+import com.example.cms.config.NoSecurityConfig;
+import com.example.cms.config.TestCacheConfig;
+import com.example.cms.config.TestKafkaConfig;
+import com.example.cms.config.TestKafkaDisableConfig;
 import com.example.cms.entity.Customer;
 import com.example.cms.entity.Sector;
 import com.example.cms.entity.UserType;
@@ -11,6 +15,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Set;
@@ -21,6 +27,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc(addFilters = false)
+@ActiveProfiles("test")
+
+@Import({
+        NoSecurityConfig.class,
+        TestKafkaConfig.class,
+
+        TestKafkaDisableConfig.class
+})
+
 class CustomerPaginationTest {
 
     @Autowired

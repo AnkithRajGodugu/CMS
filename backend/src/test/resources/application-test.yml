@@ -15,8 +15,15 @@ spring:
     database-platform: org.hibernate.dialect.H2Dialect
     show-sql: false
 
+
+    cache:
+      type: simple
+
+cms:
   kafka:
     enabled: false
 
 server:
   port: 0
+
+

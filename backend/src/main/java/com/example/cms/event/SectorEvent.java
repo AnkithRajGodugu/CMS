@@ -17,6 +17,7 @@ public class SectorEvent {
     private String eventId;
     private String eventType;
     private String sectorCode;
+
     private Long userId;
     private Long organizationId;
 

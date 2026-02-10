@@ -1,6 +1,9 @@
 package com.example.cms.integration;
 
 import com.example.cms.config.NoSecurityConfig;
+import com.example.cms.config.TestCacheConfig;
+import com.example.cms.config.TestKafkaConfig;
+import com.example.cms.config.TestKafkaDisableConfig;
 import com.example.cms.entity.Sector;
 import com.example.cms.entity.UserType;
 import com.example.cms.model.SectorContext;
@@ -15,6 +18,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Set;
@@ -25,60 +29,60 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc(addFilters = false)
-@Import(NoSecurityConfig.class)
+@ActiveProfiles("test")
 
-
+@Import({
+        NoSecurityConfig.class,
+        TestKafkaConfig.class,
+        TestKafkaDisableConfig.class
+})
 class CustomerBulkIntegrationTest {
 
     @Autowired
-    private MockMvc mockMvc;
+    MockMvc mockMvc;
 
     @Autowired
-    private SectorRepository sectorRepository;
+    SectorRepository sectorRepository;
 
     @Autowired
-    private CustomerRepository customerRepository;
+    CustomerRepository customerRepository;
 
-    private Sector sector;
+    Sector sector;
 
     @BeforeEach
     void setup() {
         customerRepository.deleteAll();
         sectorRepository.deleteAll();
 
-        sector = Sector.builder()
-                .name("Banking")
-                .code("BANKING")
-                .routePath("/banking")
-                .enabled(true)
-                .displayOrder(1)
-                .build();
-
-        sector = sectorRepository.save(sector);
+        sector = sectorRepository.save(
+                Sector.builder()
+                        .name("Banking")
+                        .code("BANKING")
+                        .routePath("/banking")
+                        .enabled(true)
+                        .displayOrder(1)
+                        .build()
+        );
     }
 
     @Test
+
     @WithMockUser(roles = "ADMIN")
-    void bulkCreateCustomers_shouldCreateCustomersAndReturn200() throws Exception {
+
+
+        void bulkCreateCustomers_shouldCreateCustomersAndReturn200() throws Exception {
 
         String csv = """
                 firstName,lastName,email,phone
-                John,Doe,john@example.com,9999999999
-                Jane,Smith,jane@example.com,8888888888
+                John,Doe,john@example.com,999
+                Jane,Smith,jane@example.com,888
                 """;
 
-        MockMultipartFile file = new MockMultipartFile(
-                "file",
-                "customers.csv",
-                MediaType.TEXT_PLAIN_VALUE,
-                csv.getBytes()
-        );
+        MockMultipartFile file =
+                new MockMultipartFile("file", "c.csv", "text/csv", csv.getBytes());
 
         SectorContext ctx = SectorContext.builder()
                 .sectorId(sector.getId())
-                .sectorCode("BANKING")
-                .userId(1L)
-                .userType(UserType.INDIVIDUAL)
                 .roles(Set.of("ROLE_ADMIN"))
                 .build();
 

@@ -339,15 +339,15 @@ public class KafkaConsumerService {
 
     private void processCustomerEvent(CustomerEvent event) {
         switch (event.getEventType()) {
-            case "CREATED":
+            case CREATED:
                 log.info("Processing customer creation: {}", event.getCustomerId());
                 // Add business logic for customer creation
                 break;
-            case "UPDATED":
+            case UPDATED:
                 log.info("Processing customer update: {}", event.getCustomerId());
                 // Add business logic for customer update
                 break;
-            case "DELETED":
+            case DELETED:
                 log.info("Processing customer deletion: {}", event.getCustomerId());
                 // Add business logic for customer deletion
                 break;

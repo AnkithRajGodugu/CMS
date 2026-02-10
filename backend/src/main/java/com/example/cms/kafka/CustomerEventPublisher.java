@@ -14,7 +14,7 @@ public class CustomerEventPublisher {
     public void publish(CustomerEvent event) {
         kafkaTemplate.send(
                 KafkaTopics.CUSTOMER_EVENTS,
-                event.getCustomerId().toString(),
+                event.getCustomerId() == null ? "bulk" : event.getCustomerId().toString(),
                 event
         );
     }

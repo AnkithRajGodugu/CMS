@@ -7,15 +7,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
 @Configuration
-@Profile("!test")   // 👈 THIS IS THE FIX
-public class CacheConfig {
+@Profile("test")
+public class TestCacheConfig {
 
     @Bean
     public CacheManager cacheManager() {
-        return new ConcurrentMapCacheManager(
-                "customers",
-                "sectors",
-                "organizations"
-        );
+        return new ConcurrentMapCacheManager();
     }
 }

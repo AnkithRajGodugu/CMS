@@ -1,6 +1,6 @@
 package com.example.cms.integration;
 
-import com.example.cms.config.TestcontainersConfig;
+import com.example.cms.config.*;
 import com.example.cms.entity.Sector;
 import com.example.cms.entity.User;
 import com.example.cms.entity.UserType;
@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -28,6 +29,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Disabled("Disabled until Docker/Testcontainers is enabled")
 
 @SpringBootTest
+@Import({
+        NoSecurityConfig.class,
+        TestKafkaConfig.class,
+
+        TestKafkaDisableConfig.class
+})
+
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @Transactional

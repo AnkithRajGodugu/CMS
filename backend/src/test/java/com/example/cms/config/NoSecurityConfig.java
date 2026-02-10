@@ -12,8 +12,7 @@ public class NoSecurityConfig {
 
     @Bean
     SecurityFilterChain testSecurity(HttpSecurity http) throws Exception {
-        http
-                .csrf(csrf -> csrf.disable())
+        http.csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
         return http.build();
     }

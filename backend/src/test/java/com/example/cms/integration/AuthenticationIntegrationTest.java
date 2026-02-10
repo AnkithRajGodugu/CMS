@@ -1,6 +1,6 @@
 package com.example.cms.integration;
 
-import com.example.cms.config.TestcontainersConfig;
+import com.example.cms.config.*;
 import com.example.cms.dto.LoginResponse;
 import com.example.cms.entity.Sector;
 import com.example.cms.entity.User;
@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +25,12 @@ import static org.junit.jupiter.api.Assertions.*;
 @Disabled("Disabled until Docker/Testcontainers is enabled")
 
 @SpringBootTest
+@Import({
+        NoSecurityConfig.class,
+        TestKafkaConfig.class,
+        TestKafkaDisableConfig.class
+})
+
 @ActiveProfiles("test")
 @Transactional
 class AuthenticationIntegrationTest extends TestcontainersConfig {

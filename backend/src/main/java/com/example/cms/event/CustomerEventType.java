@@ -1,11 +1,8 @@
 package com.example.cms.event;
 
 public enum CustomerEventType {
-
     CREATED,
     UPDATED,
-    DELETED ,
+    DELETED,
     BULK_CREATED
-
 }
-
