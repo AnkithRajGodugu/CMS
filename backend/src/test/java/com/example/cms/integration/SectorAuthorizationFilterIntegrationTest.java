@@ -31,9 +31,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @Import({
         NoSecurityConfig.class,
-        TestKafkaConfig.class,
 
-        TestKafkaDisableConfig.class
 })
 
 @AutoConfigureMockMvc

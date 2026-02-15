@@ -3,11 +3,12 @@ package com.example.cms.service;
 import com.example.cms.event.AuditEvent;
 import com.example.cms.event.CustomerEvent;
 import com.example.cms.event.SectorEvent;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.support.SendResult;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
@@ -15,7 +16,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 
 @Service
 @RequiredArgsConstructor
@@ -24,16 +24,26 @@ import java.util.concurrent.CompletableFuture;
 public class KafkaProducerService {
 
     private final KafkaTemplate<String, Object> kafkaTemplate;
+    private final MeterRegistry meterRegistry;
+
+    private Counter kafkaPublishedCounter;
 
     private static final String CUSTOMER_TOPIC = "customer-events";
     private static final String AUDIT_TOPIC = "audit-events";
     private static final String SECTOR_TOPIC_PREFIX = "sector-events-";
+
+    @jakarta.annotation.PostConstruct
+    public void initMetrics() {
+        this.kafkaPublishedCounter =
+                meterRegistry.counter("kafka.events.published");
+    }
 
     public void sendCustomerEvent(CustomerEvent event) {
         kafkaTemplate
                 .send(CUSTOMER_TOPIC, event.getCustomerId().toString(), event)
                 .whenComplete((result, ex) -> {
                     if (ex == null) {
+                        kafkaPublishedCounter.increment();
                         log.info("Customer event sent: {} offset={}",
                                 event.getEventType(),
                                 result.getRecordMetadata().offset());
@@ -69,6 +79,7 @@ public class KafkaProducerService {
                 .send(topic, event.getEventId(), event)
                 .whenComplete((result, ex) -> {
                     if (ex == null) {
+                        kafkaPublishedCounter.increment();
                         log.info("Sector event sent: {} topic={}", eventType, topic);
                     } else {
                         log.error("Sector event send failed: {}", eventType, ex);
@@ -90,6 +101,7 @@ public class KafkaProducerService {
                 .send(AUDIT_TOPIC, auditEvent.getId(), auditEvent)
                 .whenComplete((result, ex) -> {
                     if (ex == null) {
+                        kafkaPublishedCounter.increment();
                         log.info("Audit event sent: {} user={}",
                                 auditEvent.getAction(), auditEvent.getUserId());
                     } else {

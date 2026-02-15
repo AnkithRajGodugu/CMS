@@ -1,11 +1,7 @@
 package com.example.cms.integration;
 
 import com.example.cms.config.NoSecurityConfig;
-import com.example.cms.config.TestCacheConfig;
-import com.example.cms.config.TestKafkaConfig;
-import com.example.cms.config.TestKafkaDisableConfig;
 import com.example.cms.entity.Sector;
-import com.example.cms.entity.UserType;
 import com.example.cms.model.SectorContext;
 import com.example.cms.repository.CustomerRepository;
 import com.example.cms.repository.SectorRepository;
@@ -15,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
@@ -33,8 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @Import({
         NoSecurityConfig.class,
-        TestKafkaConfig.class,
-        TestKafkaDisableConfig.class
+
 })
 class CustomerBulkIntegrationTest {
 

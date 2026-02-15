@@ -29,9 +29,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @Transactional
 @Import({
         NoSecurityConfig.class,
-        TestKafkaConfig.class,
 
-        TestKafkaDisableConfig.class
 })
 
 class DatabaseIntegrationTest extends TestcontainersConfig {

@@ -44,7 +44,7 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
             Pageable pageable
     );
 
-    /* ---------- Pagination + search + date range (Phase 4.5) ---------- */
+    /* ---------- Pagination + search + date range ---------- */
 
     @Query("""
         SELECT c FROM Customer c
@@ -73,76 +73,56 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
             LocalDateTime start,
             LocalDateTime end
     );
-//
-//
-//    @Query("""
-//    SELECT new com.example.cms.dto.SectorMonthlyCustomerCountResponse(
-//        s.id,
-//        s.code,
-//        YEAR(c.createdAt),
-//        MONTH(c.createdAt),
-//        COUNT(c.id)
-//    )
-//    FROM Customer c
-//    JOIN c.sector s
-//    WHERE c.createdAt BETWEEN :start AND :end
-//    GROUP BY s.id, s.code, YEAR(c.createdAt), MONTH(c.createdAt)
-//    ORDER BY s.code, YEAR(c.createdAt), MONTH(c.createdAt)
-//""")
-//    List<SectorMonthlyCustomerCountResponse> getMonthlyCustomerCountsAllSectors(
-//            @Param("start") LocalDateTime start,
-//            @Param("end") LocalDateTime end
-//    );
+
+    /* ---------- Monthly report per sector ---------- */
 
     @Query("""
-    select new com.example.cms.dto.MonthlyCustomerCountResponse(
-        extract(year from c.createdAt),
-        extract(month from c.createdAt),
-        count(c.id)
-    )
-    from Customer c
-    where c.sector.id = :sectorId
-      and c.createdAt between :start and :end
-    group by
-        extract(year from c.createdAt),
-        extract(month from c.createdAt)
-    order by
-        extract(year from c.createdAt),
-        extract(month from c.createdAt)
-""")
+        select new com.example.cms.dto.MonthlyCustomerCountResponse(
+            year(c.createdAt),
+            month(c.createdAt),
+            count(c.id)
+        )
+        from Customer c
+        where c.sector.id = :sectorId
+          and c.createdAt between :start and :end
+        group by
+            year(c.createdAt),
+            month(c.createdAt)
+        order by
+            year(c.createdAt),
+            month(c.createdAt)
+    """)
     List<MonthlyCustomerCountResponse> getMonthlyCustomerCounts(
             @Param("sectorId") Long sectorId,
             @Param("start") LocalDateTime start,
             @Param("end") LocalDateTime end
     );
 
-
+    /* ---------- Monthly report all sectors (Admin) ---------- */
 
     @Query("""
-    select new com.example.cms.dto.SectorMonthlyCustomerCountResponse(
-        s.id,
-        s.code,
-        extract(year from c.createdAt),
-        extract(month from c.createdAt),
-        count(c.id)
-    )
-    from Customer c
-    join c.sector s
-    where c.createdAt between :start and :end
-    group by
-        s.id, s.code,
-        extract(year from c.createdAt),
-        extract(month from c.createdAt)
-    order by
-        s.code,
-        extract(year from c.createdAt),
-        extract(month from c.createdAt)
-""")
+        select new com.example.cms.dto.SectorMonthlyCustomerCountResponse(
+            s.id,
+            s.code,
+            year(c.createdAt),
+            month(c.createdAt),
+            count(c.id)
+        )
+        from Customer c
+        join c.sector s
+        where c.createdAt between :start and :end
+        group by
+            s.id, s.code,
+            year(c.createdAt),
+            month(c.createdAt)
+        order by
+            s.code,
+            year(c.createdAt),
+            month(c.createdAt)
+    """)
     List<SectorMonthlyCustomerCountResponse> getMonthlyCustomerCountsAllSectors(
             @Param("start") LocalDateTime start,
             @Param("end") LocalDateTime end
     );
-
-
 
 }

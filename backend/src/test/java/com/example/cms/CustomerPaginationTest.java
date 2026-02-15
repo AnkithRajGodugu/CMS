@@ -1,9 +1,6 @@
 package com.example.cms;
 
 import com.example.cms.config.NoSecurityConfig;
-import com.example.cms.config.TestCacheConfig;
-import com.example.cms.config.TestKafkaConfig;
-import com.example.cms.config.TestKafkaDisableConfig;
 import com.example.cms.entity.Customer;
 import com.example.cms.entity.Sector;
 import com.example.cms.entity.UserType;
@@ -31,9 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @Import({
         NoSecurityConfig.class,
-        TestKafkaConfig.class,
 
-        TestKafkaDisableConfig.class
 })
 
 class CustomerPaginationTest {

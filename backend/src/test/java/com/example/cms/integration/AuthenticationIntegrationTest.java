@@ -27,8 +27,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 @Import({
         NoSecurityConfig.class,
-        TestKafkaConfig.class,
-        TestKafkaDisableConfig.class
+
 })
 
 @ActiveProfiles("test")

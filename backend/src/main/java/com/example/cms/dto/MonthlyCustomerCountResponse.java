@@ -1,8 +1,7 @@
 package com.example.cms.dto;
 
 public record MonthlyCustomerCountResponse(
-        int year,
-        int month,
-        long count
+        Integer year,
+        Integer month,
+        Long count
 ) {}
-

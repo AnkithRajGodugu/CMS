@@ -1,12 +1,8 @@
 package com.example.cms;
 
 import com.example.cms.config.NoSecurityConfig;
-import com.example.cms.config.TestCacheConfig;
-import com.example.cms.config.TestKafkaConfig;
-import com.example.cms.config.TestKafkaDisableConfig;
 import com.example.cms.model.SectorContext;
 import com.example.cms.service.CustomerService;
-import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -29,9 +25,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @Import({
         NoSecurityConfig.class,
-        TestKafkaConfig.class,
 
-        TestKafkaDisableConfig.class
 })
 class CustomerControllerTest {
 

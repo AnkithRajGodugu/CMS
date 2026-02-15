@@ -7,6 +7,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication(scanBasePackages = "com.example.cms")
 @EnableScheduling
+@EnableCaching
 
 public class CmsApplication {
     public static void main(String[] args) {

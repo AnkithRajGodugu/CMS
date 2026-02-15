@@ -96,16 +96,19 @@ public class CustomerController {
     ) {
         SectorContext ctx = sector(request);
 
-        // ADMIN → cross-sector
-        if (ctx == null || ctx.getRoles().contains("ROLE_ADMIN")) {
+        LocalDateTime startDateTime = start.atStartOfDay();
+        LocalDateTime endDateTime = end.atTime(23, 59, 59);
+
+        boolean isAdmin = ctx != null &&
+                ctx.getRoles() != null &&
+                ctx.getRoles().stream()
+                        .anyMatch(r -> r.equals("ROLE_ADMIN") || r.equals("ADMIN"));
+
+        if (isAdmin) {
             return ResponseEntity.ok(
                     customerService
-                            .getAdminMonthlyCustomerReport(
-                                    start.atStartOfDay(),
-                                    end.atTime(23, 59, 59)
-                            )
+                            .getAdminMonthlyCustomerReport(startDateTime, endDateTime)
                             .stream()
-                            // ✅ FIX: record accessors, NOT getters
                             .map(r -> new MonthlyCustomerCountResponse(
                                     r.year(),
                                     r.month(),
@@ -115,18 +118,17 @@ public class CustomerController {
             );
         }
 
-        // MANAGER → sector-bound
         return ResponseEntity.ok(
                 customerService.getMonthlyCustomerReport(
                         ctx,
-                        start.atStartOfDay(),
-                        end.atTime(23, 59, 59)
+                        startDateTime,
+                        endDateTime
                 )
         );
     }
 
     /* =========================
-       ADMIN REPORT (TEST REQUIRES THIS)
+       ADMIN REPORT
     ========================== */
 
     @GetMapping("/reports/admin/monthly")
@@ -135,6 +137,7 @@ public class CustomerController {
             @RequestParam LocalDate start,
             @RequestParam LocalDate end
     ) {
+
         return ResponseEntity.ok(
                 customerService.getAdminMonthlyCustomerReport(
                         start.atStartOfDay(),

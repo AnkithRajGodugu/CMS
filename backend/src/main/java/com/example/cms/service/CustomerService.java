@@ -8,7 +8,10 @@ import com.example.cms.model.SectorContext;
 import com.example.cms.repository.CustomerRepository;
 import com.example.cms.repository.SectorRepository;
 import com.example.cms.util.SecurityUtils;
-import lombok.RequiredArgsConstructor;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -21,19 +24,52 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
-@RequiredArgsConstructor
 @Transactional
 public class CustomerService {
 
     private final CustomerRepository customerRepository;
     private final SectorRepository sectorRepository;
     private final AuditService auditService;
+    private final MeterRegistry meterRegistry;
 
-    /* =========================
+    private final Counter customerCreatedCounter;
+    private final Counter customerDeletedCounter;
+    private final Counter customerBulkCreatedCounter;
+
+    public CustomerService(CustomerRepository customerRepository,
+                           SectorRepository sectorRepository,
+                           AuditService auditService,
+                           MeterRegistry meterRegistry) {
+
+        this.customerRepository = customerRepository;
+        this.sectorRepository = sectorRepository;
+        this.auditService = auditService;
+        this.meterRegistry = meterRegistry;
+
+        // Safe metric initialization (Spring + Mockito safe)
+        if (meterRegistry != null) {
+            this.customerCreatedCounter =
+                    meterRegistry.counter("customers.created");
+
+            this.customerDeletedCounter =
+                    meterRegistry.counter("customers.deleted");
+
+            this.customerBulkCreatedCounter =
+                    meterRegistry.counter("customers.bulk.created");
+        } else {
+            this.customerCreatedCounter = null;
+            this.customerDeletedCounter = null;
+            this.customerBulkCreatedCounter = null;
+        }
+    }
+
+    /* =========================================================
        READ
-    ========================== */
+    ========================================================== */
 
+    @Cacheable(value = "customers", key = "#ctx.sectorId")
     public List<Customer> getAllCustomers(SectorContext ctx) {
+
         List<Customer> customers =
                 customerRepository.findBySectorId(ctx.getSectorId());
 
@@ -46,10 +82,13 @@ public class CustomerService {
                 "READ",
                 SecurityUtils.clientIp()
         );
+
         return customers;
     }
 
+    @Cacheable(value = "customer", key = "#id + '-' + #ctx.sectorId")
     public Customer getCustomer(Long id, SectorContext ctx) {
+
         Customer customer = customerRepository
                 .findByIdAndSectorId(id, ctx.getSectorId())
                 .orElseThrow(() -> new RuntimeException("Customer not found"));
@@ -63,13 +102,18 @@ public class CustomerService {
                 "READ",
                 SecurityUtils.clientIp()
         );
+
         return customer;
     }
 
-    /* =========================
+    /* =========================================================
        PAGINATION
-    ========================== */
+    ========================================================== */
 
+    @Cacheable(
+            value = "customersPaged",
+            key = "#ctx.sectorId + '-' + #search + '-' + #from + '-' + #to + '-' + #pageable.pageNumber"
+    )
     public Page<Customer> getCustomersPaged(
             SectorContext ctx,
             String search,
@@ -77,21 +121,31 @@ public class CustomerService {
             LocalDateTime to,
             Pageable pageable
     ) {
+
         return customerRepository.findBySectorWithSearchAndDateRange(
-                ctx.getSectorId(), search, from, to, pageable
+                ctx.getSectorId(),
+                search,
+                from,
+                to,
+                pageable
         );
     }
 
-    /* =========================
+    /* =========================================================
        REPORTING
-    ========================== */
+    ========================================================== */
 
     @Transactional(readOnly = true)
+    @Cacheable(
+            value = "monthlyReport",
+            key = "#ctx.sectorId + '-' + #start + '-' + #end"
+    )
     public List<MonthlyCustomerCountResponse> getMonthlyCustomerReport(
             SectorContext ctx,
             LocalDateTime start,
             LocalDateTime end
     ) {
+
         if (start == null || end == null) {
             throw new IllegalArgumentException("Start and end dates are required");
         }
@@ -104,17 +158,27 @@ public class CustomerService {
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(
+            value = "adminMonthlyReport",
+            key = "#start + '-' + #end"
+    )
     public List<SectorMonthlyCustomerCountResponse> getAdminMonthlyCustomerReport(
             LocalDateTime start,
             LocalDateTime end
     ) {
+
+
         return customerRepository.getMonthlyCustomerCountsAllSectors(start, end);
     }
 
-    /* =========================
+    /* =========================================================
        CRUD
-    ========================== */
+    ========================================================== */
 
+    @CacheEvict(
+            value = {"customers", "customer", "customersPaged", "monthlyReport", "adminMonthlyReport"},
+            allEntries = true
+    )
     public Customer createCustomer(Customer customer, SectorContext ctx) {
 
         if (ctx == null || ctx.getSectorId() == null) {
@@ -124,18 +188,18 @@ public class CustomerService {
         Sector sector = sectorRepository.findById(ctx.getSectorId())
                 .orElseThrow(() -> new RuntimeException("Sector not found"));
 
-        Long userId = Optional.ofNullable(SecurityUtils.currentUserId()).orElse(0L);
+        Long userId =
+                Optional.ofNullable(SecurityUtils.currentUserId())
+                        .orElse(0L);
 
         customer.setSector(sector);
         customer.setCreatedBy(userId);
         customer.setUpdatedBy(userId);
 
-
         Customer saved = customerRepository.save(customer);
 
-        Map<String, Object> metadata = new HashMap<>();
-        if (saved.getEmail() != null) {
-            metadata.put("email", saved.getEmail());
+        if (customerCreatedCounter != null) {
+            customerCreatedCounter.increment();
         }
 
         auditService.logAction(
@@ -145,15 +209,19 @@ public class CustomerService {
                 "CREATE_CUSTOMER",
                 "CUSTOMER",
                 saved.getId().toString(),
-                metadata.isEmpty() ? null : metadata,
+                null,
                 SecurityUtils.clientIp()
         );
-
 
         return saved;
     }
 
+    @CacheEvict(
+            value = {"customers", "customer", "customersPaged", "monthlyReport", "adminMonthlyReport"},
+            allEntries = true
+    )
     public Customer updateCustomer(Long id, Customer updated, SectorContext ctx) {
+
         Customer existing = getCustomer(id, ctx);
 
         existing.setFirstName(updated.getFirstName());
@@ -178,12 +246,21 @@ public class CustomerService {
         return saved;
     }
 
+    @CacheEvict(
+            value = {"customers", "customer", "customersPaged", "monthlyReport", "adminMonthlyReport"},
+            allEntries = true
+    )
     public void deleteCustomer(Long id, SectorContext ctx) {
+
         if (!customerRepository.existsByIdAndSectorId(id, ctx.getSectorId())) {
             throw new RuntimeException("Customer not found");
         }
 
         customerRepository.deleteById(id);
+
+        if (customerDeletedCounter != null) {
+            customerDeletedCounter.increment();
+        }
 
         auditService.logAction(
                 SecurityUtils.currentUserId(),
@@ -197,26 +274,35 @@ public class CustomerService {
         );
     }
 
-    /* =========================
+    /* =========================================================
        BULK CSV
-    ========================== */
+    ========================================================== */
 
+    @CacheEvict(
+            value = {"customers", "customer", "customersPaged", "monthlyReport", "adminMonthlyReport"},
+            allEntries = true
+    )
     public int bulkCreateFromCsv(MultipartFile file, SectorContext ctx) {
 
         Sector sector = sectorRepository.findById(ctx.getSectorId())
                 .orElseThrow(() -> new RuntimeException("Sector not found"));
 
-        Long userId = Optional.ofNullable(SecurityUtils.currentUserId()).orElse(0L);
+        Long userId =
+                Optional.ofNullable(SecurityUtils.currentUserId())
+                        .orElse(0L);
 
         List<Customer> customers = new ArrayList<>();
 
         try (BufferedReader reader =
-                     new BufferedReader(new InputStreamReader(file.getInputStream()))) {
+                     new BufferedReader(
+                             new InputStreamReader(file.getInputStream()))) {
 
             reader.readLine(); // skip header
+
             String line;
 
             while ((line = reader.readLine()) != null) {
+
                 String[] f = line.split(",");
 
                 Customer c = new Customer();
@@ -230,11 +316,16 @@ public class CustomerService {
 
                 customers.add(c);
             }
+
         } catch (Exception e) {
             throw new RuntimeException("Invalid CSV format", e);
         }
 
         customerRepository.saveAll(customers);
+
+        if (customerBulkCreatedCounter != null) {
+            customerBulkCreatedCounter.increment(customers.size());
+        }
 
         auditService.logAction(
                 userId,

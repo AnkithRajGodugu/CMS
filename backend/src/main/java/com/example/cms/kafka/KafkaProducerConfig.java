@@ -2,6 +2,7 @@ package com.example.cms.kafka;
 
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.core.*;
@@ -11,6 +12,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Configuration
+@ConditionalOnProperty(
+        name = "cms.kafka.enabled",
+        havingValue = "true",
+        matchIfMissing = false
+)
 public class KafkaProducerConfig {
 
     @Bean
@@ -20,7 +26,10 @@ public class KafkaProducerConfig {
 
         props.put(
                 ProducerConfig.BOOTSTRAP_SERVERS_CONFIG,
-                System.getenv().getOrDefault("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092")
+                System.getenv().getOrDefault(
+                        "KAFKA_BOOTSTRAP_SERVERS",
+                        "localhost:9092"
+                )
         );
 
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
