@@ -18,6 +18,7 @@ public class CacheConfig {
 
         CaffeineCacheManager manager =
                 new CaffeineCacheManager(
+                        "sectorContext",          // ✅ FIX ADDED
                         "customers",
                         "customer",
                         "customersPaged",

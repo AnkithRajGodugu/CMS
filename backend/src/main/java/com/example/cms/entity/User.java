@@ -26,14 +26,14 @@ import java.util.Set;
 @AllArgsConstructor
 @Builder
 public class User {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(unique = true, nullable = false)
     private String username;
-    
+
     @Column(unique = true, nullable = false, length = 1000)
     @Convert(converter = EncryptedEmailConverter.class)
     private String email;
@@ -44,7 +44,7 @@ public class User {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;
-    
+
     @Enumerated(EnumType.STRING)
     @Column(name = "user_type", nullable = false)
     @Builder.Default
@@ -53,31 +53,31 @@ public class User {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "sector_id")
     private Sector sector;
-    
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "organization_id")
     private Organization organization;
-    
+
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
     @Column(name = "role_name")
     private Set<String> roles;
-    
+
     @Column(nullable = false)
     @Builder.Default
     private boolean enabled = true;
-    
+
     @Column(name = "created_at", nullable = false, updatable = false)
     @Builder.Default
     private LocalDateTime createdAt = LocalDateTime.now();
-    
+
     @Column(name = "last_login")
     private LocalDateTime lastLogin;
 
     public enum Role {
         ADMIN, MANAGER, USER, BANKING, HEALTHCARE, LOGISTICS, CONTENT
     }
-    
+
     // Backward compatibility constructor
     public User(String username, String password, Role role) {
         this.username = username;

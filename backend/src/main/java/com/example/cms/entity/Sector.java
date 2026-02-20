@@ -40,7 +40,7 @@ public class Sector {
     private String routePath;
 
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(columnDefinition = "json")
+    @Column(columnDefinition = "jsonb")
     private JsonNode configuration;
     
     @Column(nullable = false)

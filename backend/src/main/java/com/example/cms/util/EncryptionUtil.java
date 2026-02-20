@@ -31,12 +31,12 @@ public class EncryptionUtil {
 
     /**
      * Constructor that initializes the encryption key from application properties.
-     * 
+     *
      * @param encryptionKey Base64-encoded encryption key from configuration
      */
     public EncryptionUtil(@Value("${encryption.key:}") String encryptionKey) {
         this.secureRandom = new SecureRandom();
-        
+
         if (encryptionKey == null || encryptionKey.isEmpty()) {
             // Generate a new key if none is provided (for development only)
             this.secretKey = generateKey();
@@ -51,7 +51,7 @@ public class EncryptionUtil {
     /**
      * Generates a new AES-256 encryption key.
      * This should only be used for development/testing.
-     * 
+     *
      * @return A new SecretKey
      */
     public static SecretKey generateKey() {
@@ -66,7 +66,7 @@ public class EncryptionUtil {
 
     /**
      * Generates a Base64-encoded encryption key for configuration.
-     * 
+     *
      * @return Base64-encoded key string
      */
     public static String generateKeyString() {
@@ -76,7 +76,7 @@ public class EncryptionUtil {
 
     /**
      * Encrypts the given plaintext using AES-256-GCM.
-     * 
+     *
      * @param plaintext The text to encrypt
      * @return Base64-encoded encrypted data with IV prepended
      * @throws RuntimeException if encryption fails
@@ -113,7 +113,7 @@ public class EncryptionUtil {
 
     /**
      * Decrypts the given ciphertext using AES-256-GCM.
-     * 
+     *
      * @param ciphertext Base64-encoded encrypted data with IV prepended
      * @return Decrypted plaintext
      * @throws RuntimeException if decryption fails
@@ -150,7 +150,7 @@ public class EncryptionUtil {
 
     /**
      * Checks if the given string appears to be encrypted (Base64 format).
-     * 
+     *
      * @param value The string to check
      * @return true if the string appears to be encrypted
      */
@@ -158,7 +158,7 @@ public class EncryptionUtil {
         if (value == null || value.isEmpty()) {
             return false;
         }
-        
+
         try {
             byte[] decoded = Base64.getDecoder().decode(value);
             // Encrypted data should be at least IV length + some data
@@ -170,7 +170,7 @@ public class EncryptionUtil {
 
     /**
      * Encrypts data only if it's not already encrypted.
-     * 
+     *
      * @param data The data to encrypt
      * @return Encrypted data or original if already encrypted
      */
@@ -185,7 +185,7 @@ public class EncryptionUtil {
      * One-way hash function for passwords (not reversible).
      * This is a convenience method that uses the encryption key as salt.
      * For production, use BCrypt or Argon2 instead.
-     * 
+     *
      * @param password The password to hash
      * @return Base64-encoded hash
      */
@@ -193,7 +193,7 @@ public class EncryptionUtil {
         if (password == null || password.isEmpty()) {
             return password;
         }
-        
+
         try {
             java.security.MessageDigest digest = java.security.MessageDigest.getInstance("SHA-256");
             byte[] hash = digest.digest(password.getBytes(StandardCharsets.UTF_8));
