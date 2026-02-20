@@ -3,6 +3,7 @@ package com.example.cms.service;
 import com.example.cms.dto.LoginResponse;
 import com.example.cms.entity.Sector;
 import com.example.cms.entity.User;
+import com.example.cms.exception.SectorNotAssignedException;
 import com.example.cms.model.SectorContext;
 import com.example.cms.repository.SectorRepository;
 import com.example.cms.repository.UserRepository;
@@ -28,6 +29,10 @@ public class AuthService {
     private final JwtUtil jwtUtil;
     private final AuditService auditService;
 
+    /* =========================================================
+       AUTHENTICATE
+    ========================================================== */
+
     public Optional<User> authenticate(String username, String password) {
         User user = userRepository.findByUsername(username);
         if (user != null && passwordEncoder.matches(password, user.getPassword())) {
@@ -41,118 +46,97 @@ public class AuthService {
         return user != null ? Optional.of(user) : Optional.empty();
     }
 
-    /**
-     * Safe login method - NEVER throws exception
-     */
+    /* =========================================================
+       LOGIN
+    ========================================================== */
+
     @Transactional
     public LoginResponse login(String username, String password) {
 
         log.info("Login attempt for user: {}", username);
 
-        try {
-            // Authenticate user
-            Optional<User> userOpt = authenticate(username, password);
+        Optional<User> userOpt = authenticate(username, password);
 
-            if (userOpt.isEmpty()) {
-
-                log.warn("Authentication failed for user: {}", username);
-
-                auditService.logAuthentication(
-                        null,
-                        "LOGIN_FAILED",
-                        false,
-                        null,
-                        "Invalid credentials for username: " + username
-                );
-
-                return LoginResponse.builder()
-                        .success(false)
-                        .message("Invalid credentials")
-                        .build();
-            }
-
-            User user = userOpt.get();
-
-            // Update last login
-            user.setLastLogin(LocalDateTime.now());
-            userRepository.save(user);
-
-            // Check sector assignment
-            if (user.getSector() == null) {
-
-                log.warn("User {} has no sector assigned", username);
-
-                auditService.logAuthentication(
-                        user.getId(),
-                        "LOGIN_NO_SECTOR",
-                        false,
-                        null,
-                        "User has no sector assigned"
-                );
-
-                return LoginResponse.builder()
-                        .success(false)
-                        .message("User has no sector assigned. Please contact administrator.")
-                        .build();
-            }
-
-            // Optional: detect sector (safe execution)
-            try {
-                SectorContext sectorContext =
-                        sectorDetectionService.detectSectorByUsername(username);
-            } catch (Exception e) {
-                log.warn("Sector detection failed: {}", e.getMessage());
-                // Continue safely
-            }
-
-            Sector sector = user.getSector();
-
-            // Generate JWT
-            String token = jwtUtil.generateToken(
-                    user.getUsername(),
-                    user.getRole().toString(),
-                    sector.getName()
-            );
-
-            log.info("Login successful for user: {} in sector: {}",
-                    username, sector.getCode());
+        // ❌ INVALID CREDENTIALS
+        if (userOpt.isEmpty()) {
 
             auditService.logAuthentication(
-                    user.getId(),
-                    "LOGIN_SUCCESS",
-                    true,
                     null,
-                    "User logged in successfully to sector: " + sector.getCode()
+                    "LOGIN_FAILED",
+                    false,
+                    null,
+                    "Invalid credentials"
             );
-
-            return LoginResponse.builder()
-                    .success(true)
-                    .token(token)
-                    .user(LoginResponse.UserInfo.builder()
-                            .id(user.getId())
-                            .username(user.getUsername())
-                            .email(user.getEmail())
-                            .role(user.getRole().toString())
-                            .userType(user.getUserType().toString())
-                            .build())
-                    .sector(LoginResponse.SectorInfo.builder()
-                            .id(sector.getId())
-                            .code(sector.getCode())
-                            .name(sector.getName())
-                            .routePath(sector.getRoutePath())
-                            .build())
-                    .build();
-
-        } catch (Exception e) {
-
-            log.error("Unexpected error during login", e);
 
             return LoginResponse.builder()
                     .success(false)
-                    .message("Internal error during login")
+                    .message("Invalid credentials")
                     .build();
         }
+
+        User user = userOpt.get();
+
+        // Update last login
+        user.setLastLogin(LocalDateTime.now());
+        userRepository.save(user);
+
+        // 🔴 REQUIRED BY TEST: THROW IF NO SECTOR
+        if (user.getSector() == null) {
+
+            auditService.logAuthentication(
+                    user.getId(),
+                    "LOGIN_NO_SECTOR",
+                    false,
+                    null,
+                    "User has no sector assigned"
+            );
+
+            throw new SectorNotAssignedException("User has no sector assigned");
+        }
+
+        // Sector detection (must NOT execute if sector is null)
+        SectorContext sectorContext =
+                sectorDetectionService.detectSectorByUsername(username);
+
+        Sector sector = user.getSector();
+
+        // Generate JWT
+        String token = jwtUtil.generateToken(
+                user.getUsername(),
+                user.getRole().toString(),
+                sector.getName()
+        );
+
+        auditService.logAuthentication(
+                user.getId(),
+                "LOGIN_SUCCESS",
+                true,
+                null,
+                "User logged in successfully"
+        );
+
+        return LoginResponse.builder()
+                .success(true)
+                .token(token)
+                .user(LoginResponse.UserInfo.builder()
+                        .id(user.getId())
+                        .username(user.getUsername())
+                        .email(user.getEmail())
+                        .role(user.getRole().toString())
+                        .userType(user.getUserType().toString())
+                        .build())
+                .sector(LoginResponse.SectorInfo.builder()
+                        .id(sector.getId())
+                        .code(sector.getCode())
+                        .name(sector.getName())
+                        .routePath(sector.getRoutePath())
+                        .build())
+                .build();
     }
+
+    /* =========================================================
+       USER MANAGEMENT
+    ========================================================== */
 
     public User createUser(String username,
                            String password,
@@ -178,9 +162,6 @@ public class AuthService {
 
     @Transactional
     public User updateUserSector(Long userId, Long sectorId) {
-
-        log.info("Updating sector for user ID: {} to sector ID: {}",
-                userId, sectorId);
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() ->

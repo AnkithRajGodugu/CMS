@@ -1,23 +1,28 @@
 spring:
-  sql:
-    init:
-      mode: never   # 🔥 THIS IS THE KEY FIX
-
   datasource:
-    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1
+    url: jdbc:h2:mem:testdb;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1
     driver-class-name: org.h2.Driver
     username: sa
     password:
 
   jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
     hibernate:
       ddl-auto: create-drop
-    database-platform: org.hibernate.dialect.H2Dialect
     show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+        jdbc:
+          lob:
+            non_contextual_creation: true
 
+  sql:
+    init:
+      mode: never   # 🚨 IMPORTANT (prevents schema.sql conflicts)
 
-    cache:
-      type: simple
+  cache:
+    type: simple
 
 cms:
   kafka:
@@ -25,5 +30,3 @@ cms:
 
 server:
   port: 0
-
-

@@ -7,7 +7,7 @@ INSERT INTO sectors (id, code, name, description, icon, route_path, configuratio
 (5, 'EDUCATION', 'Education', 'Educational institution and student management', 'school', '/dashboard/education', '{"features": ["students", "courses", "grades"], "modules": ["academic", "administration"]}', true, 5),
 (6, 'RETAIL', 'Retail', 'Retail operations and inventory management', 'shopping-cart', '/dashboard/retail', '{"features": ["inventory", "orders", "customers"], "modules": ["pos", "ecommerce"]}', true, 6),
 (7, 'MANUFACTURING', 'Manufacturing', 'Manufacturing and production management', 'factory', '/dashboard/manufacturing', '{"features": ["production", "quality", "inventory"], "modules": ["planning", "execution"]}', true, 7)
-ON CONFLICT (id) DO NOTHING;
+;
 
 -- Insert Sample Organizations
 INSERT INTO organizations (id, name, domain, sector_id, settings, active, created_at) VALUES
@@ -15,7 +15,7 @@ INSERT INTO organizations (id, name, domain, sector_id, settings, active, create
 (2, 'City General Hospital', 'cityhospital.com', 2, '{"bedCount": 500, "departments": ["Emergency", "Surgery", "Pediatrics"]}', true, NOW()),
 (3, 'Global Logistics Inc', 'globallogistics.com', 3, '{"warehouseCount": 20, "fleetSize": 100}', true, NOW()),
 (4, 'Creative Media Agency', 'creativemedia.com', 4, '{"teamSize": 25, "specialties": ["Video", "Design", "Copy"]}', true, NOW())
-ON CONFLICT (id) DO NOTHING;
+;
 
 -- Insert Users with enhanced fields (password is 'password123' encoded with BCrypt)
 INSERT INTO users (id, username, email, password, role, user_type, sector_id, enabled, created_at) VALUES 
@@ -38,7 +38,7 @@ INSERT INTO users (id, username, email, password, role, user_type, sector_id, en
 (10, 'content_admin', 'content_admin@example.com', '$2a$10$N.zmdr9k7uOLQvQHbh/Ta.4hy/Xx6oUH5Hx8fzMOn9O1k7Ej7.K2e', 'ADMIN', 'INDIVIDUAL', 4, true, NOW()),
 (11, 'content_manager', 'content_manager@example.com', '$2a$10$N.zmdr9k7uOLQvQHbh/Ta.4hy/Xx6oUH5Hx8fzMOn9O1k7Ej7.K2e', 'MANAGER', 'INDIVIDUAL', 4, true, NOW()),
 (12, 'content_user', 'content_user@example.com', '$2a$10$N.zmdr9k7uOLQvQHbh/Ta.4hy/Xx6oUH5Hx8fzMOn9O1k7Ej7.K2e', 'USER', 'INDIVIDUAL', 4, true, NOW())
-ON CONFLICT (id) DO NOTHING;
+;
 
 -- Insert Sample Customers for each sector
 INSERT INTO customers (id, first_name, last_name, email, phone, sector_id, created_at) VALUES 
@@ -69,7 +69,7 @@ INSERT INTO customers (id, first_name, last_name, email, phone, sector_id, creat
 (18, 'Ashley', 'Lewis', 'ashley.lewis@email.com', '+1-555-0403', 4, NOW()),
 (19, 'Joshua', 'Lee', 'joshua.lee@email.com', '+1-555-0404', 4, NOW()),
 (20, 'Stephanie', 'Walker', 'stephanie.walker@email.com', '+1-555-0405', 4, NOW())
-ON CONFLICT (id) DO NOTHING;
+;
 
 -- Reset sequences to avoid conflicts
 SELECT setval('sectors_id_seq', (SELECT MAX(id) FROM sectors));
