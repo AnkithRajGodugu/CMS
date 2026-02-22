@@ -15,7 +15,7 @@ const HeroPage = () => {
 
   const fetchSectors = async () => {
     try {
-      const response = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:8080'}/api/public/sectors`);
+      const response = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:8082'}/api/public/sectors`);
       setSectors(response.data);
     } catch (error) {
       console.error('Failed to fetch sectors:', error);
