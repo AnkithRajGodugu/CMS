@@ -43,3 +43,16 @@ Content-Type: application/json
   "username": "admin",
   "password": "admin123"
 }
+
+
+###
+POST http://localhost:8082/api/auth/register
+Content-Type: application/json
+
+{
+  "username": "51user",
+  "password": "password123",
+  "email": "test15@test.com",
+  "sectorId": 2,
+  "role": "USER"
+}

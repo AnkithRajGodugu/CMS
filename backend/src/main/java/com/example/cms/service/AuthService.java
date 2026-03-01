@@ -138,19 +138,24 @@ public class AuthService {
        USER MANAGEMENT
     ========================================================== */
 
-    public User createUser(String username,
-                           String password,
-                           User.Role role,
-                           Long sectorId) {
-
+    public User createUser(
+            String username,
+            String email,
+            String password,
+            User.Role role,
+            Long sectorId
+    ) {
         User user = new User();
         user.setUsername(username);
+        user.setEmail(email); // ✅ IMPORTANT
         user.setPassword(passwordEncoder.encode(password));
         user.setRole(role);
+        user.setEnabled(true);
 
         if (sectorId != null) {
-            sectorRepository.findById(sectorId)
-                    .ifPresent(user::setSector);
+            Sector sector = sectorRepository.findById(sectorId)
+                    .orElseThrow(() -> new IllegalArgumentException("Invalid sector ID"));
+            user.setSector(sector);
         }
 
         return userRepository.save(user);

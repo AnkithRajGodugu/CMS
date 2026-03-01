@@ -6,7 +6,9 @@ import com.example.cms.service.AuthService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -259,35 +261,59 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<Map<String, Object>> register(@RequestBody RegisterRequest request) {
-        if (authService.userExists(request.getUsername())) {
-            Map<String, Object> response = new HashMap<>();
-            response.put("success", false);
-            response.put("message", "Username already exists");
-            return ResponseEntity.badRequest().body(response);
-        }
+    public ResponseEntity<Map<String, Object>> register(
+            @Valid @RequestBody RegisterRequest request
+    ) {
+
+        Map<String, Object> response = new HashMap<>();
 
         try {
-            User.Role role = User.Role.valueOf(request.getRole().toUpperCase());
-            User user = authService.createUser(request.getUsername(), request.getPassword(), role, request.getSectorId());
-            
-            Map<String, Object> response = new HashMap<>();
-            response.put("success", true);
-            response.put("message", "User created successfully");
-            response.put("user", Map.of(
-                "id", user.getId(),
-                "username", user.getUsername(),
-                "role", user.getRole().toString()
-            ));
-            return ResponseEntity.ok(response);
+
+            // 1️⃣ Check if username exists
+            if (authService.userExists(request.getUsername())) {
+                response.put("success", false);
+                response.put("message", "Username already exists");
+                return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+            }
+
+            // 2️⃣ Validate role safely
+            User.Role role;
+            try {
+                role = User.Role.valueOf(request.getRole().toUpperCase());
+            } catch (IllegalArgumentException e) {
+                response.put("success", false);
+                response.put("message", "Invalid role. Allowed roles: ADMIN, USER");
+                return ResponseEntity.badRequest().body(response);
+            }
+
+            // 3️⃣ Create user
+            User user = authService.createUser(
+                    request.getUsername(),
+                    request.getEmail(),
+                    request.getPassword(),
+                    role,
+                    request.getSectorId()
+            );
+
+            Map<String, Object> userMap = new HashMap<>();
+            userMap.put("id", user.getId());
+            userMap.put("username", user.getUsername());
+            userMap.put("role", user.getRole() != null ? user.getRole().toString() : null);
+            userMap.put("sectorId", user.getSector() != null ? user.getSector().getId() : null);
+
+            response.put("user", userMap);
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+
         } catch (Exception e) {
-            Map<String, Object> response = new HashMap<>();
+            e.printStackTrace();
+
             response.put("success", false);
             response.put("message", "Registration failed: " + e.getMessage());
-            return ResponseEntity.badRequest().body(response);
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
     }
-
     // DTOs with validation
     public static class LoginRequest {
         @NotBlank(message = "Username is required")
@@ -305,26 +331,69 @@ public class AuthController {
     }
 
     public static class RegisterRequest {
-        @NotBlank(message = "Username is required")
-        @Size(min = 3, max = 50, message = "Username must be between 3 and 50 characters")
-        private String username;
-        
-        @NotBlank(message = "Password is required")
-        @Size(min = 8, message = "Password must be at least 8 characters")
-        private String password;
-        
-        @NotBlank(message = "Role is required")
-        private String role;
-        
-        private Long sectorId;
+        public void setUsername(String username) {
+            this.username = username;
+        }
 
-        public String getUsername() { return username; }
-        public void setUsername(String username) { this.username = username; }
-        public String getPassword() { return password; }
-        public void setPassword(String password) { this.password = password; }
-        public String getRole() { return role; }
-        public void setRole(String role) { this.role = role; }
-        public Long getSectorId() { return sectorId; }
-        public void setSectorId(Long sectorId) { this.sectorId = sectorId; }
-    }
+        public void setEmail(String email) {
+            this.email = email;
+        }
+
+        public void setPassword(String password) {
+            this.password = password;
+        }
+
+        public void setRole(String role) {
+            this.role = role;
+        }
+
+        public void setSectorId(Long sectorId) {
+            this.sectorId = sectorId;
+        }
+
+        public String getUsername() {
+            return username;
+        }
+
+        public String getEmail() {
+            return email;
+        }
+
+        public String getPassword() {
+            return password;
+        }
+
+        public String getRole() {
+            return role;
+        }
+
+        public Long getSectorId() {
+            return sectorId;
+        }
+
+
+
+            @NotBlank(message = "Username is required")
+            @Size(min = 3, max = 50, message = "Username must be between 3 and 50 characters")
+            private String username;
+
+            @NotBlank(message = "Email is required")
+            @jakarta.validation.constraints.Email(message = "Invalid email format")
+            private String email;
+
+            @NotBlank(message = "Password is required")
+            @Size(min = 8, message = "Password must be at least 8 characters")
+            private String password;
+
+            @NotBlank(message = "Role is required")
+            private String role;
+
+            @jakarta.validation.constraints.NotNull(message = "Sector is required")
+            private Long sectorId;
+
+            // getters + setters
+        }
+
+        // getters & setters
+
 }

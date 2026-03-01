@@ -28,55 +28,87 @@ public class UserController {
 
     private User getCurrentUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null || !auth.isAuthenticated()) {
+        if (auth == null || !auth.isAuthenticated() || auth.getPrincipal().equals("anonymousUser")) {
             return null;
         }
-        String username = ((UserDetails) auth.getPrincipal()).getUsername();
-        return userRepository.findByUsername(username);
+
+        Object principal = auth.getPrincipal();
+        if (principal instanceof UserDetails userDetails) {
+            return userRepository.findByUsername(userDetails.getUsername());
+        }
+
+        return null;
     }
 
     @PostMapping
     public ResponseEntity<User> createUser(@Valid @RequestBody User user) {
+
         User currentUser = getCurrentUser();
         if (currentUser == null || currentUser.getRole() != User.Role.ADMIN) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
-        if (user.getRole() == User.Role.MANAGER && user.getSector() == null) {
-            return ResponseEntity.badRequest().body(null); // Require sector for managers
+
+        // 🔴 Force sector required for ALL non-admin roles
+        if (user.getRole() != User.Role.ADMIN && user.getSector() == null) {
+            return ResponseEntity.badRequest().build();
         }
+
+        // Keep your manager rule
+        if (user.getRole() == User.Role.MANAGER && user.getSector() == null) {
+            return ResponseEntity.badRequest().build();
+        }
+
         return ResponseEntity.ok(userService.createUser(user));
     }
 
     @GetMapping
     public ResponseEntity<List<User>> getAllUsers() {
+
         User currentUser = getCurrentUser();
         if (currentUser == null || currentUser.getRole() != User.Role.ADMIN) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
+
         List<User> users = userService.getAllUsers();
-        return users.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(users);
+        return users.isEmpty()
+                ? ResponseEntity.noContent().build()
+                : ResponseEntity.ok(users);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<User> getUserById(@PathVariable Long id) {
+
         User currentUser = getCurrentUser();
         if (currentUser == null || currentUser.getRole() != User.Role.ADMIN) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
+
         return userService.getUserById(id)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<User> updateUser(@PathVariable Long id, @Valid @RequestBody User userDetails) {
+    public ResponseEntity<User> updateUser(
+            @PathVariable Long id,
+            @Valid @RequestBody User userDetails
+    ) {
+
         User currentUser = getCurrentUser();
         if (currentUser == null || currentUser.getRole() != User.Role.ADMIN) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
-        if (userDetails.getRole() == User.Role.MANAGER && userDetails.getSector() == null) {
-            return ResponseEntity.badRequest().body(null);
+
+        // 🔴 Force sector required for ALL non-admin roles
+        if (userDetails.getRole() != User.Role.ADMIN && userDetails.getSector() == null) {
+            return ResponseEntity.badRequest().build();
         }
+
+        // Keep manager rule
+        if (userDetails.getRole() == User.Role.MANAGER && userDetails.getSector() == null) {
+            return ResponseEntity.badRequest().build();
+        }
+
         return userService.updateUser(id, userDetails)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
@@ -84,10 +116,12 @@ public class UserController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+
         User currentUser = getCurrentUser();
         if (currentUser == null || currentUser.getRole() != User.Role.ADMIN) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
+
         return userService.deleteUser(id)
                 ? ResponseEntity.ok().build()
                 : ResponseEntity.notFound().build();
