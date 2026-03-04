@@ -69,6 +69,7 @@ public class SecurityConfig {
                                 "/api/public/**"
                         ).permitAll()
 
+
                         // --- Actuator / Monitoring ---
                         .requestMatchers("/actuator/**").permitAll()
 
@@ -76,10 +77,10 @@ public class SecurityConfig {
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
                         // --- Sector-scoped APIs (MAIN DESIGN) ---
-                        .requestMatchers("/api/sectors/**").authenticated()
+                        .requestMatchers("/api/v1/sectors/**").authenticated()
 
                         // --- Any other API must be authenticated ---
-                        .requestMatchers("/api/**").authenticated()
+                        //.requestMatchers("/api/**").authenticated()
 
                         // --- Frontend (React) routes ---
                         .requestMatchers(
@@ -103,6 +104,7 @@ public class SecurityConfig {
 
                         // --- Everything else ---
                         .anyRequest().permitAll()
+
                 )
 
                 // -------- Filters --------

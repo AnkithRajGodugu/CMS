@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  isAuthenticated, 
-  getUserData, 
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  isAuthenticated,
+  getUserData,
   getSectorData,
   setSectorData,
-  logout as authLogout 
+  logout as authLogout
 } from '../utils/auth';
 import { AuthContext } from './auth';
 import api from '../services/api';
@@ -15,31 +15,47 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check if user is authenticated on app load
+    initializeAuth();
+  }, []);
+
+  const initializeAuth = () => {
     if (isAuthenticated()) {
       const userData = getUserData();
       const sectorData = getSectorData();
-      setUser(userData);
-      setSector(sectorData);
+
+      setUser(userData || null);
+      setSector(sectorData || null);
     }
     setLoading(false);
-  }, []);
-
-  const login = (loginData) => {
-    if (loginData.user) {
-      setUser(loginData.user);
-    }
-    if (loginData.sector) {
-      setSector(loginData.sector);
-    }
   };
 
+  /**
+   * Called after successful login
+   */
+  const login = useCallback((loginData) => {
+    if (loginData?.user) {
+      setUser(loginData.user);
+    }
+
+    if (loginData?.sector) {
+      setSector(loginData.sector);
+      setSectorData(loginData.sector);
+    }
+  }, []);
+
+  /**
+   * Detect sector from backend (if needed)
+   */
   const detectSector = async () => {
     try {
       const response = await api.get('/auth/sector');
-      const sectorData = response.data;
-      setSector(sectorData);
-      setSectorData(sectorData);
+      const sectorData = response.data?.sector || null;
+
+      if (sectorData) {
+        setSector(sectorData);
+        setSectorData(sectorData);
+      }
+
       return sectorData;
     } catch (error) {
       console.error('Sector detection failed:', error);
@@ -47,11 +63,23 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  /**
+   * Logout
+   */
   const logout = () => {
     authLogout();
     setUser(null);
     setSector(null);
   };
+
+  /**
+   * Role Helpers (Phase 1 addition)
+   */
+  const hasRole = (role) => {
+    return user?.role === role;
+  };
+
+  const isAdmin = () => hasRole('ADMIN');
 
   if (loading) {
     return (
@@ -62,17 +90,19 @@ export const AuthProvider = ({ children }) => {
   }
 
   return (
-    <AuthContext.Provider value={{ 
-      user, 
-      sector, 
-      login, 
-      logout, 
-      detectSector,
-      isAuthenticated: !!user 
-    }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        sector,
+        login,
+        logout,
+        detectSector,
+        hasRole,
+        isAdmin,
+        isAuthenticated: !!user
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
-};
-
-
+};  

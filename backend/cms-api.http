@@ -9,7 +9,7 @@ GET http://localhost:8082/actuator/health
 GET http://localhost:8082/api/sectors
 Authorization: Bearer {{token}}
 ###
-@token =eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoiQkFOS0lORyIsInNlY3RvciI6IkJhbmtpbmciLCJzdWIiOiJiYW5rX3VzZXIiLCJpYXQiOjE3NzE1NzY4ODYsImV4cCI6MTc3MTY2MzI4Nn0.DNl7hupgVX4jwseutPKdSWgOI2DL8_8sfl9xLKs6afg
+#@token =eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoiQkFOS0lORyIsInNlY3RvciI6IkJhbmtpbmciLCJzdWIiOiJiYW5rX3VzZXIiLCJpYXQiOjE3NzE1NzY4ODYsImV4cCI6MTc3MTY2MzI4Nn0.DNl7hupgVX4jwseutPKdSWgOI2DL8_8sfl9xLKs6afg
 GET http://localhost:8082/api/v1/sectors/banking/accounts
 Authorization: Bearer {{token}}
 ###
@@ -55,4 +55,14 @@ Content-Type: application/json
   "email": "test15@test.com",
   "sectorId": 2,
   "role": "USER"
+}
+
+###
+GET http://localhost:8082/api/v1/sectors/customers
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoiQURNSU4iLCJzZWN0b3IiOiJCYW5raW5nIiwic3ViIjoiYWRtaW4iLCJpYXQiOjE3NzIzNzIyODksImV4cCI6MTc3MjQ1ODY4OX0.RJ-Wny8abOOTKtbO8W6CiBXxmKti8kcQZV7sFd656T4
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "admin123"
 }

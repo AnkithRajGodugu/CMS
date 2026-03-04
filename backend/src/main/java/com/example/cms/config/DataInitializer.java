@@ -4,7 +4,7 @@ import com.example.cms.entity.*;
 import com.example.cms.repository.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -15,29 +15,18 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Component
-@Profile("!test") // 🔥 DO NOT RUN IN TESTS
+@Profile("!test") // Do NOT run in tests
+@RequiredArgsConstructor
 public class DataInitializer implements CommandLineRunner {
 
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private SectorRepository sectorRepository;
-
-    @Autowired
-    private BankAccountRepository bankAccountRepository;
-
-    @Autowired
-    private TransactionRepository transactionRepository;
-
-    @Autowired
-    private PatientRepository patientRepository;
-
-    @Autowired
-    private AppointmentRepository appointmentRepository;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    private final UserRepository userRepository;
+    private final SectorRepository sectorRepository;
+    private final CustomerRepository customerRepository;
+    private final BankAccountRepository bankAccountRepository;
+    private final TransactionRepository transactionRepository;
+    private final PatientRepository patientRepository;
+    private final AppointmentRepository appointmentRepository;
+    private final PasswordEncoder passwordEncoder;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -49,50 +38,44 @@ public class DataInitializer implements CommandLineRunner {
         ========================== */
         if (sectorRepository.count() == 0) {
 
-            Sector banking = createSector("Banking", "Banking & Finance", "BANKING", "/banking");
-            Sector healthcare = createSector("Healthcare", "Healthcare Services", "HEALTHCARE", "/healthcare");
-            Sector logistics = createSector("Logistics", "Logistics & Supply Chain", "LOGISTICS", "/logistics");
-            Sector content = createSector("Content", "Content Creation", "CONTENT", "/content");
-
-            sectorRepository.save(banking);
-            sectorRepository.save(healthcare);
-            sectorRepository.save(logistics);
-            sectorRepository.save(content);
+            sectorRepository.save(createSector("Banking", "Banking & Finance", "BANKING", "/banking"));
+            sectorRepository.save(createSector("Healthcare", "Healthcare Services", "HEALTHCARE", "/healthcare"));
+            sectorRepository.save(createSector("Logistics", "Logistics & Supply Chain", "LOGISTICS", "/logistics"));
+            sectorRepository.save(createSector("Content", "Content Creation", "CONTENT", "/content"));
 
             System.out.println("✅ Sectors initialized");
         }
+
+        Sector banking = sectorRepository.findByName("Banking").orElseThrow();
+        Sector healthcare = sectorRepository.findByName("Healthcare").orElseThrow();
+        Sector logistics = sectorRepository.findByName("Logistics").orElseThrow();
+        Sector content = sectorRepository.findByName("Content").orElseThrow();
 
         /* =========================
            USER INITIALIZATION
         ========================== */
         if (userRepository.count() == 0) {
 
-            Sector bankingSector = sectorRepository.findByName("Banking").orElseThrow();
-            Sector healthcareSector = sectorRepository.findByName("Healthcare").orElseThrow();
-            Sector logisticsSector = sectorRepository.findByName("Logistics").orElseThrow();
-            Sector contentSector = sectorRepository.findByName("Content").orElseThrow();
+            createUser("admin", "admin123", User.Role.ADMIN, banking);
+            createUser("bank_user", "bank123", User.Role.BANKING, banking);
+            createUser("health_user", "health123", User.Role.HEALTHCARE, healthcare);
+            createUser("logistics_user", "logistics123", User.Role.LOGISTICS, logistics);
+            createUser("content_user", "content123", User.Role.CONTENT, content);
 
-            User admin = new User("admin", passwordEncoder.encode("admin123"), User.Role.ADMIN);
-            admin.setSector(bankingSector);
-            userRepository.save(admin);
+            System.out.println("✅ Users initialized");
+        }
 
-            User bankingUser = new User("bank_user", passwordEncoder.encode("bank123"), User.Role.BANKING);
-            bankingUser.setSector(bankingSector);
-            userRepository.save(bankingUser);
+        /* =========================
+           CUSTOMERS (ALL SECTORS)
+        ========================== */
+        if (customerRepository.count() == 0) {
 
-            User healthcareUser = new User("health_user", passwordEncoder.encode("health123"), User.Role.HEALTHCARE);
-            healthcareUser.setSector(healthcareSector);
-            userRepository.save(healthcareUser);
+            seedCustomers(banking, "BankCustomer", 20);
+            seedCustomers(healthcare, "HealthCustomer", 15);
+            seedCustomers(logistics, "LogCustomer", 10);
+            seedCustomers(content, "ContentCustomer", 8);
 
-            User logisticsUser = new User("logistics_user", passwordEncoder.encode("logistics123"), User.Role.LOGISTICS);
-            logisticsUser.setSector(logisticsSector);
-            userRepository.save(logisticsUser);
-
-            User contentUser = new User("content_user", passwordEncoder.encode("content123"), User.Role.CONTENT);
-            contentUser.setSector(contentSector);
-            userRepository.save(contentUser);
-
-            System.out.println("✅ Test users initialized");
+            System.out.println("✅ Customers initialized for all sectors");
         }
 
         /* =========================
@@ -105,7 +88,7 @@ public class DataInitializer implements CommandLineRunner {
             createAccount("ACC003", BankAccount.AccountType.BUSINESS, "ABC Corp", "125000.00");
             createAccount("ACC004", BankAccount.AccountType.CREDIT, "Mike Johnson", "-2500.00");
 
-            System.out.println("✅ Sample bank accounts initialized");
+            System.out.println("✅ Bank accounts initialized");
         }
 
         /* =========================
@@ -113,27 +96,11 @@ public class DataInitializer implements CommandLineRunner {
         ========================== */
         if (transactionRepository.count() == 0) {
 
-            Transaction txn1 = new Transaction(
-                    "TXN001",
-                    Transaction.TransactionType.DEPOSIT,
-                    new BigDecimal("2500.00"),
-                    "ACC001"
-            );
-            txn1.setStatus(Transaction.TransactionStatus.COMPLETED);
-            txn1.setDescription("Salary deposit");
-            transactionRepository.save(txn1);
+            createTransaction("TXN001", Transaction.TransactionType.DEPOSIT, "2500.00", "ACC001", "Salary deposit");
+            createTransaction("TXN002", Transaction.TransactionType.WITHDRAWAL, "150.00", "ACC002", "ATM withdrawal");
+            createTransaction("TXN003", Transaction.TransactionType.TRANSFER, "500.00", "ACC001", "Utility payment");
 
-            Transaction txn2 = new Transaction(
-                    "TXN002",
-                    Transaction.TransactionType.WITHDRAWAL,
-                    new BigDecimal("150.00"),
-                    "ACC002"
-            );
-            txn2.setStatus(Transaction.TransactionStatus.COMPLETED);
-            txn2.setDescription("ATM withdrawal");
-            transactionRepository.save(txn2);
-
-            System.out.println("✅ Sample transactions initialized");
+            System.out.println("✅ Transactions initialized");
         }
 
         /* =========================
@@ -148,7 +115,7 @@ public class DataInitializer implements CommandLineRunner {
             patient.setStatus(Patient.PatientStatus.STABLE);
             patientRepository.save(patient);
 
-            System.out.println("✅ Sample patients initialized");
+            System.out.println("✅ Patients initialized");
         }
 
         /* =========================
@@ -166,8 +133,10 @@ public class DataInitializer implements CommandLineRunner {
             apt.setStatus(Appointment.AppointmentStatus.CONFIRMED);
             appointmentRepository.save(apt);
 
-            System.out.println("✅ Sample appointments initialized");
+            System.out.println("✅ Appointments initialized");
         }
+
+        System.out.println("🚀 Data Initialization Completed");
     }
 
     /* =========================
@@ -192,9 +161,43 @@ public class DataInitializer implements CommandLineRunner {
         return sector;
     }
 
+    private void createUser(String username, String password, User.Role role, Sector sector) {
+        User user = new User(username, passwordEncoder.encode(password), role);
+        user.setSector(sector);
+        userRepository.save(user);
+    }
+
+    private void seedCustomers(Sector sector, String prefix, int count) {
+        for (int i = 1; i <= count; i++) {
+            Customer c = new Customer();
+            c.setFirstName(prefix + i);
+            c.setLastName("Test");
+            c.setEmail(prefix.toLowerCase() + i + "@mail.com");
+            c.setSector(sector);
+            customerRepository.save(c);
+        }
+    }
+
     private void createAccount(String accNo, BankAccount.AccountType type, String name, String balance) {
         BankAccount acc = new BankAccount(accNo, type, name);
         acc.setBalance(new BigDecimal(balance));
         bankAccountRepository.save(acc);
+    }
+
+    private void createTransaction(String txnNo,
+                                   Transaction.TransactionType type,
+                                   String amount,
+                                   String accountNo,
+                                   String description) {
+
+        Transaction txn = new Transaction(
+                txnNo,
+                type,
+                new BigDecimal(amount),
+                accountNo
+        );
+        txn.setStatus(Transaction.TransactionStatus.COMPLETED);
+        txn.setDescription(description);
+        transactionRepository.save(txn);
     }
 }

@@ -35,16 +35,18 @@ public class SectorAuthorizationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(
+
             HttpServletRequest request,
             HttpServletResponse response,
             FilterChain filterChain
     ) throws ServletException, IOException {
 
         String requestPath = request.getRequestURI();
+        System.out.println("🔥 SectorFilter HIT for path: " + requestPath);
         log.debug("SectorAuthorizationFilter processing: {}", requestPath);
 
         // Apply ONLY to sector-scoped APIs
-        if (!requestPath.startsWith("/api/sectors/")) {
+        if (!requestPath.startsWith("/api/v1/sectors/")) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -63,6 +65,11 @@ public class SectorAuthorizationFilter extends OncePerRequestFilter {
             // 1️⃣ Detect sector context
             SectorContext sectorContext = sectorDetectionService.detectSector(authentication);
 
+            System.out.println("🔥 SectorContext created:");
+            System.out.println("UserId: " + sectorContext.getUserId());
+            System.out.println("SectorCode: " + sectorContext.getSectorCode());
+            System.out.println("Roles: " + sectorContext.getRoles());
+
             // 2️⃣ Put into logging MDC
             LoggingUtil.setUserId(sectorContext.getUserId());
             LoggingUtil.setSectorId(sectorContext.getSectorId());
@@ -71,6 +78,8 @@ public class SectorAuthorizationFilter extends OncePerRequestFilter {
             // 3️⃣ ✅ ADMIN BYPASS — EXACT PLACE
             if (sectorContext.getRoles() != null
                     && sectorContext.getRoles().contains("ROLE_ADMIN")) {
+
+                System.out.println("🔥 Checking admin bypass. Roles = " + sectorContext.getRoles());
 
                 log.debug("ADMIN user detected, bypassing sector validation");
                 request.setAttribute("sectorContext", sectorContext);
@@ -128,6 +137,7 @@ public class SectorAuthorizationFilter extends OncePerRequestFilter {
             log.error("Sector authorization error", e);
             sendErrorResponse(response, "Sector authorization failed");
         }
+
     }
 
     // ===================== helpers =====================

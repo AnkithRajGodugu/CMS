@@ -60,7 +60,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         userDetails, null, userDetails.getAuthorities());
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
-                
+                System.out.println("🔥 Authentication set for: " + username);
+                System.out.println("🔥 Authorities: " + userDetails.getAuthorities());
                 // Set database context for row-level security
                 try {
                     User user = userRepository.findByUsername(username);
