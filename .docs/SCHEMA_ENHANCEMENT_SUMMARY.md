@@ -59,7 +59,7 @@
 - Index creation for performance
 - Foreign key constraints
 
-✅ **V2__seed_sector_data.sql** (`backend/src/main/resources/db/migration/V2__seed_sector_data.sql`)
+✅ **V5__seed_sector_data.sql** (`backend/src/main/resources/db/migration/V5__seed_sector_data.sql`)
 - Seed data for enhanced sectors with all new fields
 - Includes: BANKING, HEALTHCARE, EDUCATION, RETAIL, MANUFACTURING
 

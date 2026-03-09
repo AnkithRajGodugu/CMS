@@ -58,8 +58,8 @@ Content-Type: application/json
 }
 
 ###
-GET http://localhost:8082/api/v1/sectors/customers
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoiQURNSU4iLCJzZWN0b3IiOiJCYW5raW5nIiwic3ViIjoiYWRtaW4iLCJpYXQiOjE3NzIzNzIyODksImV4cCI6MTc3MjQ1ODY4OX0.RJ-Wny8abOOTKtbO8W6CiBXxmKti8kcQZV7sFd656T4
+GET http://localhost:8082/api/v1/sectors/banking/transactions
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoiQURNSU4iLCJzZWN0b3IiOiJCYW5raW5nIiwic3ViIjoiYWRtaW4iLCJpYXQiOjE3NzMwNDIxNjMsImV4cCI6MTc3MzEyODU2M30.NlAsVRlTPFP05DxAQCTXXZyP19eyTFJXmhk6a5ssRl0
 Content-Type: application/json
 
 {

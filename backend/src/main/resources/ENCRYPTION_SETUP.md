@@ -144,7 +144,7 @@ spring.datasource.hikari.data-source-properties.sslkey=/path/to/client.key
 
 Run the encryption setup script:
 ```bash
-psql -U postgres -d cms_db -f postgresql-encryption-setup.sql
+psql -U postgres -d cms_db -f V8__postgresql-encryption-setup.sql
 ```
 
 This creates:

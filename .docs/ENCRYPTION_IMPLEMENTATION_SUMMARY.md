@@ -9,7 +9,7 @@ Task 13 "Implement data encryption" has been successfully completed. This implem
 ### 13.1 Configure Database Encryption ✅
 
 **Files Created:**
-- `backend/src/main/resources/db/postgresql-encryption-setup.sql` - PostgreSQL encryption functions and setup
+- `backend/src/main/resources/db/V8__postgresql-encryption-setup.sql` - PostgreSQL encryption functions and setup
 - `backend/src/main/resources/db/ENCRYPTION_SETUP.md` - Comprehensive database encryption guide
 
 **Configuration Updates:**
@@ -94,7 +94,7 @@ encryption.key=<generated-key>
 Run the PostgreSQL setup script:
 
 ```bash
-psql -U postgres -d cms_db -f backend/src/main/resources/db/postgresql-encryption-setup.sql
+psql -U postgres -d cms_db -f backend/src/main/resources/db/V8__postgresql-encryption-setup.sql
 ```
 
 ### 4. Apply Encryption to Fields
@@ -181,7 +181,7 @@ String decrypted = encryptionUtil.decrypt(encrypted);
 ### Comprehensive Guides Created
 1. **ENCRYPTION_SETUP.md** - Database encryption setup (TLS, encryption at rest)
 2. **ENCRYPTION_GUIDE.md** - Field-level encryption guide (usage, best practices)
-3. **postgresql-encryption-setup.sql** - Database initialization script
+3. **V8__postgresql-encryption-setup.sql** - Database initialization script
 
 ### Key Topics Covered
 - Setup and configuration
@@ -223,7 +223,7 @@ This implementation satisfies the following requirements from the design documen
 3. `backend/src/main/java/com/example/cms/converter/EncryptedEmailConverter.java`
 4. `backend/src/main/java/com/example/cms/util/KeyGenerator.java`
 5. `backend/src/main/java/com/example/cms/util/ENCRYPTION_GUIDE.md`
-6. `backend/src/main/resources/db/postgresql-encryption-setup.sql`
+6. `backend/src/main/resources/db/V8__postgresql-encryption-setup.sql`
 7. `backend/src/main/resources/db/ENCRYPTION_SETUP.md`
 8. `backend/ENCRYPTION_IMPLEMENTATION_SUMMARY.md`
 

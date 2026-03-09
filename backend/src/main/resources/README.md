@@ -35,7 +35,7 @@ This file contains manual migration scripts for reference. It includes:
 
 **Note**: This file is for reference only. Hibernate will handle most of these changes automatically.
 
-### V2__seed_sector_data.sql
+### V5__seed_sector_data.sql
 
 Contains INSERT statements for populating sectors with enhanced data. This is also handled by `data.sql` but provided here for reference.
 

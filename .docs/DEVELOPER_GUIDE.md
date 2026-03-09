@@ -580,7 +580,7 @@ CREATE INDEX idx_healthcare_appointments_time ON healthcare.appointments(appoint
 Use Flyway or Liquibase for database migrations:
 
 1. Create migration files in `backend/src/main/resources/db/migration/`
-2. Name files with version prefix: `V1__initial_schema.sql`, `V2__add_retail_sector.sql`
+2. Name files with version prefix: `V1__core_schema.sql.`, `V2__add_retail_sector.sql`
 3. Run migrations automatically on application startup
 
 ---
