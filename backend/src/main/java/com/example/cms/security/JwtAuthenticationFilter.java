@@ -9,6 +9,8 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -19,76 +21,109 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 /**
- * JWT Authentication Filter that validates JWT tokens and sets up security context.
- * Also sets the database user context for row-level security policies.
+ * JWT Authentication Filter
+ * - Validates JWT
+ * - Sets Spring Security context
+ * - (RLS DISABLED for now to avoid DB crashes)
  */
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
+    private static final Logger logger =
+            LoggerFactory.getLogger(JwtAuthenticationFilter.class);
+
     private final JwtUtil jwtUtil;
     private final UserDetailsServiceImpl userDetailsService;
     private final UserRepository userRepository;
-    private final DatabaseContextService databaseContextService;
+    private final DatabaseContextService databaseContextService; // kept but disabled
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, 
-                                  FilterChain filterChain) throws ServletException, IOException {
-        
+    protected void doFilterInternal(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            FilterChain filterChain
+    ) throws ServletException, IOException {
+
         final String requestTokenHeader = request.getHeader("Authorization");
 
         String username = null;
         String jwtToken = null;
 
-        // JWT Token is in the form "Bearer token"
+        // =========================
+        // 1️⃣ Extract JWT
+        // =========================
         if (requestTokenHeader != null && requestTokenHeader.startsWith("Bearer ")) {
             jwtToken = requestTokenHeader.substring(7);
+
             try {
                 username = jwtUtil.getUsernameFromToken(jwtToken);
             } catch (Exception e) {
-                logger.warn("Unable to get JWT Token or JWT Token has expired");
+                logger.warn("⚠️ Invalid or expired JWT token");
             }
         }
 
-        // Validate token and set security context
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+        // =========================
+        // 2️⃣ Validate & authenticate
+        // =========================
+        if (username != null &&
+                SecurityContextHolder.getContext().getAuthentication() == null) {
+
+            UserDetails userDetails =
+                    userDetailsService.loadUserByUsername(username);
 
             if (jwtUtil.validateToken(jwtToken, userDetails.getUsername())) {
-                UsernamePasswordAuthenticationToken authToken = 
-                    new UsernamePasswordAuthenticationToken(
-                        userDetails, null, userDetails.getAuthorities());
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
+                UsernamePasswordAuthenticationToken authToken =
+                        new UsernamePasswordAuthenticationToken(
+                                userDetails,
+                                null,
+                                userDetails.getAuthorities()
+                        );
+
+                authToken.setDetails(
+                        new WebAuthenticationDetailsSource().buildDetails(request)
+                );
+
                 SecurityContextHolder.getContext().setAuthentication(authToken);
+
                 System.out.println("🔥 Authentication set for: " + username);
-                System.out.println("🔥 Authorities: " + userDetails.getAuthorities());
-                // Set database context for row-level security
+                System.out.println("🔥 Roles: " + userDetails.getAuthorities());
+
+                // =========================
+                // ❌ RLS DISABLED (IMPORTANT FIX)
+                // =========================
                 try {
                     User user = userRepository.findByUsername(username);
+
                     if (user != null && user.getId() != null) {
-                        databaseContextService.setUserContext(user.getId());
-                        if (logger.isDebugEnabled()) {
-                            logger.debug("Set database context for user: " + username + " (ID: " + user.getId() + ")");
-                        }
+
+                        // 🔥 COMMENTED TO FIX 500 ERROR
+                        // databaseContextService.setUserContext(user.getId());
+
+                        logger.debug("⚠️ RLS DISABLED - skipping DB context for user: {}", username);
                     }
+
                 } catch (Exception e) {
-                    logger.error("Failed to set database context for user: " + username, e);
-                    // Continue processing even if database context setting fails
+                    logger.error("Error fetching user for context", e);
                 }
             }
         }
-        
+
+        // =========================
+        // 3️⃣ Continue request
+        // =========================
         try {
             filterChain.doFilter(request, response);
         } finally {
-            // Clear database context after request processing
-            // This ensures context doesn't leak between requests
+
+            // =========================
+            // ❌ RLS CLEAR DISABLED
+            // =========================
             try {
-                databaseContextService.clearUserContext();
+                // databaseContextService.clearUserContext(); // DISABLED
             } catch (Exception e) {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Error clearing database context: " + e.getMessage());
-                }
+                logger.debug("Error clearing DB context: {}", e.getMessage());
             }
         }
     }

@@ -1,11 +1,34 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FaEdit, FaProjectDiagram, FaUsers, FaCalendarAlt, FaFileAlt, FaClock } from 'react-icons/fa';
+import api from '../../services/api';
 
 const ContentDashboard = () => {
+  const [projects, setProjects] = useState([]);
+  const [assets, setAssets] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchContentData = async () => {
+      try {
+        const [projectsRes, assetsRes] = await Promise.all([
+          api.get('/content/projects'),
+          api.get('/content/assets')
+        ]);
+        setProjects(projectsRes.data);
+        setAssets(assetsRes.data);
+      } catch (err) {
+        console.error('Failed to load content data', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchContentData();
+  }, []);
   const stats = [
-    { label: 'Active Projects', value: '24', change: '+8%', icon: FaProjectDiagram, color: 'text-primary' },
-    { label: 'Total Clients', value: '156', change: '+12%', icon: FaUsers, color: 'text-success' },
-    { label: 'Content Pieces', value: '342', change: '+25%', icon: FaFileAlt, color: 'text-info' },
+    { label: 'Active Projects', value: projects.filter(p => p.status === 'IN_PROGRESS').length || 0, change: '+8%', icon: FaProjectDiagram, color: 'text-primary' },
+    { label: 'Total Clients', value: new Set(projects.map(p => p.clientName)).size || 0, change: '+12%', icon: FaUsers, color: 'text-success' },
+    { label: 'Content Pieces', value: assets.length || 0, change: '+25%', icon: FaFileAlt, color: 'text-info' },
     { label: 'Hours Tracked', value: '1,234', change: '+15%', icon: FaClock, color: 'text-warning' },
   ];
 
@@ -82,24 +105,28 @@ const ContentDashboard = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  <tr>
-                    <td>Brand Campaign 2024</td>
-                    <td>Acme Corp</td>
-                    <td><span className="badge badge-info">In Progress</span></td>
-                    <td>Dec 15, 2024</td>
-                  </tr>
-                  <tr>
-                    <td>Social Media Content</td>
-                    <td>TechStart Inc</td>
-                    <td><span className="badge badge-success">Completed</span></td>
-                    <td>Oct 20, 2024</td>
-                  </tr>
-                  <tr>
-                    <td>Website Redesign</td>
-                    <td>Global Solutions</td>
-                    <td><span className="badge badge-warning">Review</span></td>
-                    <td>Nov 30, 2024</td>
-                  </tr>
+                  {loading ? (
+                    <tr><td colSpan="4" className="text-center">Loading...</td></tr>
+                  ) : projects.length === 0 ? (
+                    <tr><td colSpan="4" className="text-center">No projects found.</td></tr>
+                  ) : (
+                    projects.map(project => (
+                      <tr key={project.id}>
+                        <td>{project.projectName}</td>
+                        <td>{project.clientName}</td>
+                        <td>
+                          <span className={`badge ${
+                            project.status === 'COMPLETED' ? 'badge-success' : 
+                            project.status === 'IN_PROGRESS' ? 'badge-info' : 
+                            'badge-warning'
+                          }`}>
+                            {project.status.replace('_', ' ')}
+                          </span>
+                        </td>
+                        <td>{project.deadline ? new Date(project.deadline).toLocaleDateString() : 'No Deadline'}</td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>

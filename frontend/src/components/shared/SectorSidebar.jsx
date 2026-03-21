@@ -28,13 +28,13 @@ const SectorSidebar = ({ sector, collapsed, onToggle }) => {
   // Get sector-specific menu items
   const getSectorMenuItems = (sectorCode) => {
     const menuItems = {
-      banking: [
-        { path: '/dashboard/banking', label: 'Dashboard', icon: LayoutDashboard },
-        { path: '/banking-&-finance/AccountManagementPage', label: 'Accounts', icon: CreditCard },
-        { path: '/banking-&-finance/TransactionTrackingPage', label: 'Transactions', icon: FileText },
-        { path: '/banking-&-finance/ComplianceToolsPage', label: 'Compliance', icon: Settings },
-        { path: '/banking-&-finance/RiskAssessmentPage', label: 'Risk Assessment', icon: BarChart3 },
-      ],
+        banking: [
+            { path: '/dashboard/banking', label: 'Dashboard', icon: LayoutDashboard },
+            { path: '/dashboard/banking/accounts', label: 'Accounts', icon: CreditCard },
+            { path: '/dashboard/banking/transactions', label: 'Transactions', icon: FileText },
+            { path: '/dashboard/banking/compliance', label: 'Compliance', icon: Settings },
+            { path: '/dashboard/banking/risk', label: 'Risk Assessment', icon: BarChart3 },
+        ],
       healthcare: [
         { path: '/dashboard/healthcare', label: 'Dashboard', icon: LayoutDashboard },
         { path: '/healthcare/PatientRecordsPage', label: 'Patient Records', icon: Users },

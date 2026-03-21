@@ -75,8 +75,8 @@ CREATE TABLE customers (
                            sector_id BIGINT NOT NULL,
                            created_by BIGINT,
                            updated_by BIGINT,
-                           created_at TIMESTAMP NOT NULL,
-                           updated_at TIMESTAMP NOT NULL,
+                           created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                           updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
                            CONSTRAINT fk_customer_sector FOREIGN KEY (sector_id) REFERENCES sectors(id)
 );
 

@@ -9,6 +9,7 @@ const RiskAssessmentPage = () => {
   const [selectedCustomer, setSelectedCustomer] = useState('');
   
   if (!user || user.role !== 'banking') {
+    //if(!user){
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-100 to-blue-300">
         <Header />

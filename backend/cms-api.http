@@ -58,11 +58,11 @@ Content-Type: application/json
 }
 
 ###
-GET http://localhost:8082/api/v1/sectors/banking/transactions
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoiQURNSU4iLCJzZWN0b3IiOiJCYW5raW5nIiwic3ViIjoiYWRtaW4iLCJpYXQiOjE3NzMwNDIxNjMsImV4cCI6MTc3MzEyODU2M30.NlAsVRlTPFP05DxAQCTXXZyP19eyTFJXmhk6a5ssRl0
+GET http://localhost:8082/api/v1/sectors/customers/paged?page=0&size=5
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoiQURNSU4iLCJzZWN0b3IiOiJCYW5raW5nIiwic3ViIjoiYWRtaW4iLCJpYXQiOjE3NzQwOTgxNDYsImV4cCI6MTc3NDE4NDU0Nn0.EVU882MAbHhLndHuqTRyV7z_LS2Yx1QA5MWbv0_Y_z8
 Content-Type: application/json
 
-{
-  "username": "admin",
-  "password": "admin123"
-}
+//{
+//  "username": "admin",
+//  "password": "admin123"
+//}

@@ -29,15 +29,15 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
     /* ---------- Pagination + search ---------- */
 
     @Query("""
-        SELECT c FROM Customer c
-        WHERE c.sector.id = :sectorId
-          AND (
-                :search IS NULL OR
-                LOWER(c.firstName) LIKE LOWER(CONCAT('%', :search, '%')) OR
-                LOWER(c.lastName) LIKE LOWER(CONCAT('%', :search, '%')) OR
-                LOWER(c.email) LIKE LOWER(CONCAT('%', :search, '%'))
-          )
-    """)
+    SELECT c FROM Customer c
+    WHERE c.sector.id = :sectorId
+      AND (
+            :search IS NULL OR
+            LOWER(c.firstName) LIKE CONCAT('%', :search, '%') OR
+            LOWER(c.lastName) LIKE CONCAT('%', :search, '%') OR
+            LOWER(c.email) LIKE CONCAT('%', :search, '%')
+      )
+""")
     Page<Customer> findBySectorWithSearch(
             @Param("sectorId") Long sectorId,
             @Param("search") String search,
@@ -47,17 +47,17 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
     /* ---------- Pagination + search + date range ---------- */
 
     @Query("""
-        SELECT c FROM Customer c
-        WHERE c.sector.id = :sectorId
-          AND (
-                :search IS NULL OR
-                LOWER(c.firstName) LIKE LOWER(CONCAT('%', :search, '%')) OR
-                LOWER(c.lastName) LIKE LOWER(CONCAT('%', :search, '%')) OR
-                LOWER(c.email) LIKE LOWER(CONCAT('%', :search, '%'))
-          )
-          AND (:from IS NULL OR c.createdAt >= :from)
-          AND (:to IS NULL OR c.createdAt <= :to)
-    """)
+    SELECT c FROM Customer c
+    WHERE c.sector.id = :sectorId
+      AND (
+            :search = '' OR
+            LOWER(c.firstName) LIKE LOWER(CONCAT('%', :search, '%')) OR
+            LOWER(c.lastName) LIKE LOWER(CONCAT('%', :search, '%')) OR
+            LOWER(c.email) LIKE LOWER(CONCAT('%', :search, '%'))
+      )
+      AND c.createdAt >= :from
+      AND c.createdAt <= :to
+""")
     Page<Customer> findBySectorWithSearchAndDateRange(
             @Param("sectorId") Long sectorId,
             @Param("search") String search,
@@ -65,7 +65,6 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
             @Param("to") LocalDateTime to,
             Pageable pageable
     );
-
     /* ---------- Reporting ---------- */
 
     long countBySectorAndCreatedAtBetween(

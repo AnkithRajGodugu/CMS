@@ -11,7 +11,9 @@ const SignupPage = () => {
     password: '',
     confirmPassword: '',
     role: '',
-    sectorId: ''
+    sectorId: '',
+    organizationName: '',
+    isOrganization: false
   });
 
   const [error, setError] = useState('');
@@ -36,8 +38,13 @@ const SignupPage = () => {
       return;
     }
 
-    if (!formData.role) {
+    if (!formData.isOrganization && !formData.role) {
       setError('Please select a role');
+      return;
+    }
+
+    if (formData.isOrganization && !formData.organizationName) {
+      setError('Organization Name is required');
       return;
     }
 
@@ -51,15 +58,26 @@ const SignupPage = () => {
     setSuccess('');
 
     try {
-      const payload = {
-        username: formData.username,
-        email: formData.email,
-        password: formData.password,
-        role: formData.role,
-        sectorId: Number(formData.sectorId)
-      };
-
-      const response = await api.post('/auth/register', payload);
+      let response;
+      if (formData.isOrganization) {
+        const payload = {
+          username: formData.username,
+          email: formData.email,
+          password: formData.password,
+          organizationName: formData.organizationName,
+          sectorId: Number(formData.sectorId)
+        };
+        response = await api.post('/auth/register/organization', payload);
+      } else {
+        const payload = {
+          username: formData.username,
+          email: formData.email,
+          password: formData.password,
+          role: formData.role,
+          sectorId: Number(formData.sectorId)
+        };
+        response = await api.post('/auth/register', payload);
+      }
 
       if (response.data.user) {
         setSuccess('Account created successfully! Redirecting to login...');
@@ -78,9 +96,10 @@ const SignupPage = () => {
   };
 
   const handleChange = (e) => {
+    const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [e.target.name]: value
     });
   };
 
@@ -103,6 +122,17 @@ const SignupPage = () => {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
+
+            <div className="form-control flex flex-row items-center cursor-pointer gap-2">
+              <input
+                type="checkbox"
+                name="isOrganization"
+                checked={formData.isOrganization}
+                onChange={handleChange}
+                className="checkbox checkbox-primary"
+              />
+              <span className="label-text">Register as Organization</span>
+            </div>
 
             <div className="form-control">
               <label className="label">
@@ -160,22 +190,40 @@ const SignupPage = () => {
               />
             </div>
 
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text">Role</span>
-              </label>
-              <select
-                name="role"
-                value={formData.role}
-                onChange={handleChange}
-                className="select select-bordered"
-                required
-              >
-                <option value="">Select Role</option>
-                <option value="USER">User</option>
-                <option value="ADMIN">Admin</option>
-              </select>
-            </div>
+            {formData.isOrganization && (
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text">Organization Name</span>
+                </label>
+                <input
+                  type="text"
+                  name="organizationName"
+                  value={formData.organizationName}
+                  onChange={handleChange}
+                  className="input input-bordered"
+                  required={formData.isOrganization}
+                />
+              </div>
+            )}
+
+            {!formData.isOrganization && (
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text">Role</span>
+                </label>
+                <select
+                  name="role"
+                  value={formData.role}
+                  onChange={handleChange}
+                  className="select select-bordered"
+                  required={!formData.isOrganization}
+                >
+                  <option value="">Select Role</option>
+                  <option value="USER">User</option>
+                  <option value="ADMIN">Admin</option>
+                </select>
+              </div>
+            )}
 
             <div className="form-control">
               <label className="label">

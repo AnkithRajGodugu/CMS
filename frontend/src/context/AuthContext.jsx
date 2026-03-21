@@ -99,7 +99,7 @@ export const AuthProvider = ({ children }) => {
         detectSector,
         hasRole,
         isAdmin,
-        isAuthenticated: !!user
+        isAuthenticated: isAuthenticated()
       }}
     >
       {children}

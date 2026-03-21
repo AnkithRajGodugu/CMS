@@ -91,7 +91,7 @@ public class SectorDetectionService {
      * Detect sector by username (without Authentication object).
      */
     @Transactional(readOnly = true)
-    @Cacheable(value = "sectorContext", key = "#username")
+    @Cacheable(value = "sectorContext", key = "#p0")
     public SectorContext detectSectorByUsername(String username) {
 
         log.debug("Detecting sector for username: {}", username);

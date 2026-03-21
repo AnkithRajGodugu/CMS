@@ -17,7 +17,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/sectors/banking")
-@PreAuthorize("hasRole('ADMIN') or hasRole('user')")
+@PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
 public class BankingController {
 
     @Autowired

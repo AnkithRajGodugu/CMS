@@ -314,6 +314,45 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
     }
+
+    @PostMapping("/register/organization")
+    public ResponseEntity<Map<String, Object>> registerOrganization(
+            @Valid @RequestBody RegisterOrgRequest request
+    ) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            if (authService.userExists(request.getUsername())) {
+                response.put("success", false);
+                response.put("message", "Username already exists");
+                return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+            }
+
+            User user = authService.createOrganizationUser(
+                    request.getUsername(),
+                    request.getEmail(),
+                    request.getPassword(),
+                    request.getOrganizationName(),
+                    request.getSectorId()
+            );
+
+            Map<String, Object> userMap = new HashMap<>();
+            userMap.put("id", user.getId());
+            userMap.put("username", user.getUsername());
+            userMap.put("role", user.getRole() != null ? user.getRole().toString() : null);
+            userMap.put("sectorId", user.getSector() != null ? user.getSector().getId() : null);
+
+            response.put("success", true);
+            response.put("user", userMap);
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.put("success", false);
+            response.put("message", "Registration failed: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
+    }
     // DTOs with validation
     public static class LoginRequest {
         @NotBlank(message = "Username is required")
@@ -328,6 +367,37 @@ public class AuthController {
         public void setUsername(String username) { this.username = username; }
         public String getPassword() { return password; }
         public void setPassword(String password) { this.password = password; }
+    }
+
+    public static class RegisterOrgRequest {
+        @NotBlank(message = "Username is required")
+        @Size(min = 3, max = 50, message = "Username must be between 3 and 50 characters")
+        private String username;
+
+        @NotBlank(message = "Email is required")
+        @jakarta.validation.constraints.Email(message = "Invalid email format")
+        private String email;
+
+        @NotBlank(message = "Password is required")
+        @Size(min = 8, message = "Password must be at least 8 characters")
+        private String password;
+
+        @NotBlank(message = "Organization name is required")
+        private String organizationName;
+
+        @jakarta.validation.constraints.NotNull(message = "Sector is required")
+        private Long sectorId;
+
+        public String getUsername() { return username; }
+        public void setUsername(String username) { this.username = username; }
+        public String getEmail() { return email; }
+        public void setEmail(String email) { this.email = email; }
+        public String getPassword() { return password; }
+        public void setPassword(String password) { this.password = password; }
+        public String getOrganizationName() { return organizationName; }
+        public void setOrganizationName(String organizationName) { this.organizationName = organizationName; }
+        public Long getSectorId() { return sectorId; }
+        public void setSectorId(Long sectorId) { this.sectorId = sectorId; }
     }
 
     public static class RegisterRequest {

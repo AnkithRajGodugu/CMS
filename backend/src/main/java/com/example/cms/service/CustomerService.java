@@ -110,10 +110,12 @@ public class CustomerService {
        PAGINATION
     ========================================================== */
 
-    @Cacheable(
-            value = "customersPaged",
-            key = "#ctx.sectorId + '-' + #search + '-' + #from + '-' + #to + '-' + #pageable.pageNumber"
-    )
+//    @Cacheable(
+//            value = "customersPaged",
+//            key = "T(String).valueOf(#ctx.sectorId) + '-' + T(String).valueOf(#search) + '-' + T(String).valueOf(#from) + '-' + T(String).valueOf(#to) + '-' + #pageable.pageNumber"
+//    )
+
+
     public Page<Customer> getCustomersPaged(
             SectorContext ctx,
             String search,
@@ -122,15 +124,24 @@ public class CustomerService {
             Pageable pageable
     ) {
 
+        if (ctx == null || ctx.getSectorId() == null) {
+            throw new RuntimeException("SectorContext is missing");
+        }
+
+        // ✅ Fix for Hibernate 6 'IS NULL' SemanticException: Provide default values instead of null
+        String safeSearch = search == null || search.trim().isEmpty() ? "" : search.trim();
+        LocalDateTime safeFrom = from != null ? from : LocalDateTime.of(2000, 1, 1, 0, 0);
+        LocalDateTime safeTo = to != null ? to : LocalDateTime.of(2099, 12, 31, 23, 59, 59);
+
+        // ✅ USE CORRECT QUERY
         return customerRepository.findBySectorWithSearchAndDateRange(
                 ctx.getSectorId(),
-                search,
-                from,
-                to,
+                safeSearch,
+                safeFrom,
+                safeTo,
                 pageable
         );
     }
-
     /* =========================================================
        REPORTING
     ========================================================== */

@@ -50,8 +50,8 @@ public class User {
     @Builder.Default
     private UserType userType = UserType.INDIVIDUAL;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "sector_id")
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "sector_id", nullable = false)
     private Sector sector;
 
     @ManyToOne(fetch = FetchType.LAZY)

@@ -37,6 +37,18 @@ public class DataInitializer implements CommandLineRunner {
     private AppointmentRepository appointmentRepository;
 
     @Autowired
+    private ShipmentRepository shipmentRepository;
+
+    @Autowired
+    private InventoryItemRepository inventoryItemRepository;
+
+    @Autowired
+    private ProjectRepository projectRepository;
+
+    @Autowired
+    private ContentAssetRepository contentAssetRepository;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -49,10 +61,10 @@ public class DataInitializer implements CommandLineRunner {
         ========================== */
         if (sectorRepository.count() == 0) {
 
-            Sector banking = createSector("Banking", "Banking & Finance", "BANKING", "/banking");
-            Sector healthcare = createSector("Healthcare", "Healthcare Services", "HEALTHCARE", "/healthcare");
-            Sector logistics = createSector("Logistics", "Logistics & Supply Chain", "LOGISTICS", "/logistics");
-            Sector content = createSector("Content", "Content Creation", "CONTENT", "/content");
+            Sector banking = createSector("Banking", "Banking & Finance", "BANKING", "/dashboard/banking");
+            Sector healthcare = createSector("Healthcare", "Healthcare Services", "HEALTHCARE", "/dashboard/healthcare");
+            Sector logistics = createSector("Logistics", "Logistics & Supply Chain", "LOGISTICS", "/dashboard/logistics");
+            Sector content = createSector("Content", "Content Creation", "CONTENT", "/dashboard/content");
 
             sectorRepository.save(banking);
             sectorRepository.save(healthcare);
@@ -60,6 +72,29 @@ public class DataInitializer implements CommandLineRunner {
             sectorRepository.save(content);
 
             System.out.println("✅ Sectors initialized");
+        } else {
+            // Force update routes for existing sectors
+            Sector banking = sectorRepository.findByName("Banking").orElseThrow();
+            if (!"/dashboard/banking".equals(banking.getRoutePath())) {
+                banking.setRoutePath("/dashboard/banking");
+                sectorRepository.save(banking);
+            }
+            Sector healthcare = sectorRepository.findByName("Healthcare").orElseThrow();
+            if (!"/dashboard/healthcare".equals(healthcare.getRoutePath())) {
+                healthcare.setRoutePath("/dashboard/healthcare");
+                sectorRepository.save(healthcare);
+            }
+            Sector logistics = sectorRepository.findByName("Logistics").orElseThrow();
+            if (!"/dashboard/logistics".equals(logistics.getRoutePath())) {
+                logistics.setRoutePath("/dashboard/logistics");
+                sectorRepository.save(logistics);
+            }
+            Sector content = sectorRepository.findByName("Content").orElseThrow();
+            if (!"/dashboard/content".equals(content.getRoutePath())) {
+                content.setRoutePath("/dashboard/content");
+                sectorRepository.save(content);
+            }
+            System.out.println("✅ Sector routes updated");
         }
 
         /* =========================
@@ -167,6 +202,62 @@ public class DataInitializer implements CommandLineRunner {
             appointmentRepository.save(apt);
 
             System.out.println("✅ Sample appointments initialized");
+        }
+
+        /* =========================
+           LOGISTICS: SHIPMENTS & INVENTORY
+        ========================== */
+        if (shipmentRepository.count() == 0) {
+            Shipment ship1 = new Shipment("SHP-999-001", "New York", "Los Angeles", Shipment.ShipmentStatus.IN_TRANSIT);
+            ship1.setWeight(new BigDecimal("150.5"));
+            ship1.setEstimatedDelivery(LocalDateTime.now().plusDays(3));
+            shipmentRepository.save(ship1);
+
+            Shipment ship2 = new Shipment("SHP-999-002", "Chicago", "Houston", Shipment.ShipmentStatus.PENDING);
+            ship2.setWeight(new BigDecimal("85.0"));
+            ship2.setEstimatedDelivery(LocalDateTime.now().plusDays(5));
+            shipmentRepository.save(ship2);
+            System.out.println("✅ Sample shipments initialized");
+        }
+
+        if (inventoryItemRepository.count() == 0) {
+            InventoryItem inv1 = new InventoryItem("SKU-1001", "Industrial Widget", 500, 100, "Warehouse A");
+            inventoryItemRepository.save(inv1);
+            InventoryItem inv2 = new InventoryItem("SKU-1002", "Electronic Component", 50, 200, "Warehouse B");
+            inventoryItemRepository.save(inv2);
+            System.out.println("✅ Sample inventory initialized");
+        }
+
+        /* =========================
+           CONTENT CREATION: PROJECTS & ASSETS
+        ========================== */
+        if (projectRepository.count() == 0) {
+            Project proj1 = new Project("Q4 Marketing Campaign", "Acme Corp", Project.ProjectStatus.IN_PROGRESS);
+            proj1.setStartDate(LocalDate.now().minusDays(10));
+            proj1.setDeadline(LocalDate.now().plusDays(20));
+            proj1.setBudget(15000.0);
+            projectRepository.save(proj1);
+
+            Project proj2 = new Project("Website Redesign", "Globex", Project.ProjectStatus.PLANNING);
+            proj2.setStartDate(LocalDate.now().plusDays(5));
+            proj2.setDeadline(LocalDate.now().plusMonths(2));
+            proj2.setBudget(25000.0);
+            projectRepository.save(proj2);
+            System.out.println("✅ Sample projects initialized");
+        }
+
+        if (contentAssetRepository.count() == 0) {
+            Project parentProject = projectRepository.findAll().stream().findFirst().orElse(null);
+            if (parentProject != null) {
+                ContentAsset asset1 = new ContentAsset("Campaign Banner", ContentAsset.AssetType.IMAGE, "https://example.com/assets/banner.jpg");
+                asset1.setProject(parentProject);
+                contentAssetRepository.save(asset1);
+                
+                ContentAsset asset2 = new ContentAsset("Marketing Video Draft", ContentAsset.AssetType.VIDEO, "https://example.com/assets/draft.mp4");
+                asset2.setProject(parentProject);
+                contentAssetRepository.save(asset2);
+            }
+            System.out.println("✅ Sample content assets initialized");
         }
     }
 

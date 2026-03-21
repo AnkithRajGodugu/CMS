@@ -6,8 +6,10 @@ import { Link } from 'react-router-dom';
 
 const AccountManagementPage = () => {
   const { user } = useAuth();
+    console.log("USER:", user);
   
   if (!user || user.role !== 'banking') {
+    //if(!user){
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-100 to-blue-300">
         <Header />
@@ -29,6 +31,7 @@ const AccountManagementPage = () => {
   ];
 
   return (
+
     <div className="min-h-screen bg-gradient-to-br from-blue-100 to-blue-300">
       <Header />
       <section className="py-20">
@@ -40,6 +43,7 @@ const AccountManagementPage = () => {
             <p className="text-xl text-blue-900/70 max-w-3xl mx-auto">
               Comprehensive customer management for banks, credit unions, and financial institutions.
             </p>
+
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
@@ -60,6 +64,7 @@ const AccountManagementPage = () => {
             </div>
           </div>
 
+
           <div className="bg-white rounded-xl shadow-lg p-8">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold text-blue-700">Customer Accounts</h2>
@@ -79,6 +84,7 @@ const AccountManagementPage = () => {
                   </tr>
                 </thead>
                 <tbody>
+
                   {accounts.map((account) => (
                     <tr key={account.id}>
                       <td className="font-mono">{account.id}</td>
@@ -109,6 +115,7 @@ const AccountManagementPage = () => {
       <Footer />
     </div>
   );
+
 };
 
 export default AccountManagementPage;

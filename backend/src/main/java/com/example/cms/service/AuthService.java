@@ -28,6 +28,7 @@ public class AuthService {
     private final SectorRepository sectorRepository;
     private final JwtUtil jwtUtil;
     private final AuditService auditService;
+    private final com.example.cms.repository.OrganizationRepository organizationRepository;
 
     /* =========================================================
        AUTHENTICATE
@@ -163,6 +164,36 @@ public class AuthService {
 
     public boolean userExists(String username) {
         return userRepository.findByUsername(username) != null;
+    }
+
+    @Transactional
+    public User createOrganizationUser(
+            String username,
+            String email,
+            String password,
+            String orgName,
+            Long sectorId
+    ) {
+        Sector sector = sectorRepository.findById(sectorId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid sector ID"));
+
+        com.example.cms.entity.Organization org = new com.example.cms.entity.Organization();
+        org.setName(orgName);
+        org.setSector(sector);
+        org.setActive(true);
+        org = organizationRepository.save(org);
+
+        User user = new User();
+        user.setUsername(username);
+        user.setEmail(email);
+        user.setPassword(passwordEncoder.encode(password));
+        user.setRole(User.Role.ADMIN);
+        user.setUserType(com.example.cms.entity.UserType.ORGANIZATION);
+        user.setOrganization(org);
+        user.setSector(sector);
+        user.setEnabled(true);
+
+        return userRepository.save(user);
     }
 
     @Transactional

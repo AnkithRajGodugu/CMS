@@ -33,6 +33,7 @@ public class CustomerController {
 
     private final CustomerService customerService;
 
+
     private SectorContext sector(HttpServletRequest request) {
         return (SectorContext) request.getAttribute("sectorContext");
     }
@@ -75,14 +76,30 @@ public class CustomerController {
             HttpServletRequest request
     ) {
 
-        Page<CustomerResponse> dtoPage =
-                customerService
-                        .getCustomersPaged(sector(request), search, from, to, pageable)
-                        .map(CustomerMapper::toResponse);
+        System.out.println("✅ STEP 1 - Controller hit");
+
+        SectorContext ctx = sector(request);
+        System.out.println("🔥 SECTOR CONTEXT: " + ctx);
+        System.out.println("🔥 SectorContext object: " + ctx);
+        System.out.println("🔥 Sector ID: " + (ctx != null ? ctx.getSectorId() : "NULL"));
+        System.out.println("🔥 Sector ID: " + ctx.getSectorId());
+        System.out.println("🔥 Search: " + search);
+        System.out.println("🔥 From: " + from);
+        System.out.println("🔥 To: " + to);
+
+        Page<Customer> page = customerService.getCustomersPaged(ctx, search, from, to, pageable);
+
+        System.out.println("✅ STEP 2 - Got page from service: " + page.getContent().size());
+
+        Page<CustomerResponse> dtoPage = page.map(customer -> {
+            System.out.println("Mapping customer: " + customer.getId());
+            return CustomerMapper.toResponse(customer);
+        });
+
+        System.out.println("✅ STEP 3 - Mapping done");
 
         return ResponseEntity.ok(PageUtils.from(dtoPage));
     }
-
     /* =========================
        REPORTS
     ========================== */
@@ -196,4 +213,5 @@ public class CustomerController {
         int count = customerService.bulkCreateFromCsv(file, sector(request));
         return ResponseEntity.ok(Map.of("created", count));
     }
+
 }

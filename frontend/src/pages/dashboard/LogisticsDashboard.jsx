@@ -1,12 +1,35 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FaTruck, FaBoxes, FaRoute, FaWarehouse, FaUsers, FaShippingFast } from 'react-icons/fa';
+import api from '../../services/api';
 
 const LogisticsDashboard = () => {
+  const [shipments, setShipments] = useState([]);
+  const [inventory, setInventory] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchLogisticsData = async () => {
+      try {
+        const [shipmentsRes, inventoryRes] = await Promise.all([
+          api.get('/logistics/shipments'),
+          api.get('/logistics/inventory')
+        ]);
+        setShipments(shipmentsRes.data);
+        setInventory(inventoryRes.data);
+      } catch (err) {
+        console.error('Failed to load logistics data', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchLogisticsData();
+  }, []);
   const stats = [
-    { label: 'Active Shipments', value: '342', change: '+18%', icon: FaShippingFast, color: 'text-info' },
-    { label: 'Inventory Items', value: '12,456', change: '+5%', icon: FaBoxes, color: 'text-success' },
-    { label: 'Fleet Vehicles', value: '87', change: '0%', icon: FaTruck, color: 'text-warning' },
-    { label: 'Warehouses', value: '12', change: '+2', icon: FaWarehouse, color: 'text-error' },
+    { label: 'Active Shipments', value: shipments.filter(s => s.status === 'IN_TRANSIT' || s.status === 'PENDING').length || 0, change: '+18%', icon: FaShippingFast, color: 'text-info' },
+    { label: 'Inventory Items', value: inventory.length || 0, change: '+5%', icon: FaBoxes, color: 'text-success' },
+    { label: 'Total Shipments', value: shipments.length || 0, change: '0%', icon: FaTruck, color: 'text-warning' },
+    { label: 'Warehouses', value: '2', change: '0', icon: FaWarehouse, color: 'text-error' },
   ];
 
   const quickActions = [
@@ -82,24 +105,28 @@ const LogisticsDashboard = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  <tr>
-                    <td>TRK-2024-001</td>
-                    <td>New York, NY</td>
-                    <td><span className="badge badge-info">In Transit</span></td>
-                    <td>2 days</td>
-                  </tr>
-                  <tr>
-                    <td>TRK-2024-002</td>
-                    <td>Los Angeles, CA</td>
-                    <td><span className="badge badge-success">Delivered</span></td>
-                    <td>-</td>
-                  </tr>
-                  <tr>
-                    <td>TRK-2024-003</td>
-                    <td>Chicago, IL</td>
-                    <td><span className="badge badge-warning">Pending</span></td>
-                    <td>5 days</td>
-                  </tr>
+                  {loading ? (
+                    <tr><td colSpan="4" className="text-center">Loading...</td></tr>
+                  ) : shipments.length === 0 ? (
+                    <tr><td colSpan="4" className="text-center">No shipments found.</td></tr>
+                  ) : (
+                    shipments.map(shipment => (
+                      <tr key={shipment.id}>
+                        <td>{shipment.trackingId}</td>
+                        <td>{shipment.destination}</td>
+                        <td>
+                          <span className={`badge ${
+                            shipment.status === 'DELIVERED' ? 'badge-success' : 
+                            shipment.status === 'IN_TRANSIT' ? 'badge-info' : 
+                            'badge-warning'
+                          }`}>
+                            {shipment.status}
+                          </span>
+                        </td>
+                        <td>{shipment.estimatedDelivery ? new Date(shipment.estimatedDelivery).toLocaleDateString() : 'Pending'}</td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>

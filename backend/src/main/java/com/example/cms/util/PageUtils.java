@@ -9,7 +9,7 @@ public class PageUtils {
 
     public static <T> PagedResponse<T> from(Page<T> page) {
         return PagedResponse.<T>builder()
-                .data(page.getContent())
+                .content(page.getContent())
                 .page(page.getNumber())
                 .size(page.getSize())
                 .totalElements(page.getTotalElements())
