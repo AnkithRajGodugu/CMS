@@ -86,7 +86,7 @@ class CustomerPaginationTest {
                                 .requestAttr("sectorContext", ctx)
                 )
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data", hasSize(2)))
+                .andExpect(jsonPath("$.content", hasSize(2)))
                 .andExpect(jsonPath("$.page").value(0))
                 .andExpect(jsonPath("$.size").value(2))
                 .andExpect(jsonPath("$.totalElements").value(5))
