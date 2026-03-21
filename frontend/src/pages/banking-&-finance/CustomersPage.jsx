@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { getCustomers } from '../../services/customerService';
 import Header from '../../components/layout/Header';
 import Footer from '../../components/layout/Footer';
+import ReportExportButtons from '../../components/shared/ReportExportButtons';
 
 const CustomersPage = () => {
     const [customers, setCustomers] = useState([]);
@@ -36,7 +37,10 @@ const CustomersPage = () => {
             <Header />
 
             <div className="max-w-6xl mx-auto p-6">
-                <h1 className="text-3xl font-bold mb-6">Customers</h1>
+                <div className="flex justify-between items-center mb-6">
+                    <h1 className="text-3xl font-bold">Customers</h1>
+                    <ReportExportButtons sectorCode="BANKING" />
+                </div>
 
                 {loading ? (
                     <p>Loading...</p>

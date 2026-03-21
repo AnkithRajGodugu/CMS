@@ -51,4 +51,19 @@ public class UserService {
         }
         return false;
     }
+
+    /**
+     * Verify currentPassword then hash & store newPassword.
+     * Returns true on success, false if currentPassword is wrong.
+     */
+    public boolean changePassword(Long userId, String currentPassword, String newPassword) {
+        return userRepository.findById(userId).map(user -> {
+            if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+                return false;
+            }
+            user.setPassword(passwordEncoder.encode(newPassword));
+            userRepository.save(user);
+            return true;
+        }).orElse(false);
+    }
 }

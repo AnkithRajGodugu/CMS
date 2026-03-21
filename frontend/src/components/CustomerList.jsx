@@ -2,6 +2,7 @@ import { useEffect, useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { AuthContext } from '../context/auth';
+import ReportExportButtons from './shared/ReportExportButtons';
 
 const CustomerList = () => {
   const { hasRole } = useContext(AuthContext);
@@ -69,19 +70,8 @@ const CustomerList = () => {
     }
   };
 
-  const exportCSV = () => {
-    const csv = customers
-      .map(c => `${c.firstName},${c.lastName},${c.email}`)
-      .join('\n');
-
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'customers.csv';
-    a.click();
-  };
+  const { user, sector } = useContext(AuthContext);
+  const currentSectorCode = sector || user?.sector || 'BANKING';
 
   if (loading) {
     return (
@@ -137,12 +127,7 @@ const CustomerList = () => {
           <option value="firstName,desc">Name Desc</option>
         </select>
 
-        <button
-          onClick={exportCSV}
-          className="btn btn-outline"
-        >
-          Export CSV
-        </button>
+        <ReportExportButtons sectorCode={currentSectorCode} />
 
         {selected.length > 0 && (
           <button

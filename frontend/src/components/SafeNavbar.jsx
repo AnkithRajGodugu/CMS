@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { useTheme } from '../context/SafeThemeContext';
 import DynamicLogo from './logos/DynamicLogo';
+import NotificationsDropdown from './NotificationsDropdown';
 
 const SafeNavbar = () => {
   const { user, logout, isAuthenticated } = useAuth();
@@ -56,12 +57,26 @@ const SafeNavbar = () => {
                 </Link>
               </li>
             )}
+            {user?.role === 'ADMIN' && (
+              <li>
+                <Link
+                  to="/admin/audit-logs"
+                  className="hover:text-primary transition-colors"
+                >
+                  Audit Trail
+                </Link>
+              </li>
+            )}
           </ul>
         )}
       </div>
       
       <div className="navbar-end">
         <div className="flex items-center gap-2">
+
+          {/* Live notifications bell */}
+          {isAuthenticated && <NotificationsDropdown />}
+
           {/* Sector switcher for desktop */}
           {isAuthenticated && (
             <div className="dropdown dropdown-end hidden lg:block">
@@ -106,8 +121,7 @@ const SafeNavbar = () => {
                   <span>{user?.username}</span>
                   <span className="text-xs opacity-60">{user?.role} • {user?.sector}</span>
                 </li>
-                <li><Link to="/profile">Profile</Link></li>
-                <li><Link to="/settings">Settings</Link></li>
+                <li><Link to="/settings">Profile & Settings</Link></li>
                 <li><hr className="my-2" /></li>
                 <li>
                   <button 

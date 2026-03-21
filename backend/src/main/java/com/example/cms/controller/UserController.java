@@ -14,6 +14,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -125,5 +126,29 @@ public class UserController {
         return userService.deleteUser(id)
                 ? ResponseEntity.ok().build()
                 : ResponseEntity.notFound().build();
+    }
+
+    /**
+     * Change current user's password (self-service)
+     */
+    @PostMapping("/change-password")
+    public ResponseEntity<?> changePassword(@RequestBody Map<String, String> body) {
+        User currentUser = getCurrentUser();
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        String currentPassword = body.get("currentPassword");
+        String newPassword     = body.get("newPassword");
+
+        if (currentPassword == null || newPassword == null || newPassword.length() < 8) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("message", "Invalid password data"));
+        }
+
+        return userService.changePassword(currentUser.getId(), currentPassword, newPassword)
+                ? ResponseEntity.ok(Map.of("message", "Password changed successfully"))
+                : ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(Map.of("message", "Current password is incorrect"));
     }
 }

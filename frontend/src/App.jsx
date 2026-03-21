@@ -19,6 +19,12 @@ const UnauthorizedPage = lazy(() => import("./pages/UnauthorizedPage"));
 const AboutPage = lazy(() => import("./pages/AboutPage"));
 const DocumentationPage = lazy(() => import("./pages/DocumentationPage"));
 
+/* ---------------- Phase 2 Pages ---------------- */
+
+const AuditLogsPage = lazy(() => import("./pages/admin/AuditLogsPage"));
+const SettingsPage = lazy(() => import("./pages/profile/SettingsPage"));
+const ForgotPasswordPage = lazy(() => import("./pages/auth/ForgotPasswordPage"));
+
 /* ---------------- Sector Pages ---------------- */
 
 const SectorsOverviewPage = lazy(() => import("./pages/SectorsOverviewPage"));
@@ -80,6 +86,7 @@ function App() {
                             <Route path="/simple" element={<WorkingLandingPage />} />
                             <Route path="/login" element={<LoginPage />} />
                             <Route path="/signup" element={<SignupPage />} />
+                            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
                             <Route path="/test-credentials" element={<TestCredentialsPage />} />
                             <Route path="/unauthorized" element={<UnauthorizedPage />} />
 
@@ -220,6 +227,26 @@ function App() {
                             <Route path="/about" element={<AboutPage />} />
                             <Route path="/docs" element={<DocumentationPage />} />
                             <Route path="/documentation" element={<DocumentationPage />} />
+
+                            {/* ---------------- PROFILE & ADMIN ---------------- */}
+
+                            <Route
+                                path="/settings"
+                                element={
+                                    <ProtectedRoute>
+                                        <SettingsPage />
+                                    </ProtectedRoute>
+                                }
+                            />
+
+                            <Route
+                                path="/admin/audit-logs"
+                                element={
+                                    <ProtectedRoute>
+                                        <AuditLogsPage />
+                                    </ProtectedRoute>
+                                }
+                            />
 
                         </Routes>
                     </Suspense>

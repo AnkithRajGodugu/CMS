@@ -20,15 +20,27 @@ const DataTable = ({
   columns = [], 
   pageSize = 10,
   searchable = true,
-  className = ''
+  loading = false,
+  className = '',
+  serverSide = false, // If true, internal sorting/filtering/pagination is disabled
+  totalItems = 0,     // Required for serverSide pagination
+  onPageChange,       // (page) => void
+  onSortChange,       // (key, direction) => void
+  onSearchChange,     // (term) => void
+  currentPage: externalPage,
+  sortConfig: externalSort,
 }) => {
-  const [currentPage, setCurrentPage] = useState(1);
-  const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
-  const [searchTerm, setSearchTerm] = useState('');
+  const [internalPage, setInternalPage] = useState(1);
+  const [internalSort, setInternalSort] = useState({ key: null, direction: null });
+  const [internalSearch, setInternalSearch] = useState('');
 
-  // Filter data based on search term
+  const currentPage = serverSide ? (externalPage || 1) : internalPage;
+  const sortConfig = serverSide ? (externalSort || { key: null, direction: null }) : internalSort;
+  const searchTerm = serverSide ? '' : internalSearch; // Server side search usually handled by parent
+
+  // Filter data based on search term (CLIENT SIDE ONLY)
   const filteredData = useMemo(() => {
-    if (!searchTerm) return data;
+    if (serverSide || !searchTerm) return data;
     
     return data.filter(row =>
       columns.some(column => {
@@ -36,11 +48,11 @@ const DataTable = ({
         return value?.toString().toLowerCase().includes(searchTerm.toLowerCase());
       })
     );
-  }, [data, searchTerm, columns]);
+  }, [data, searchTerm, columns, serverSide]);
 
-  // Sort data
+  // Sort data (CLIENT SIDE ONLY)
   const sortedData = useMemo(() => {
-    if (!sortConfig.key) return filteredData;
+    if (serverSide || !sortConfig.key) return filteredData;
 
     return [...filteredData].sort((a, b) => {
       const aValue = a[sortConfig.key];
@@ -51,21 +63,34 @@ const DataTable = ({
       const comparison = aValue < bValue ? -1 : 1;
       return sortConfig.direction === 'asc' ? comparison : -comparison;
     });
-  }, [filteredData, sortConfig]);
+  }, [filteredData, sortConfig, serverSide]);
 
-  // Paginate data
+  // Paginate data (CLIENT SIDE ONLY)
   const paginatedData = useMemo(() => {
+    if (serverSide) return data; // Data arrive already paginated
     const startIndex = (currentPage - 1) * pageSize;
     return sortedData.slice(startIndex, startIndex + pageSize);
-  }, [sortedData, currentPage, pageSize]);
+  }, [data, sortedData, currentPage, pageSize, serverSide]);
 
-  const totalPages = Math.ceil(sortedData.length / pageSize);
+  const totalPages = serverSide 
+    ? Math.ceil(totalItems / pageSize) 
+    : Math.ceil(sortedData.length / pageSize);
+
+  const handlePageChange = (newPage) => {
+    if (serverSide) {
+      onPageChange?.(newPage);
+    } else {
+      setInternalPage(newPage);
+    }
+  };
 
   const handleSort = (key) => {
-    setSortConfig(prev => ({
-      key,
-      direction: prev.key === key && prev.direction === 'asc' ? 'desc' : 'asc'
-    }));
+    const direction = sortConfig.key === key && sortConfig.direction === 'asc' ? 'desc' : 'asc';
+    if (serverSide) {
+      onSortChange?.(key, direction);
+    } else {
+      setInternalSort({ key, direction });
+    }
   };
 
   const getSortIcon = (columnKey) => {
@@ -87,17 +112,21 @@ const DataTable = ({
             <input
               type="text"
               placeholder="Search..."
-              value={searchTerm}
+              value={serverSide ? '' : searchTerm} // Search usually separate in serverSide
               onChange={(e) => {
-                setSearchTerm(e.target.value);
-                setCurrentPage(1);
+                if (serverSide) {
+                  onSearchChange?.(e.target.value);
+                } else {
+                  setInternalSearch(e.target.value);
+                  setInternalPage(1);
+                }
               }}
               className="input input-bordered w-full pl-10"
               aria-label="Search table"
             />
           </div>
           <div className="text-sm text-base-content/60">
-            {sortedData.length} {sortedData.length === 1 ? 'result' : 'results'}
+            {serverSide ? totalItems : sortedData.length} { (serverSide ? totalItems : sortedData.length) === 1 ? 'result' : 'results'}
           </div>
         </div>
       )}
@@ -122,7 +151,13 @@ const DataTable = ({
             </tr>
           </thead>
           <tbody>
-            {paginatedData.length === 0 ? (
+            {loading ? (
+              <tr>
+                <td colSpan={columns.length} className="text-center py-10">
+                  <span className="loading loading-spinner loading-lg text-primary"></span>
+                </td>
+              </tr>
+            ) : paginatedData.length === 0 ? (
               <tr>
                 <td colSpan={columns.length} className="text-center py-8 text-base-content/60">
                   No data available
@@ -155,7 +190,7 @@ const DataTable = ({
           <div className="join">
             <button
               className="join-item btn btn-sm"
-              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+              onClick={() => handlePageChange(currentPage - 1)}
               disabled={currentPage === 1}
               aria-label="Previous page"
             >
@@ -173,7 +208,7 @@ const DataTable = ({
                   <button
                     key={page}
                     className={`join-item btn btn-sm ${currentPage === page ? 'btn-active' : ''}`}
-                    onClick={() => setCurrentPage(page)}
+                    onClick={() => handlePageChange(page)}
                   >
                     {page}
                   </button>
@@ -185,7 +220,7 @@ const DataTable = ({
             })}
             <button
               className="join-item btn btn-sm"
-              onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+              onClick={() => handlePageChange(currentPage + 1)}
               disabled={currentPage === totalPages}
               aria-label="Next page"
             >

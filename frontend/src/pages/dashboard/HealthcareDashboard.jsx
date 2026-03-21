@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { FaHospital, FaUserMd, FaCalendarCheck, FaFileMedical, FaShieldAlt } from 'react-icons/fa';
+import ReportExportButtons from '../../components/shared/ReportExportButtons';
 
 const HealthcareDashboard = () => {
   const stats = [
@@ -20,13 +21,16 @@ const HealthcareDashboard = () => {
     <div className="min-h-screen bg-base-200">
       <div className="container mx-auto p-6">
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-2">
-            <FaHospital className="text-4xl text-success" />
-            <h1 className="text-4xl font-bold">Healthcare Dashboard</h1>
+          <div className="flex justify-between items-end mb-2">
+            <div>
+              <div className="flex items-center gap-3 mb-2">
+                <FaHospital className="text-4xl text-success" />
+                <h1 className="text-4xl font-bold">Healthcare Dashboard</h1>
+              </div>
+              <p className="text-base-content/70">Manage patients, appointments, and medical records</p>
+            </div>
+            <ReportExportButtons sectorCode="HEALTHCARE" />
           </div>
-          <p className="text-base-content/70">Manage patients, appointments, and medical records</p>
-        </div>
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">

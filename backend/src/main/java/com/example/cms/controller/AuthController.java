@@ -401,6 +401,25 @@ public class AuthController {
     }
 
     public static class RegisterRequest {
+
+        @NotBlank(message = "Username is required")
+        @Size(min = 3, max = 50, message = "Username must be between 3 and 50 characters")
+        private String username;
+
+        @NotBlank(message = "Email is required")
+        @jakarta.validation.constraints.Email(message = "Invalid email format")
+        private String email;
+
+        @NotBlank(message = "Password is required")
+        @Size(min = 8, message = "Password must be at least 8 characters")
+        private String password;
+
+        @NotBlank(message = "Role is required")
+        private String role;
+
+        @jakarta.validation.constraints.NotNull(message = "Sector is required")
+        private Long sectorId;
+
         public void setUsername(String username) {
             this.username = username;
         }
@@ -440,30 +459,20 @@ public class AuthController {
         public Long getSectorId() {
             return sectorId;
         }
+    }
 
+    // ─── Forgot Password ──────────────────────────────────────────────────────
 
-
-            @NotBlank(message = "Username is required")
-            @Size(min = 3, max = 50, message = "Username must be between 3 and 50 characters")
-            private String username;
-
-            @NotBlank(message = "Email is required")
-            @jakarta.validation.constraints.Email(message = "Invalid email format")
-            private String email;
-
-            @NotBlank(message = "Password is required")
-            @Size(min = 8, message = "Password must be at least 8 characters")
-            private String password;
-
-            @NotBlank(message = "Role is required")
-            private String role;
-
-            @jakarta.validation.constraints.NotNull(message = "Sector is required")
-            private Long sectorId;
-
-            // getters + setters
+    @PostMapping("/forgot-password")
+    public ResponseEntity<Map<String, String>> forgotPassword(@RequestBody Map<String, String> body) {
+        String email = body.get("email");
+        if (email == null || email.isBlank()) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("message", "Email is required"));
         }
 
-        // getters & setters
-
+        // Note: integrate an email service here (e.g. Spring Mail) to send a real reset token.
+        // For now, always return success to prevent user enumeration.
+        return ResponseEntity.ok(Map.of("message", "If that email is registered, a reset link has been sent."));
+    }
 }

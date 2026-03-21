@@ -4,6 +4,7 @@ import {
   getBankingDashboardStats,
   getRecentTransactions
 } from '../../services/bankingService';
+import ReportExportButtons from '../../components/shared/ReportExportButtons';
 
 const BankingDashboard = () => {
 
@@ -95,7 +96,7 @@ const BankingDashboard = () => {
           </div>
 
           <div className="flex space-x-2">
-            <button className="btn btn-outline">Export Report</button>
+            <ReportExportButtons sectorCode="BANKING" />
             <button className="btn btn-primary">New Account</button>
           </div>
         </div>
