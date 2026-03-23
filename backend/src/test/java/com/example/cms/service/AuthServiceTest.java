@@ -17,9 +17,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.util.HashSet;
 import java.util.Optional;
-import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -68,10 +66,6 @@ class AuthServiceTest {
         testUser.setEmail("test@example.com");
         testUser.setSector(testSector);
         testUser.setUserType(UserType.INDIVIDUAL);
-        
-        Set<String> roles = new HashSet<>();
-        roles.add("ROLE_USER");
-        testUser.setRoles(roles);
     }
 
     @Test

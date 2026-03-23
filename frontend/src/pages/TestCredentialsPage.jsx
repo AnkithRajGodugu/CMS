@@ -4,38 +4,31 @@ const TestCredentialsPage = () => {
   const testCredentials = [
     {
       role: 'Admin',
-      username: 'admin',
-      password: 'admin123',
+      username: 'admin@example.com',
+      password: 'Admin123!',
       sector: 'All Sectors',
-      description: 'Full system access'
+      description: 'Full system access (Login with Email or Username: admin)'
     },
     {
       role: 'Banking User',
-      username: 'bank_user',
-      password: 'bank123',
+      username: 'banking@example.com',
+      password: 'Banking123!',
       sector: 'Banking',
       description: 'Banking sector access'
     },
     {
       role: 'Healthcare User',
-      username: 'health_user',
-      password: 'health123',
+      username: 'healthcare@example.com',
+      password: 'Healthcare123!',
       sector: 'Healthcare',
       description: 'Healthcare sector access'
     },
     {
       role: 'Logistics User',
-      username: 'logistics_user',
-      password: 'logistics123',
+      username: 'logistics@example.com',
+      password: 'Logistics123!',
       sector: 'Logistics',
       description: 'Logistics sector access'
-    },
-    {
-      role: 'Content User',
-      username: 'content_user',
-      password: 'content123',
-      sector: 'Content Creation',
-      description: 'Content creation sector access'
     }
   ];
 

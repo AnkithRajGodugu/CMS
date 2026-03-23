@@ -23,7 +23,7 @@ const SettingsPage = () => {
     setSaving(true);
     setProfileMsg(null);
     try {
-      await api.put(`/api/users/${user?.id}`, { firstName, lastName, email });
+      await api.put(`/users/${user?.id}`, { firstName, lastName, email });
       setProfileMsg({ ok: true, text: 'Profile updated successfully!' });
     } catch (err) {
       setProfileMsg({ ok: false, text: err.response?.data?.message || 'Failed to save profile.' });
@@ -41,7 +41,7 @@ const SettingsPage = () => {
     setSaving(true);
     setPwdMsg(null);
     try {
-      await api.post('/api/users/change-password', {
+      await api.post('/users/change-password', {
         currentPassword: pwdCurrent,
         newPassword: pwdNew,
       });

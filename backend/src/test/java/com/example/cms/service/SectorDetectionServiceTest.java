@@ -17,9 +17,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.Authentication;
 
-import java.util.HashSet;
 import java.util.Optional;
-import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -60,16 +58,12 @@ class SectorDetectionServiceTest {
         testOrganization.setSector(testSector);
 
         // Create test user
-        Set<String> roles = new HashSet<>();
-        roles.add("ROLE_USER");
-        
         testUser = new User("testuser", "password", User.Role.USER);
         testUser.setId(1L);
         testUser.setEmail("test@example.com");
         testUser.setSector(testSector);
         testUser.setOrganization(testOrganization);
         testUser.setUserType(UserType.ORGANIZATION);
-        testUser.setRoles(roles);
     }
 
     @Test

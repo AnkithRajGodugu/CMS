@@ -4,12 +4,12 @@ import { AuthProvider } from "./context/AuthContext";
 import { SectorThemeProvider } from "./context/SectorThemeProvider";
 import ProtectedRoute from "./components/ProtectedRoute";
 import SafeNavbar from "./components/SafeNavbar";
+import { NotificationProvider } from "./components/providers/NotificationProvider";
+import { Toaster } from "sonner";
 
 
 /* ---------------- Public Pages ---------------- */
 
-import WorkingLandingPage from "./pages/WorkingLandingPage";
-import SafeLandingPage from "./pages/SafeLandingPage";
 import ProfessionalLandingPage from "./pages/ProfessionalLandingPage";
 
 const LoginPage = lazy(() => import("./pages/LoginPage"));
@@ -22,8 +22,11 @@ const DocumentationPage = lazy(() => import("./pages/DocumentationPage"));
 /* ---------------- Phase 2 Pages ---------------- */
 
 const AuditLogsPage = lazy(() => import("./pages/admin/AuditLogsPage"));
+const UserManagementPage = lazy(() => import("./pages/admin/UserManagementPage"));
 const SettingsPage = lazy(() => import("./pages/profile/SettingsPage"));
+const OrganizationSettingsPage = lazy(() => import("./pages/profile/OrganizationSettingsPage"));
 const ForgotPasswordPage = lazy(() => import("./pages/auth/ForgotPasswordPage"));
+const ResetPasswordPage = lazy(() => import("./pages/auth/ResetPasswordPage"));
 
 /* ---------------- Sector Pages ---------------- */
 
@@ -61,6 +64,24 @@ const RiskAssessmentPage = lazy(() =>
     import("./pages/banking-&-finance/RiskAssessmentPage")
 );
 const CustomersPage = lazy(() => import("./pages/banking-&-finance/CustomersPage"));
+
+/* ---------------- Logistics Pages ---------------- */
+
+const LogisticsShipmentTrackingPage = lazy(() => import("./pages/logistics-&-supply/LogisticsShipmentTrackingPage"));
+const LogisticsInventoryManagementPage = lazy(() => import("./pages/logistics-&-supply/LogisticsInventoryManagementPage"));
+const LogisticsFleetManagementPage = lazy(() => import("./pages/logistics-&-supply/LogisticsFleetManagementPage"));
+const LogisticsRouteOptimizationPage = lazy(() => import("./pages/logistics-&-supply/LogisticsRouteOptimizationPage"));
+const LogisticsWarehouseManagementPage = lazy(() => import("./pages/logistics-&-supply/LogisticsWarehouseManagementPage"));
+const LogisticsVendorRelationsPage = lazy(() => import("./pages/logistics-&-supply/LogisticsVendorRelationsPage"));
+
+/* ---------------- Content Pages ---------------- */
+
+const ProjectManagementPage = lazy(() => import("./pages/content-creation/ProjectManagementPage"));
+const ClientPortalPage = lazy(() => import("./pages/content-creation/ClientPortalPage"));
+const ContentCalendarPage = lazy(() => import("./pages/content-creation/ContentCalendarPage"));
+const CollaborationToolsPage = lazy(() => import("./pages/content-creation/CollaborationToolsPage"));
+const AssetManagementPage = lazy(() => import("./pages/content-creation/AssetManagementPage"));
+const TimeTrackingPage = lazy(() => import("./pages/content-creation/TimeTrackingPage"));
 /* ---------------- Loading UI ---------------- */
 
 const LoadingSpinner = () => (
@@ -72,9 +93,11 @@ const LoadingSpinner = () => (
 function App() {
     return (
         <AuthProvider>
-            <SectorThemeProvider>
-                <Router>
-                    <SafeNavbar />
+            <NotificationProvider>
+                <SectorThemeProvider>
+                    <Router>
+                        <SafeNavbar />
+                        <Toaster position="top-right" richColors closeButton />
 
                     <Suspense fallback={<LoadingSpinner />}>
                         <Routes>
@@ -82,11 +105,10 @@ function App() {
                             {/* ---------------- PUBLIC ROUTES ---------------- */}
 
                             <Route path="/" element={<ProfessionalLandingPage />} />
-                            <Route path="/old-landing" element={<SafeLandingPage />} />
-                            <Route path="/simple" element={<WorkingLandingPage />} />
                             <Route path="/login" element={<LoginPage />} />
                             <Route path="/signup" element={<SignupPage />} />
                             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+                            <Route path="/reset-password" element={<ResetPasswordPage />} />
                             <Route path="/test-credentials" element={<TestCredentialsPage />} />
                             <Route path="/unauthorized" element={<UnauthorizedPage />} />
 
@@ -213,6 +235,13 @@ function App() {
                                 }
                             />
 
+                            <Route path="/dashboard/logistics/tracking" element={<ProtectedRoute><LogisticsShipmentTrackingPage /></ProtectedRoute>} />
+                            <Route path="/dashboard/logistics/inventory" element={<ProtectedRoute><LogisticsInventoryManagementPage /></ProtectedRoute>} />
+                            <Route path="/dashboard/logistics/fleet" element={<ProtectedRoute><LogisticsFleetManagementPage /></ProtectedRoute>} />
+                            <Route path="/dashboard/logistics/routes" element={<ProtectedRoute><LogisticsRouteOptimizationPage /></ProtectedRoute>} />
+                            <Route path="/dashboard/logistics/warehouse" element={<ProtectedRoute><LogisticsWarehouseManagementPage /></ProtectedRoute>} />
+                            <Route path="/dashboard/logistics/vendors" element={<ProtectedRoute><LogisticsVendorRelationsPage /></ProtectedRoute>} />
+
                             <Route
                                 path="/dashboard/content"
                                 element={
@@ -221,6 +250,13 @@ function App() {
                                     </ProtectedRoute>
                                 }
                             />
+
+                            <Route path="/dashboard/content/projects" element={<ProtectedRoute><ProjectManagementPage /></ProtectedRoute>} />
+                            <Route path="/dashboard/content/clients" element={<ProtectedRoute><ClientPortalPage /></ProtectedRoute>} />
+                            <Route path="/dashboard/content/calendar" element={<ProtectedRoute><ContentCalendarPage /></ProtectedRoute>} />
+                            <Route path="/dashboard/content/collaboration" element={<ProtectedRoute><CollaborationToolsPage /></ProtectedRoute>} />
+                            <Route path="/dashboard/content/assets" element={<ProtectedRoute><AssetManagementPage /></ProtectedRoute>} />
+                            <Route path="/dashboard/content/time" element={<ProtectedRoute><TimeTrackingPage /></ProtectedRoute>} />
 
                             {/* ---------------- INFO PAGES ---------------- */}
 
@@ -248,10 +284,29 @@ function App() {
                                 }
                             />
 
+                            <Route
+                                path="/users"
+                                element={
+                                    <ProtectedRoute>
+                                        <UserManagementPage />
+                                    </ProtectedRoute>
+                                }
+                            />
+
+                            <Route
+                                path="/organization-settings"
+                                element={
+                                    <ProtectedRoute>
+                                        <OrganizationSettingsPage />
+                                    </ProtectedRoute>
+                                }
+                            />
+
                         </Routes>
                     </Suspense>
                 </Router>
             </SectorThemeProvider>
+            </NotificationProvider>
         </AuthProvider>
     );
 }

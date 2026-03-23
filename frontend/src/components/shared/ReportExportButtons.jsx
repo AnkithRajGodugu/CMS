@@ -1,5 +1,7 @@
 import React from 'react';
-import { Download, FileSpreadsheet, FileText } from 'lucide-react';
+import { Download, FileSpreadsheet, FileText, FileUp } from 'lucide-react';
+import BulkImportButton from './BulkImportButton';
+import { toast } from 'sonner';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8082';
 
@@ -55,6 +57,10 @@ const ReportExportButtons = ({ sectorCode }) => {
         <FileText size={16} />
         PDF Export
       </button>
+
+      <div className="divider divider-horizontal mx-0"></div>
+
+      <BulkImportButton onComplete={() => window.location.reload()} />
     </div>
   );
 };

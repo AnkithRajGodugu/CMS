@@ -1,26 +1,76 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from '../../components/layout/Header';
 import Footer from '../../components/layout/Footer';
 import { useAuth } from '../../hooks/useAuth';
 import { Link } from 'react-router-dom';
+import api from '../../services/api';
+import { FaBoxes, FaPlus, FaExclamationTriangle, FaWarehouse, FaHistory } from 'react-icons/fa';
+import { toast } from 'sonner';
 
 const LogisticsInventoryManagementPage = () => {
   const { user } = useAuth();
-  const inventory = [
-    { item: 'Laptops', stock: 120, reorder: 30, forecast: 'Stable' },
-    { item: 'Monitors', stock: 80, reorder: 20, forecast: 'Increasing' },
-    { item: 'Keyboards', stock: 200, reorder: 50, forecast: 'Stable' },
-    { item: 'Printers', stock: 40, reorder: 10, forecast: 'Decreasing' },
-  ];
+  const [inventory, setInventory] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [newItem, setNewItem] = useState({
+    productName: '',
+    quantity: 0,
+    reorderPoint: 10,
+    warehouseLocation: ''
+  });
+
+  const fetchInventory = async () => {
+    try {
+      setLoading(true);
+      const response = await api.get('/logistics/inventory');
+      // response.data is the ApiResponse object from backend
+      if (response.data && response.data.success) {
+        setInventory(response.data.data);
+      }
+    } catch (err) {
+      console.error('Failed to fetch inventory', err);
+      toast.error('Failed to load inventory data');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (user && user.role === 'logistics') {
+      fetchInventory();
+    }
+  }, [user]);
+
+  const handleCreateItem = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await api.post('/logistics/inventory', newItem);
+      if (response.data && response.data.success) {
+        toast.success(response.data.message || 'Item created successfully');
+        setIsModalOpen(false);
+        setNewItem({ productName: '', quantity: 0, reorderPoint: 10, warehouseLocation: '' });
+        fetchInventory();
+      }
+    } catch (err) {
+      console.error('Failed to create item', err);
+    }
+  };
+
+  const filteredInventory = inventory.filter(item => 
+    item.productName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    item.warehouseLocation.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   if (!user || user.role !== 'logistics') {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-green-100 to-green-300">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-base-200">
         <Header />
-        <div className="bg-white rounded-xl shadow-lg p-8 text-center">
-          <h2 className="text-3xl font-bold mb-4 text-green-700">Logistics Login Required</h2>
-          <p className="mb-6 text-green-900/80">Please log in with your logistics credentials to view inventory management details.</p>
-          <Link to="/login" className="btn btn-primary">Login</Link>
+        <div className="card bg-base-100 shadow-xl p-8 text-center max-w-md mx-auto mt-20">
+          <FaExclamationTriangle className="text-6xl text-warning mx-auto mb-4" />
+          <h2 className="text-3xl font-bold mb-4">Logistics Access Only</h2>
+          <p className="mb-6 text-base-content/70">Please log in with your logistics credentials to manage inventory.</p>
+          <Link to="/login" className="btn btn-primary">Go to Login</Link>
         </div>
         <Footer />
       </div>
@@ -28,54 +78,204 @@ const LogisticsInventoryManagementPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-100 to-green-300">
+    <div className="min-h-screen bg-base-200 flex flex-col">
       <Header />
-      <section className="py-20">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center mb-16">
-            <h1 className="text-4xl md:text-5xl font-bold mb-6 text-green-700">
-              Inventory Management
-            </h1>
-            <p className="text-xl text-green-900/70 max-w-3xl mx-auto">
-              Smart inventory control with automated reordering and forecasting.
-            </p>
+      
+      <main className="flex-grow pt-24 pb-12 px-4 md:px-8">
+        <div className="max-w-7xl mx-auto">
+          
+          {/* Page Header */}
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+            <div>
+              <h1 className="text-4xl font-bold flex items-center gap-3">
+                <FaBoxes className="text-success" />
+                Inventory Management
+              </h1>
+              <p className="text-base-content/70 mt-1">Monitor stock levels, reorder points, and warehouse locations across global sites.</p>
+            </div>
+            <button 
+              className="btn btn-success gap-2 text-white"
+              onClick={() => setIsModalOpen(true)}
+            >
+              <FaPlus /> Add New Item
+            </button>
           </div>
-          <div className="flex flex-col md:flex-row gap-12 items-center justify-center">
-            <div className="bg-white rounded-xl shadow-lg p-8 w-full md:w-2/3">
-              <div className="text-9xl mb-4 text-green-600">📋</div>
-              <h2 className="text-2xl font-bold mb-4">Inventory Overview</h2>
-              <table className="table-auto w-full mb-6 border">
-                <thead>
-                  <tr className="bg-green-200">
-                    <th className="px-4 py-2">Item</th>
-                    <th className="px-4 py-2">Stock</th>
-                    <th className="px-4 py-2">Reorder Point</th>
-                    <th className="px-4 py-2">Forecast</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {inventory.map((row, idx) => (
-                    <tr key={idx} className="text-center">
-                      <td className="border px-4 py-2">{row.item}</td>
-                      <td className="border px-4 py-2">{row.stock}</td>
-                      <td className="border px-4 py-2">{row.reorder}</td>
-                      <td className="border px-4 py-2">{row.forecast}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              <div className="mt-6">
-                <h3 className="text-xl font-bold mb-2 text-green-700">Analytics</h3>
-                <ul className="list-disc ml-6 text-green-900/80">
-                  <li>Automated reordering prevents stockouts</li>
-                  <li>Forecasting helps optimize inventory levels</li>
-                  <li>Stable items require less frequent review</li>
-                </ul>
+
+          {/* Quick Stats */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            <div className="stats shadow bg-base-100">
+              <div className="stat">
+                <div className="stat-figure text-success text-2xl"><FaBoxes /></div>
+                <div className="stat-title">Total SKUs</div>
+                <div className="stat-value text-success">{inventory.length}</div>
+              </div>
+            </div>
+            <div className="stats shadow bg-base-100">
+              <div className="stat">
+                <div className="stat-figure text-error text-2xl"><FaExclamationTriangle /></div>
+                <div className="stat-title">Low Stock Alerts</div>
+                <div className="stat-value text-error">
+                  {inventory.filter(i => i.quantity <= i.reorderPoint).length}
+                </div>
+              </div>
+            </div>
+            <div className="stats shadow bg-base-100">
+              <div className="stat">
+                <div className="stat-figure text-info text-2xl"><FaWarehouse /></div>
+                <div className="stat-title">Active Warehouse Zones</div>
+                <div className="stat-value text-info">
+                  {new Set(inventory.map(i => i.warehouseLocation)).size}
+                </div>
+              </div>
+            </div>
+            <div className="stats shadow bg-base-100">
+              <div className="stat">
+                <div className="stat-figure text-primary text-2xl"><FaHistory /></div>
+                <div className="stat-title">Items Restocked (All)</div>
+                <div className="stat-value text-primary">
+                   {inventory.reduce((sum, i) => sum + (i.quantity > 100 ? 1 : 0), 0)}
+                </div>
               </div>
             </div>
           </div>
+
+          {/* Search & Table */}
+          <div className="card bg-base-100 shadow-xl overflow-hidden">
+            <div className="p-6 border-b border-base-200 flex flex-col sm:flex-row justify-between gap-4 bg-base-100/50 backdrop-blur">
+               <div className="form-control w-full max-w-md">
+                 <input 
+                   type="text" 
+                   placeholder="Search products or locations..." 
+                   className="input input-bordered w-full" 
+                   value={searchTerm}
+                   onChange={(e) => setSearchTerm(e.target.value)}
+                 />
+               </div>
+               <div className="flex items-center gap-2 text-sm text-base-content/60">
+                 Showing {filteredInventory.length} items
+               </div>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="table table-zebra w-full">
+                <thead>
+                  <tr className="bg-base-200">
+                    <th>Product Name</th>
+                    <th>Warehouse Location</th>
+                    <th>Current Stock</th>
+                    <th>Reorder Point</th>
+                    <th>Status</th>
+                    <th>Last Restocked</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {loading ? (
+                    <tr><td colSpan="7" className="text-center py-10 font-bold">Loading inventory...</td></tr>
+                  ) : filteredInventory.length === 0 ? (
+                    <tr><td colSpan="7" className="text-center py-10">No items found matching your criteria.</td></tr>
+                  ) : (
+                    filteredInventory.map((item) => {
+                      const isLowStock = item.quantity <= item.reorderPoint;
+                      return (
+                        <tr key={item.id} className="hover">
+                          <td>
+                            <div className="font-bold">{item.productName}</div>
+                            <div className="text-xs opacity-50 uppercase font-mono">ID: {item.id}</div>
+                          </td>
+                          <td>
+                             <div className="flex items-center gap-2">
+                               <FaWarehouse className="text-base-content/30" />
+                               {item.warehouseLocation || 'Unassigned'}
+                             </div>
+                          </td>
+                          <td className="font-mono font-bold">{item.quantity}</td>
+                          <td className="text-base-content/60">{item.reorderPoint}</td>
+                          <td>
+                            <span className={`badge ${isLowStock ? 'badge-error' : 'badge-success'} badge-sm font-bold`}>
+                              {isLowStock ? 'LOW STOCK' : 'HEALTHY'}
+                            </span>
+                          </td>
+                          <td className="text-xs">
+                             {item.lastRestocked ? new Date(item.lastRestocked).toLocaleDateString() : 'N/A'}
+                          </td>
+                          <td>
+                            <div className="join join-horizontal">
+                              <button className="btn btn-ghost btn-xs join-item">History</button>
+                              <button className="btn btn-ghost btn-xs join-item text-primary">Update</button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
-      </section>
+      </main>
+
+      {/* Add Item Modal */}
+      {isModalOpen && (
+        <div className="modal modal-open">
+          <div className="modal-box max-w-md relative">
+            <button className="btn btn-sm btn-circle absolute right-2 top-2" onClick={() => setIsModalOpen(false)}>✕</button>
+            <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
+              <FaPlus className="text-success" /> Add New Inventory Item
+            </h3>
+            <form onSubmit={handleCreateItem} className="space-y-4">
+              <div className="form-control">
+                <label className="label"><span className="label-text">Product Name</span></label>
+                <input 
+                  type="text" 
+                  required
+                  className="input input-bordered" 
+                  value={newItem.productName}
+                  onChange={(e) => setNewItem({...newItem, productName: e.target.value})}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="form-control">
+                  <label className="label"><span className="label-text">Current Quantity</span></label>
+                  <input 
+                    type="number" 
+                    required
+                    className="input input-bordered" 
+                    value={newItem.quantity}
+                    onChange={(e) => setNewItem({...newItem, quantity: parseInt(e.target.value)})}
+                  />
+                </div>
+                <div className="form-control">
+                  <label className="label"><span className="label-text">Reorder Point</span></label>
+                  <input 
+                    type="number" 
+                    required
+                    className="input input-bordered" 
+                    value={newItem.reorderPoint}
+                    onChange={(e) => setNewItem({...newItem, reorderPoint: parseInt(e.target.value)})}
+                  />
+                </div>
+              </div>
+              <div className="form-control">
+                <label className="label"><span className="label-text">Warehouse Location</span></label>
+                <input 
+                  type="text" 
+                  required
+                  placeholder="e.g. Zone A-4, Warehouse 1"
+                  className="input input-bordered" 
+                  value={newItem.warehouseLocation}
+                  onChange={(e) => setNewItem({...newItem, warehouseLocation: e.target.value})}
+                />
+              </div>
+              <div className="modal-action">
+                <button type="submit" className="btn btn-success text-white w-full">Create Item</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       <Footer />
     </div>
   );

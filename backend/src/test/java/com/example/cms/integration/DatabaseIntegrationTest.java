@@ -17,9 +17,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 @Disabled("Disabled until Docker/Testcontainers is enabled")
@@ -125,10 +123,6 @@ class DatabaseIntegrationTest extends TestcontainersConfig {
         user.setOrganization(organization);
         user.setUserType(UserType.ORGANIZATION);
         user.setEnabled(true);
-        
-        Set<String> roles = new HashSet<>();
-        roles.add("ROLE_USER");
-        user.setRoles(roles);
 
         // Act
         User savedUser = userRepository.save(user);
@@ -199,10 +193,6 @@ class DatabaseIntegrationTest extends TestcontainersConfig {
         user.setSector(sector);
         user.setUserType(UserType.INDIVIDUAL);
         user.setEnabled(true);
-        
-        Set<String> roles = new HashSet<>();
-        roles.add("ROLE_USER");
-        user.setRoles(roles);
         
         userRepository.save(user);
 

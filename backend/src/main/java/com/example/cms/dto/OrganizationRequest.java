@@ -14,6 +14,6 @@ public class OrganizationRequest {
     private String name;
     private String domain;
     private Long sectorId;
-    private String settings;
+    private java.util.Map<String, Object> settings;
     private boolean active;
 }

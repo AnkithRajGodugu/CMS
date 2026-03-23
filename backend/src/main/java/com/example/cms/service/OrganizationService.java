@@ -36,11 +36,10 @@ public class OrganizationService {
      * Get all organizations
      */
     @Transactional(readOnly = true)
-    public List<OrganizationResponse> getAllOrganizations() {
+    public org.springframework.data.domain.Page<OrganizationResponse> getAllOrganizations(org.springframework.data.domain.Pageable pageable) {
         log.info("Fetching all organizations");
-        return organizationRepository.findAll().stream()
-                .map(this::mapToResponse)
-                .collect(Collectors.toList());
+        return organizationRepository.findAll(pageable)
+                .map(this::mapToResponse);
     }
     
     /**
@@ -58,22 +57,20 @@ public class OrganizationService {
      * Get organizations by sector
      */
     @Transactional(readOnly = true)
-    public List<OrganizationResponse> getOrganizationsBySector(Long sectorId) {
+    public org.springframework.data.domain.Page<OrganizationResponse> getOrganizationsBySector(Long sectorId, org.springframework.data.domain.Pageable pageable) {
         log.info("Fetching organizations for sector: {}", sectorId);
-        return organizationRepository.findBySectorId(sectorId).stream()
-                .map(this::mapToResponse)
-                .collect(Collectors.toList());
+        return organizationRepository.findBySectorId(sectorId, pageable)
+                .map(this::mapToResponse);
     }
     
     /**
      * Get active organizations
      */
     @Transactional(readOnly = true)
-    public List<OrganizationResponse> getActiveOrganizations() {
+    public org.springframework.data.domain.Page<OrganizationResponse> getActiveOrganizations(org.springframework.data.domain.Pageable pageable) {
         log.info("Fetching active organizations");
-        return organizationRepository.findByActiveTrue().stream()
-                .map(this::mapToResponse)
-                .collect(Collectors.toList());
+        return organizationRepository.findAllActiveWithDetails(pageable)
+                .map(this::mapToResponse);
     }
     
     /**
@@ -171,16 +168,10 @@ public class OrganizationService {
         Organization organization = organizationRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Organization not found with id: " + id));
         
-        try {
-            String settingsJson = objectMapper.writeValueAsString(settings);
-            organization.setSettings(settingsJson);
-            Organization updatedOrganization = organizationRepository.save(organization);
-            log.info("Organization settings updated successfully for id: {}", id);
-            return mapToResponse(updatedOrganization);
-        } catch (JsonProcessingException e) {
-            log.error("Error serializing settings to JSON", e);
-            throw new RuntimeException("Error updating organization settings", e);
-        }
+        organization.setSettings(settings);
+        Organization updatedOrganization = organizationRepository.save(organization);
+        log.info("Organization settings updated successfully for id: {}", id);
+        return mapToResponse(updatedOrganization);
     }
     
     /**
@@ -197,12 +188,7 @@ public class OrganizationService {
             return new HashMap<>();
         }
         
-        try {
-            return objectMapper.readValue(organization.getSettings(), Map.class);
-        } catch (JsonProcessingException e) {
-            log.error("Error deserializing settings from JSON", e);
-            return new HashMap<>();
-        }
+        return organization.getSettings();
     }
     
     /**

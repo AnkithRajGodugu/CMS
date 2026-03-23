@@ -36,9 +36,9 @@ public class Organization {
     
     @OneToMany(mappedBy = "organization", cascade = CascadeType.ALL)
     private List<User> users;
-    
+    @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
-    private String settings;
+    private java.util.Map<String, Object> settings;
     
     @Column(nullable = false)
     @Builder.Default

@@ -1,26 +1,80 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from '../../components/layout/Header';
 import Footer from '../../components/layout/Footer';
 import { useAuth } from '../../hooks/useAuth';
 import { Link } from 'react-router-dom';
+import api from '../../services/api';
+import { FaTruck, FaPlus, FaWrench, FaUserCircle, FaExclamationTriangle, FaCheckCircle, FaCarSide } from 'react-icons/fa';
+import { toast } from 'sonner';
 
 const LogisticsFleetManagementPage = () => {
   const { user } = useAuth();
-  const fleet = [
-    { vehicle: 'Truck 1', status: 'Active', driver: 'John Doe', image: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80' },
-    { vehicle: 'Truck 2', status: 'Maintenance', driver: 'Jane Smith', image: 'https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80' },
-    { vehicle: 'Van 1', status: 'Active', driver: 'Mike Brown', image: 'https://images.unsplash.com/photo-1511918984145-48de785d4c4e?auto=format&fit=crop&w=400&q=80' },
-    { vehicle: 'Truck 3', status: 'Inactive', driver: 'Anna Lee', image: 'https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=crop&w=400&q=80' },
-  ];
+  const [vehicles, setVehicles] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [newVehicle, setNewVehicle] = useState({
+    plateNumber: '',
+    model: '',
+    status: 'AVAILABLE',
+    capacity: 0,
+    currentDriver: ''
+  });
+
+  const fetchVehicles = async () => {
+    try {
+      setLoading(true);
+      const response = await api.get('/logistics/vehicles');
+      if (response.data && response.data.success) {
+        setVehicles(response.data.data);
+      }
+    } catch (err) {
+      console.error('Failed to fetch vehicles', err);
+      toast.error('Failed to load fleet data');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (user && user.role === 'logistics') {
+      fetchVehicles();
+    }
+  }, [user]);
+
+  const handleCreateVehicle = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await api.post('/logistics/vehicles', newVehicle);
+      if (response.data && response.data.success) {
+        toast.success(response.data.message || 'Vehicle added to fleet');
+        setIsModalOpen(false);
+        setNewVehicle({ plateNumber: '', model: '', status: 'AVAILABLE', capacity: 0, currentDriver: '' });
+        fetchVehicles();
+      }
+    } catch (err) {
+      console.error('Failed to add vehicle', err);
+    }
+  };
+
+  const getStatusBadge = (status) => {
+    switch (status) {
+      case 'AVAILABLE': return 'badge-success';
+      case 'IN_USE': return 'badge-info';
+      case 'MAINTENANCE': return 'badge-warning';
+      case 'RETIRED': return 'badge-error';
+      default: return 'badge-ghost';
+    }
+  };
 
   if (!user || user.role !== 'logistics') {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-indigo-100 to-indigo-300">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-base-200">
         <Header />
-        <div className="bg-white rounded-xl shadow-lg p-8 text-center">
-          <h2 className="text-3xl font-bold mb-4 text-indigo-700">Logistics Login Required</h2>
-          <p className="mb-6 text-indigo-900/80">Please log in with your logistics credentials to view fleet management details.</p>
-          <Link to="/login" className="btn btn-primary">Login</Link>
+        <div className="card bg-base-100 shadow-xl p-8 text-center max-w-md mx-auto mt-20">
+          <FaExclamationTriangle className="text-6xl text-warning mx-auto mb-4" />
+          <h2 className="text-3xl font-bold mb-4">Logistics Access Only</h2>
+          <p className="mb-6 text-base-content/70">Please log in with your logistics credentials to manage the fleet.</p>
+          <Link to="/login" className="btn btn-primary">Go to Login</Link>
         </div>
         <Footer />
       </div>
@@ -28,35 +82,155 @@ const LogisticsFleetManagementPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-100 to-indigo-300">
+    <div className="min-h-screen bg-base-200 flex flex-col">
       <Header />
-      <section className="py-20">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center mb-16">
-            <h1 className="text-4xl md:text-5xl font-bold mb-6 text-indigo-700">Fleet Management</h1>
-            <p className="text-xl text-indigo-900/70 max-w-3xl mx-auto">Vehicle tracking, maintenance scheduling, and driver management.</p>
+      
+      <main className="flex-grow pt-24 pb-12 px-4 md:px-8">
+        <div className="max-w-7xl mx-auto">
+          
+          {/* Header */}
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+            <div>
+              <h1 className="text-4xl font-bold flex items-center gap-3">
+                <FaTruck className="text-warning" />
+                Fleet Management
+              </h1>
+              <p className="text-base-content/70 mt-1">Monitor vehicle status, maintenance schedules, and driver assignments.</p>
+            </div>
+            <button 
+              className="btn btn-warning gap-2 text-warning-content"
+              onClick={() => setIsModalOpen(true)}
+            >
+              <FaPlus /> Add Vehicle
+            </button>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center justify-center">
-            {fleet.map((row, idx) => (
-              <div key={idx} className="bg-white rounded-xl shadow-lg p-8 flex flex-col items-center">
-                <img src={row.image} alt={row.vehicle} className="rounded-lg mb-4 w-64 h-40 object-cover border" />
-                <div className="text-3xl mb-2 text-indigo-600">🚛</div>
-                <h2 className="text-xl font-bold mb-2">{row.vehicle}</h2>
-                <p className="text-lg mb-1">Status: <span className="font-semibold">{row.status}</span></p>
-                <p className="text-lg mb-1">Driver: <span className="font-semibold">{row.driver}</span></p>
+
+          {/* Quick Fleet Stats */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
+            <div className="card bg-base-100 shadow border-b-4 border-success">
+              <div className="card-body py-4 flex-row justify-between items-center">
+                <div>
+                  <p className="text-sm opacity-60">Available Vehicles</p>
+                  <p className="text-2xl font-bold">{vehicles.filter(v => v.status === 'AVAILABLE').length}</p>
+                </div>
+                <FaCheckCircle className="text-3xl text-success opacity-20" />
               </div>
-            ))}
+            </div>
+            <div className="card bg-base-100 shadow border-b-4 border-info">
+              <div className="card-body py-4 flex-row justify-between items-center">
+                <div>
+                  <p className="text-sm opacity-60">Active in Service</p>
+                  <p className="text-2xl font-bold">{vehicles.filter(v => v.status === 'IN_USE').length}</p>
+                </div>
+                <FaCarSide className="text-3xl text-info opacity-20" />
+              </div>
+            </div>
+            <div className="card bg-base-100 shadow border-b-4 border-warning">
+              <div className="card-body py-4 flex-row justify-between items-center">
+                <div>
+                  <p className="text-sm opacity-60">Under Maintenance</p>
+                  <p className="text-2xl font-bold">{vehicles.filter(v => v.status === 'MAINTENANCE').length}</p>
+                </div>
+                <FaWrench className="text-3xl text-warning opacity-20" />
+              </div>
+            </div>
           </div>
-          <div className="mt-12 bg-white rounded-xl shadow-lg p-8">
-            <h3 className="text-xl font-bold mb-2 text-indigo-700">Driver Management</h3>
-            <ul className="list-disc ml-6 text-indigo-900/80">
-              <li>Assign drivers to vehicles</li>
-              <li>Track maintenance schedules</li>
-              <li>Monitor vehicle status in real-time</li>
-            </ul>
+
+          {/* Fleet Table */}
+          <div className="card bg-base-100 shadow-xl">
+             <div className="overflow-x-auto">
+               <table className="table w-full">
+                 <thead>
+                   <tr>
+                     <th>Vehicle ID / Plate</th>
+                     <th>Model</th>
+                     <th>Current Status</th>
+                     <th>Capacity (Tons)</th>
+                     <th>Driver</th>
+                     <th>Last Service</th>
+                     <th>Actions</th>
+                   </tr>
+                 </thead>
+                 <tbody>
+                   {loading ? (
+                     <tr><td colSpan="7" className="text-center py-10 font-bold">Connecting to Fleet Control...</td></tr>
+                   ) : vehicles.length === 0 ? (
+                     <tr><td colSpan="7" className="text-center py-10 opacity-50 italic">No vehicles registered in the fleet.</td></tr>
+                   ) : (
+                    vehicles.map(v => (
+                       <tr key={v.id} className="hover">
+                         <td>
+                           <div className="font-bold text-lg font-mono">{v.plateNumber}</div>
+                           <div className="text-xs opacity-50 uppercase">V-LOG-{v.id}</div>
+                         </td>
+                         <td>{v.model}</td>
+                         <td>
+                           <span className={`badge ${getStatusBadge(v.status)} font-bold p-3`}>
+                             {v.status}
+                           </span>
+                         </td>
+                         <td>{v.capacity} T</td>
+                         <td>
+                            <div className="flex items-center gap-2">
+                               <FaUserCircle className="text-base-content/20" />
+                               {v.currentDriver || 'Unassigned'}
+                            </div>
+                         </td>
+                         <td className="text-xs">
+                           {v.lastServiceDate ? new Date(v.lastServiceDate).toLocaleDateString() : 'Pending'}
+                         </td>
+                         <td>
+                           <button className="btn btn-ghost btn-xs text-info">Service</button>
+                         </td>
+                       </tr>
+                     ))
+                   )}
+                 </tbody>
+               </table>
+             </div>
           </div>
         </div>
-      </section>
+      </main>
+
+      {/* Add Vehicle Modal */}
+      {isModalOpen && (
+        <div className="modal modal-open">
+          <div className="modal-box">
+            <h3 className="font-bold text-lg mb-6">Add New Fleet Vehicle</h3>
+            <form onSubmit={handleCreateVehicle} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="form-control">
+                  <label className="label">Plate Number</label>
+                  <input type="text" className="input input-bordered" required
+                    value={newVehicle.plateNumber} onChange={e => setNewVehicle({...newVehicle, plateNumber: e.target.value})} />
+                </div>
+                <div className="form-control">
+                  <label className="label">Model</label>
+                  <input type="text" className="input input-bordered" required
+                    value={newVehicle.model} onChange={e => setNewVehicle({...newVehicle, model: e.target.value})} />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="form-control">
+                  <label className="label">Capacity (Tons)</label>
+                  <input type="number" step="0.1" className="input input-bordered" required
+                    value={newVehicle.capacity} onChange={e => setNewVehicle({...newVehicle, capacity: parseFloat(e.target.value)})} />
+                </div>
+                <div className="form-control">
+                  <label className="label">Driver Name</label>
+                  <input type="text" className="input input-bordered"
+                    value={newVehicle.currentDriver} onChange={e => setNewVehicle({...newVehicle, currentDriver: e.target.value})} />
+                </div>
+              </div>
+              <div className="modal-action">
+                <button type="button" className="btn btn-ghost" onClick={() => setIsModalOpen(false)}>Cancel</button>
+                <button type="submit" className="btn btn-warning text-warning-content px-8">Register Vehicle</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       <Footer />
     </div>
   );

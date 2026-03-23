@@ -18,7 +18,7 @@ public class OrganizationResponse {
     private String domain;
     private Long sectorId;
     private String sectorName;
-    private String settings;
+    private java.util.Map<String, Object> settings;
     private boolean active;
     private LocalDateTime createdAt;
     private int userCount;

@@ -2,7 +2,9 @@ package com.example.cms.mapper;
 
 import com.example.cms.dto.CustomerResponse;
 import com.example.cms.entity.Customer;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public final class CustomerMapper {
 
     private CustomerMapper() {}
@@ -10,7 +12,7 @@ public final class CustomerMapper {
     public static CustomerResponse toResponse(Customer c) {
 
         if (c == null) {
-            System.out.println("❌ Customer is NULL");
+            log.warn("CustomerMapper.toResponse called with null customer");
             return null;
         }
 
@@ -29,8 +31,7 @@ public final class CustomerMapper {
             );
 
         } catch (Exception e) {
-            System.out.println("❌ Mapper crash for customer ID: " + c.getId());
-            e.printStackTrace();
+            log.error("CustomerMapper failed for customer ID: {} — {}", c.getId(), e.getMessage(), e);
 
             // 🔥 VERY IMPORTANT: DON'T CRASH WHOLE API
             return new CustomerResponse(

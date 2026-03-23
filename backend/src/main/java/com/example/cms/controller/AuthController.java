@@ -3,26 +3,26 @@ package com.example.cms.controller;
 import com.example.cms.entity.User;
 import com.example.cms.security.JwtUtil;
 import com.example.cms.service.AuthService;
+import com.example.cms.dto.LoginRequest;
+import com.example.cms.dto.RegisterRequest;
+import com.example.cms.dto.RegisterOrgRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
+
 import org.springframework.web.bind.annotation.*;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
@@ -30,20 +30,18 @@ public class AuthController {
 
     private final AuthService authService;
     private final JwtUtil jwtUtil;
-    private final AuthenticationManager authenticationManager;
-    
-    // Simple rate limiting (in production, use Redis or proper rate limiting)
-    private final Map<String, AtomicInteger> loginAttempts = new ConcurrentHashMap<>();
-    private final Map<String, Long> lastAttemptTime = new ConcurrentHashMap<>();
-    private static final int MAX_ATTEMPTS = 5;
-    private static final long LOCKOUT_TIME = 15 * 60 * 1000; // 15 minutes
+
+    private final com.example.cms.service.RateLimitService rateLimitService;
+    private final com.example.cms.service.KafkaProducerService kafkaProducerService;
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request) {
-        String clientIp = getClientIp();
+    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request,
+                                   HttpServletRequest httpRequest,
+                                   HttpServletResponse httpResponse) {
+        String clientIp = getClientIp(httpRequest);
         
         // Check rate limiting
-        if (isBlocked(clientIp)) {
+        if (!rateLimitService.tryConsume(clientIp)) {
             Map<String, Object> response = new HashMap<>();
             response.put("success", false);
             response.put("message", "Too many failed attempts. Please try again later.");
@@ -55,14 +53,16 @@ public class AuthController {
             com.example.cms.dto.LoginResponse loginResponse = authService.login(request.getUsername(), request.getPassword());
             
             if (loginResponse.isSuccess()) {
-                // Reset failed attempts on successful login
-                loginAttempts.remove(clientIp);
-                lastAttemptTime.remove(clientIp);
-                
+                // Set secure HttpOnly cookie for refresh token
+                Cookie refreshCookie = new Cookie("refresh_token", loginResponse.getRefreshToken());
+                refreshCookie.setHttpOnly(true);
+                refreshCookie.setSecure(httpRequest.isSecure());
+                refreshCookie.setPath("/api/auth/refresh");
+                refreshCookie.setMaxAge(7 * 24 * 60 * 60); // 7 days
+                httpResponse.addCookie(refreshCookie);
+
                 return ResponseEntity.ok(loginResponse);
             } else {
-                // Increment failed attempts
-                incrementFailedAttempts(clientIp);
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(loginResponse);
             }
         } catch (com.example.cms.exception.SectorNotAssignedException e) {
@@ -88,30 +88,21 @@ public class AuthController {
         }
     }
 
-    private String getClientIp() {
-        // In production, get real client IP from headers
-        return "127.0.0.1"; // Simplified for demo
-    }
-
-    private boolean isBlocked(String clientIp) {
-        AtomicInteger attempts = loginAttempts.get(clientIp);
-        Long lastAttempt = lastAttemptTime.get(clientIp);
-        
-        if (attempts != null && attempts.get() >= MAX_ATTEMPTS) {
-            if (lastAttempt != null && (System.currentTimeMillis() - lastAttempt) < LOCKOUT_TIME) {
-                return true;
-            } else {
-                // Reset after lockout period
-                loginAttempts.remove(clientIp);
-                lastAttemptTime.remove(clientIp);
-            }
+    private String getClientIp(HttpServletRequest request) {
+        String forwarded = request.getHeader("X-Forwarded-For");
+        if (forwarded != null && !forwarded.isBlank()) {
+            // X-Forwarded-For may contain a comma-separated list; first entry is the real client
+            return forwarded.split(",")[0].trim();
         }
-        return false;
+        String realIp = request.getHeader("X-Real-IP");
+        if (realIp != null && !realIp.isBlank()) {
+            return realIp.trim();
+        }
+        return request.getRemoteAddr();
     }
 
     private void incrementFailedAttempts(String clientIp) {
-        loginAttempts.computeIfAbsent(clientIp, k -> new AtomicInteger(0)).incrementAndGet();
-        lastAttemptTime.put(clientIp, System.currentTimeMillis());
+        // Redundant with Bucket4j but kept for interface compatibility if needed later
     }
 
     /**
@@ -221,20 +212,19 @@ public class AuthController {
             eventMetadata.put("source", "auth-service");
             eventMetadata.put("action", "sector-selection");
             
-            // TODO: Re-enable Kafka event publishing when Kafka is properly configured
-            // try {
-            //     kafkaProducerService.publishSectorEvent(
-            //         sector.getCode(),
-            //         "SECTOR_ASSIGNED",
-            //         user.getId(),
-            //         user.getOrganization() != null ? user.getOrganization().getId() : null,
-            //         eventPayload,
-            //         eventMetadata
-            //     );
-            // } catch (Exception e) {
-            //     // Log but don't fail the request if Kafka publish fails
-            //     System.err.println("Failed to publish sector assignment event: " + e.getMessage());
-            // }
+            try {
+                kafkaProducerService.publishSectorEvent(
+                    sector.getCode(),
+                    "SECTOR_ASSIGNED",
+                    user.getId(),
+                    user.getOrganization() != null ? user.getOrganization().getId() : null,
+                    eventPayload,
+                    eventMetadata
+                );
+            } catch (Exception e) {
+                // Log but don't fail the request if Kafka publish fails
+                log.error("Failed to publish sector assignment event for user '{}': {}", username, e.getMessage(), e);
+            }
             
             Map<String, Object> response = new HashMap<>();
             response.put("success", true);
@@ -306,11 +296,9 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
 
         } catch (Exception e) {
-            e.printStackTrace();
-
+            log.error("User registration failed for username '{}': {}", request.getUsername(), e.getMessage(), e);
             response.put("success", false);
             response.put("message", "Registration failed: " + e.getMessage());
-
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
     }
@@ -340,6 +328,7 @@ public class AuthController {
             userMap.put("username", user.getUsername());
             userMap.put("role", user.getRole() != null ? user.getRole().toString() : null);
             userMap.put("sectorId", user.getSector() != null ? user.getSector().getId() : null);
+            userMap.put("organizationId", user.getOrganization() != null ? user.getOrganization().getId() : null);
 
             response.put("success", true);
             response.put("user", userMap);
@@ -347,121 +336,25 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Organization registration failed for username '{}': {}", request.getUsername(), e.getMessage(), e);
             response.put("success", false);
             response.put("message", "Registration failed: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
     }
-    // DTOs with validation
-    public static class LoginRequest {
-        @NotBlank(message = "Username is required")
-        @Size(min = 3, max = 50, message = "Username must be between 3 and 50 characters")
-        private String username;
-        
-        @NotBlank(message = "Password is required")
-        @Size(min = 6, message = "Password must be at least 6 characters")
-        private String password;
+    // DTOs moved to com.example.cms.dto package — see LoginRequest.java, RegisterRequest.java, RegisterOrgRequest.java
 
-        public String getUsername() { return username; }
-        public void setUsername(String username) { this.username = username; }
-        public String getPassword() { return password; }
-        public void setPassword(String password) { this.password = password; }
-    }
+    // ─── Forgot Password & Email Verification ────────────────────────────────
 
-    public static class RegisterOrgRequest {
-        @NotBlank(message = "Username is required")
-        @Size(min = 3, max = 50, message = "Username must be between 3 and 50 characters")
-        private String username;
-
-        @NotBlank(message = "Email is required")
-        @jakarta.validation.constraints.Email(message = "Invalid email format")
-        private String email;
-
-        @NotBlank(message = "Password is required")
-        @Size(min = 8, message = "Password must be at least 8 characters")
-        private String password;
-
-        @NotBlank(message = "Organization name is required")
-        private String organizationName;
-
-        @jakarta.validation.constraints.NotNull(message = "Sector is required")
-        private Long sectorId;
-
-        public String getUsername() { return username; }
-        public void setUsername(String username) { this.username = username; }
-        public String getEmail() { return email; }
-        public void setEmail(String email) { this.email = email; }
-        public String getPassword() { return password; }
-        public void setPassword(String password) { this.password = password; }
-        public String getOrganizationName() { return organizationName; }
-        public void setOrganizationName(String organizationName) { this.organizationName = organizationName; }
-        public Long getSectorId() { return sectorId; }
-        public void setSectorId(Long sectorId) { this.sectorId = sectorId; }
-    }
-
-    public static class RegisterRequest {
-
-        @NotBlank(message = "Username is required")
-        @Size(min = 3, max = 50, message = "Username must be between 3 and 50 characters")
-        private String username;
-
-        @NotBlank(message = "Email is required")
-        @jakarta.validation.constraints.Email(message = "Invalid email format")
-        private String email;
-
-        @NotBlank(message = "Password is required")
-        @Size(min = 8, message = "Password must be at least 8 characters")
-        private String password;
-
-        @NotBlank(message = "Role is required")
-        private String role;
-
-        @jakarta.validation.constraints.NotNull(message = "Sector is required")
-        private Long sectorId;
-
-        public void setUsername(String username) {
-            this.username = username;
-        }
-
-        public void setEmail(String email) {
-            this.email = email;
-        }
-
-        public void setPassword(String password) {
-            this.password = password;
-        }
-
-        public void setRole(String role) {
-            this.role = role;
-        }
-
-        public void setSectorId(Long sectorId) {
-            this.sectorId = sectorId;
-        }
-
-        public String getUsername() {
-            return username;
-        }
-
-        public String getEmail() {
-            return email;
-        }
-
-        public String getPassword() {
-            return password;
-        }
-
-        public String getRole() {
-            return role;
-        }
-
-        public Long getSectorId() {
-            return sectorId;
+    @GetMapping("/verify-email")
+    public ResponseEntity<Map<String, Object>> verifyEmail(@RequestParam String token) {
+        boolean success = authService.verifyEmail(token);
+        if (success) {
+            return ResponseEntity.ok(Map.of("success", true, "message", "Email successfully verified. You can now log in."));
+        } else {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Invalid or expired verification token."));
         }
     }
-
-    // ─── Forgot Password ──────────────────────────────────────────────────────
 
     @PostMapping("/forgot-password")
     public ResponseEntity<Map<String, String>> forgotPassword(@RequestBody Map<String, String> body) {
@@ -471,8 +364,59 @@ public class AuthController {
                     .body(Map.of("message", "Email is required"));
         }
 
-        // Note: integrate an email service here (e.g. Spring Mail) to send a real reset token.
-        // For now, always return success to prevent user enumeration.
+        authService.createPasswordResetToken(email);
+
+        // Always return success to prevent user enumeration
         return ResponseEntity.ok(Map.of("message", "If that email is registered, a reset link has been sent."));
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<Map<String, Object>> resetPassword(@RequestBody Map<String, String> body) {
+        String token = body.get("token");
+        String newPassword = body.get("newPassword");
+
+        if (token == null || token.isBlank() || newPassword == null || newPassword.isBlank()) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Token and new password are required."));
+        }
+
+        boolean success = authService.resetPassword(token, newPassword);
+        if (success) {
+            return ResponseEntity.ok(Map.of("success", true, "message", "Password successfully reset."));
+        } else {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Invalid or expired reset token."));
+        }
+    }
+
+    // ─── Refresh Token ────────────────────────────────────────────────────────
+
+    @PostMapping("/refresh")
+    public ResponseEntity<?> refreshToken(@CookieValue(name = "refresh_token", required = false) String refreshToken) {
+        if (refreshToken == null || refreshToken.isBlank()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Refresh token missing"));
+        }
+
+        try {
+            if (!jwtUtil.validateRefreshToken(refreshToken)) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Invalid or expired refresh token"));
+            }
+
+            String username = jwtUtil.getUsernameFromToken(refreshToken);
+            Optional<User> userOpt = authService.findByUsername(username);
+
+            if (userOpt.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "User not found"));
+            }
+
+            User user = userOpt.get();
+            String sectorName = user.getSector() != null ? user.getSector().getName() : "NONE";
+            String newAccessToken = jwtUtil.generateToken(user.getUsername(), user.getRole().toString(), sectorName);
+
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "token", newAccessToken
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Invalid refresh token"));
+        }
     }
 }

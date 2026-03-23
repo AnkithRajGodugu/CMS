@@ -5,6 +5,9 @@ export default ({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
   return defineConfig({
     plugins: [react()],
+    define: {
+      global: 'window',
+    },
     build: {
       rollupOptions: {
         output: {

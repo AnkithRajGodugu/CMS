@@ -11,8 +11,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -40,8 +43,6 @@ public class AuditService {
                          String action, String resourceType, String resourceId,
                          Map<String, Object> details, String ipAddress) {
         try {
-            String detailsJson = details != null ? objectMapper.writeValueAsString(details) : null;
-            
             AuditLog auditLog = AuditLog.builder()
                     .userId(userId)
                     .sectorId(sectorId)
@@ -49,7 +50,7 @@ public class AuditService {
                     .action(action)
                     .resourceType(resourceType)
                     .resourceId(resourceId)
-                    .details(detailsJson)
+                    .details(details)
                     .ipAddress(ipAddress)
                     .timestamp(LocalDateTime.now())
                     .status("SUCCESS")
@@ -58,8 +59,6 @@ public class AuditService {
             auditLogRepository.save(auditLog);
             log.debug("Audit log created: action={}, userId={}, resourceType={}", 
                      action, userId, resourceType);
-        } catch (JsonProcessingException e) {
-            log.error("Failed to serialize audit log details", e);
         } catch (Exception e) {
             log.error("Failed to create audit log", e);
         }
@@ -87,8 +86,6 @@ public class AuditService {
             details.put("reason", reason);
             details.put("attemptedAction", action);
             
-            String detailsJson = objectMapper.writeValueAsString(details);
-            
             AuditLog auditLog = AuditLog.builder()
                     .userId(userId)
                     .sectorId(sectorId)
@@ -96,7 +93,7 @@ public class AuditService {
                     .action("AUTHORIZATION_FAILURE")
                     .resourceType(resourceType)
                     .resourceId(resourceId)
-                    .details(detailsJson)
+                    .details(details)
                     .ipAddress(ipAddress)
                     .timestamp(LocalDateTime.now())
                     .status("FAILURE")
@@ -106,8 +103,6 @@ public class AuditService {
             auditLogRepository.save(auditLog);
             log.warn("Authorization failure logged: userId={}, action={}, reason={}", 
                     userId, action, reason);
-        } catch (JsonProcessingException e) {
-            log.error("Failed to serialize authorization failure details", e);
         } catch (Exception e) {
             log.error("Failed to log authorization failure", e);
         }
@@ -134,8 +129,6 @@ public class AuditService {
             details.put("accessType", accessType);
             details.put("timestamp", LocalDateTime.now().toString());
             
-            String detailsJson = objectMapper.writeValueAsString(details);
-            
             AuditLog auditLog = AuditLog.builder()
                     .userId(userId)
                     .sectorId(sectorId)
@@ -143,7 +136,7 @@ public class AuditService {
                     .action("DATA_ACCESS_" + accessType)
                     .resourceType(resourceType)
                     .resourceId(resourceId)
-                    .details(detailsJson)
+                    .details(details)
                     .ipAddress(ipAddress)
                     .timestamp(LocalDateTime.now())
                     .status("SUCCESS")
@@ -152,8 +145,6 @@ public class AuditService {
             auditLogRepository.save(auditLog);
             log.debug("Data access logged: userId={}, resourceType={}, accessType={}", 
                      userId, resourceType, accessType);
-        } catch (JsonProcessingException e) {
-            log.error("Failed to serialize data access details", e);
         } catch (Exception e) {
             log.error("Failed to log data access", e);
         }
@@ -180,8 +171,6 @@ public class AuditService {
             Map<String, Object> details = new HashMap<>();
             details.put("error", errorMessage);
             
-            String detailsJson = objectMapper.writeValueAsString(details);
-            
             AuditLog auditLog = AuditLog.builder()
                     .userId(userId)
                     .sectorId(sectorId)
@@ -189,7 +178,7 @@ public class AuditService {
                     .action(action)
                     .resourceType(resourceType)
                     .resourceId(resourceId)
-                    .details(detailsJson)
+                    .details(details)
                     .ipAddress(ipAddress)
                     .timestamp(LocalDateTime.now())
                     .status("FAILURE")
@@ -199,8 +188,6 @@ public class AuditService {
             auditLogRepository.save(auditLog);
             log.error("Failed operation logged: userId={}, action={}, error={}", 
                      userId, action, errorMessage);
-        } catch (JsonProcessingException e) {
-            log.error("Failed to serialize failed operation details", e);
         } catch (Exception e) {
             log.error("Failed to log failed operation", e);
         }
@@ -228,13 +215,11 @@ public class AuditService {
             detailsMap.put("success", success);
             detailsMap.put("details", details);
             
-            String detailsJson = objectMapper.writeValueAsString(detailsMap);
-            
             AuditLog auditLog = AuditLog.builder()
                     .userId(userId)
                     .action(action)
                     .resourceType("AUTHENTICATION")
-                    .details(detailsJson)
+                    .details(detailsMap)
                     .ipAddress(ipAddress)
                     .timestamp(LocalDateTime.now())
                     .status(success ? "SUCCESS" : "FAILURE")
@@ -244,10 +229,47 @@ public class AuditService {
             auditLogRepository.save(auditLog);
             log.info("Authentication event logged: userId={}, action={}, success={}", 
                     userId, action, success);
-        } catch (JsonProcessingException e) {
-            log.error("Failed to serialize authentication details", e);
         } catch (Exception e) {
             log.error("Failed to log authentication event", e);
+        }
+    }
+
+    /**
+     * Log a data change with diff tracking
+     */
+    @Async
+    @Transactional
+    public void logDataChange(Long userId, Long sectorId, String resourceType, String resourceId,
+                             Object oldState, Object newState, String ipAddress) {
+        try {
+            Map<String, Object> diff = new HashMap<>();
+            
+            if (oldState != null && newState != null) {
+                Map<String, Object> oldMap = objectMapper.convertValue(oldState, Map.class);
+                Map<String, Object> newMap = objectMapper.convertValue(newState, Map.class);
+                
+                Map<String, Object> changes = new HashMap<>();
+                newMap.forEach((key, value) -> {
+                    Object oldValue = oldMap.get(key);
+                    if (!Objects.equals(value, oldValue)) {
+                        Map<String, Object> change = new HashMap<>();
+                        change.put("from", oldValue);
+                        change.put("to", value);
+                        changes.put(key, change);
+                    }
+                });
+                diff.put("changes", changes);
+            } else if (newState != null) {
+                diff.put("action", "CREATE");
+                diff.put("newState", newState);
+            } else if (oldState != null) {
+                diff.put("action", "DELETE");
+                diff.put("oldState", oldState);
+            }
+            
+            logAction(userId, sectorId, null, "DATA_CHANGE", resourceType, resourceId, diff, ipAddress);
+        } catch (Exception e) {
+            log.error("Failed to log data diff", e);
         }
     }
 }

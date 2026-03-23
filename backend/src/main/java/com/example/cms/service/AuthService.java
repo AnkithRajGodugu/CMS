@@ -8,6 +8,7 @@ import com.example.cms.model.SectorContext;
 import com.example.cms.repository.SectorRepository;
 import com.example.cms.repository.UserRepository;
 import com.example.cms.security.JwtUtil;
+import com.example.cms.util.EncryptionUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -16,6 +17,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.UUID;
+import com.example.cms.entity.VerificationToken;
+import com.example.cms.repository.VerificationTokenRepository;
+import com.example.cms.entity.PasswordResetToken;
+import com.example.cms.repository.PasswordResetTokenRepository;
 
 @Service
 @RequiredArgsConstructor
@@ -29,13 +35,27 @@ public class AuthService {
     private final JwtUtil jwtUtil;
     private final AuditService auditService;
     private final com.example.cms.repository.OrganizationRepository organizationRepository;
+    private final MailService mailService;
+    private final VerificationTokenRepository verificationTokenRepository;
+    private final PasswordResetTokenRepository passwordResetTokenRepository;
+    private final EncryptionUtil encryptionUtil;
 
     /* =========================================================
        AUTHENTICATE
     ========================================================== */
 
-    public Optional<User> authenticate(String username, String password) {
-        User user = userRepository.findByUsername(username);
+    public Optional<User> authenticate(String login, String password) {
+        // Try username first
+        User user = userRepository.findByUsername(login);
+
+        if (user == null && login.contains("@")) {
+            try {
+                user = userRepository.findByEmail(login.toLowerCase().trim());
+            } catch (Exception e) {
+                log.warn("Could not lookup user by email: {}", e.getMessage());
+            }
+        }
+
         if (user != null && passwordEncoder.matches(password, user.getPassword())) {
             return Optional.of(user);
         }
@@ -77,12 +97,19 @@ public class AuthService {
 
         User user = userOpt.get();
 
+        if (!user.isEmailVerified()) {
+            return LoginResponse.builder()
+                    .success(false)
+                    .message("Please verify your email address before logging in")
+                    .build();
+        }
+
         // Update last login
         user.setLastLogin(LocalDateTime.now());
         userRepository.save(user);
 
-        // 🔴 REQUIRED BY TEST: THROW IF NO SECTOR
-        if (user.getSector() == null) {
+        // ADMIN users without a sector can still log in — they manage all sectors
+        if (user.getSector() == null && user.getRole() != User.Role.ADMIN) {
 
             auditService.logAuthentication(
                     user.getId(),
@@ -95,18 +122,17 @@ public class AuthService {
             throw new SectorNotAssignedException("User has no sector assigned");
         }
 
-        // Sector detection (must NOT execute if sector is null)
-        SectorContext sectorContext =
-                sectorDetectionService.detectSectorByUsername(username);
-
         Sector sector = user.getSector();
+        String sectorName = sector != null ? sector.getName() : "ADMIN";
 
         // Generate JWT
         String token = jwtUtil.generateToken(
                 user.getUsername(),
                 user.getRole().toString(),
-                sector.getName()
+                sectorName
         );
+
+        String refreshToken = jwtUtil.generateRefreshToken(user.getUsername());
 
         auditService.logAuthentication(
                 user.getId(),
@@ -116,22 +142,37 @@ public class AuthService {
                 "User logged in successfully"
         );
 
+        LoginResponse.SectorInfo sectorInfo = null;
+        if (sector != null) {
+            sectorInfo = LoginResponse.SectorInfo.builder()
+                    .id(sector.getId())
+                    .code(sector.getCode())
+                    .name(sector.getName())
+                    .routePath(sector.getRoutePath())
+                    .build();
+        } else {
+            // Admin fallback — redirect to admin dashboard
+            sectorInfo = LoginResponse.SectorInfo.builder()
+                    .id(0L)
+                    .code("ADMIN")
+                    .name("Administration")
+                    .routePath("/admin")
+                    .build();
+        }
+
         return LoginResponse.builder()
                 .success(true)
                 .token(token)
+                .refreshToken(refreshToken)
                 .user(LoginResponse.UserInfo.builder()
                         .id(user.getId())
                         .username(user.getUsername())
                         .email(user.getEmail())
                         .role(user.getRole().toString())
-                        .userType(user.getUserType().toString())
+                        .userType(user.getUserType() != null ? user.getUserType().toString() : "INDIVIDUAL")
+                        .organizationId(user.getOrganization() != null ? user.getOrganization().getId() : null)
                         .build())
-                .sector(LoginResponse.SectorInfo.builder()
-                        .id(sector.getId())
-                        .code(sector.getCode())
-                        .name(sector.getName())
-                        .routePath(sector.getRoutePath())
-                        .build())
+                .sector(sectorInfo)
                 .build();
     }
 
@@ -152,6 +193,7 @@ public class AuthService {
         user.setPassword(passwordEncoder.encode(password));
         user.setRole(role);
         user.setEnabled(true);
+        user.setEmailVerified(true); // ✅ AUTO-VERIFY FOR DEV/TESTING
 
         if (sectorId != null) {
             Sector sector = sectorRepository.findById(sectorId)
@@ -159,7 +201,20 @@ public class AuthService {
             user.setSector(sector);
         }
 
-        return userRepository.save(user);
+        User savedUser = userRepository.save(user);
+
+        // Try to send verification email — swallow failure so user is always created
+        try {
+            String token = UUID.randomUUID().toString();
+            VerificationToken verificationToken = new VerificationToken(token, savedUser, 24 * 60);
+            verificationTokenRepository.save(verificationToken);
+            mailService.sendVerificationEmail(savedUser.getEmail(), token);
+        } catch (Exception e) {
+            log.warn("Failed to send verification email for {}: {} (user was still created)",
+                    savedUser.getUsername(), e.getMessage());
+        }
+
+        return savedUser;
     }
 
     public boolean userExists(String username) {
@@ -192,8 +247,22 @@ public class AuthService {
         user.setOrganization(org);
         user.setSector(sector);
         user.setEnabled(true);
+        user.setEmailVerified(true); // ✅ AUTO-VERIFY FOR DEV/TESTING
 
-        return userRepository.save(user);
+        User savedUser = userRepository.save(user);
+
+        // Try to send verification email — swallow failure so user is always created
+        try {
+            String token = UUID.randomUUID().toString();
+            VerificationToken verificationToken = new VerificationToken(token, savedUser, 24 * 60);
+            verificationTokenRepository.save(verificationToken);
+            mailService.sendVerificationEmail(savedUser.getEmail(), token);
+        } catch (Exception e) {
+            log.warn("Failed to send verification email for {}: {} (user was still created)",
+                    savedUser.getUsername(), e.getMessage());
+        }
+
+        return savedUser;
     }
 
     @Transactional
@@ -223,5 +292,84 @@ public class AuthService {
         );
 
         return updatedUser;
+    }
+
+    /* =========================================================
+       EMAIL VERIFICATION & PASSWORD RESET
+    ========================================================== */
+
+    @Transactional
+    public boolean verifyEmail(String token) {
+        Optional<VerificationToken> verificationTokenOpt = verificationTokenRepository.findByToken(token);
+        if (verificationTokenOpt.isEmpty()) {
+            return false;
+        }
+
+        VerificationToken verificationToken = verificationTokenOpt.get();
+        if (verificationToken.isExpired()) {
+            verificationTokenRepository.delete(verificationToken);
+            return false;
+        }
+
+        User user = verificationToken.getUser();
+        user.setEmailVerified(true);
+        userRepository.save(user);
+        
+        verificationTokenRepository.delete(verificationToken);
+        return true;
+    }
+
+    @Transactional
+    public void verifyUserEmailProgrammatically(String email) {
+        try {
+            User user = userRepository.findByEmail(email.toLowerCase().trim());
+            if (user != null) {
+                user.setEmailVerified(true);
+                userRepository.save(user);
+                log.info("Programmatically verified email for user: {}", email);
+            } else {
+                log.warn("verifyUserEmailProgrammatically: no user found for email {}", email);
+            }
+        } catch (Exception e) {
+            log.error("Failed to verify email programmatically for {}: {}", email, e.getMessage());
+        }
+    }
+
+    @Transactional
+    public void createPasswordResetToken(String email) {
+        User user = userRepository.findByEmail(email); // Need to add to UserRepository
+        if (user == null) {
+            return; // Fail silently for security
+        }
+
+        // Delete old token if exists
+        passwordResetTokenRepository.deleteByUser(user);
+
+        String token = UUID.randomUUID().toString();
+        PasswordResetToken resetToken = new PasswordResetToken(token, user, 60); // 1 hour expiry
+        passwordResetTokenRepository.save(resetToken);
+        
+        mailService.sendPasswordResetEmail(user.getEmail(), token);
+    }
+
+    @Transactional
+    public boolean resetPassword(String token, String newPassword) {
+        Optional<PasswordResetToken> resetTokenOpt = passwordResetTokenRepository.findByToken(token);
+        if (resetTokenOpt.isEmpty()) {
+            return false;
+        }
+
+        PasswordResetToken resetToken = resetTokenOpt.get();
+        if (resetToken.isExpired()) {
+            passwordResetTokenRepository.delete(resetToken);
+            return false;
+        }
+
+        User user = resetToken.getUser();
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+        
+        passwordResetTokenRepository.delete(resetToken);
+        return true;
     }
 }

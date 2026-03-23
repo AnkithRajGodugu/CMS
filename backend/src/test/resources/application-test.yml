@@ -24,9 +24,29 @@ spring:
   cache:
     type: simple
 
+  # Disable real Redis & Kafka in tests
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+  kafka:
+    bootstrap-servers: localhost:29092
+
 cms:
   kafka:
     enabled: false
 
 server:
   port: 0
+
+# Test-only JWT & encryption — safe placeholder values
+jwt:
+  secret: test-only-secret-key-that-is-at-least-64-characters-long-do-not-use-in-prod
+  expiration: 86400000
+
+encryption:
+  key: dGVzdC1lbmNyeXB0aW9uLWtleS0zMmJ5dGVzISE=
+
+websocket:
+  allowed-origins: http://localhost:3000

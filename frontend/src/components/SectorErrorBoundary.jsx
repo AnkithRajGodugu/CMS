@@ -34,7 +34,7 @@ export const SectorErrorFallback = ({ error, sector, resetError }) => {
               This issue has been logged and our team will investigate.
             </p>
             
-            {process.env.NODE_ENV === 'development' && error && (
+            {import.meta.env.MODE === 'development' && error && (
               <div className="bg-base-200 p-4 rounded-lg">
                 <p className="font-mono text-sm text-error mb-2">
                   {error.toString()}

@@ -1,6 +1,7 @@
 package com.example.cms.controller;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -112,6 +113,26 @@ public class AdminController {
                 .toList();
 
         result.put("users", users);
+        return result;
+    }
+
+    @GetMapping("/metrics")
+    public Map<String, Object> getMetrics() {
+        Map<String, Object> result = new HashMap<>();
+        
+        long activeUsers = userRepository.countActiveUsers();
+        long totalUsers = userRepository.count();
+        List<Object[]> sectorData = userRepository.countUsersBySector();
+        
+        result.put("totalUsers", totalUsers);
+        result.put("activeUsers", activeUsers);
+        
+        Map<String, Long> sectorDist = new HashMap<>();
+        for (Object[] row : sectorData) {
+            sectorDist.put((String) row[0], (Long) row[1]);
+        }
+        result.put("sectorDistribution", sectorDist);
+        
         return result;
     }
 

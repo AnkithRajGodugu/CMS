@@ -1,5 +1,6 @@
 package com.example.cms.util;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -17,6 +18,7 @@ import java.util.Base64;
  * Utility class for AES-256-GCM encryption and decryption of sensitive data.
  * Uses Galois/Counter Mode (GCM) for authenticated encryption.
  */
+@Slf4j
 @Component
 public class EncryptionUtil {
 
@@ -38,9 +40,11 @@ public class EncryptionUtil {
         this.secureRandom = new SecureRandom();
 
         if (encryptionKey == null || encryptionKey.isEmpty()) {
-            // Generate a new key if none is provided (for development only)
+            // Generate a new key if none is provided (development only — fail fast in prod)
             this.secretKey = generateKey();
-            System.err.println("WARNING: No encryption key configured. Using generated key (not suitable for production)");
+            log.error("SECURITY WARNING: No ENCRYPTION_KEY configured. "
+                    + "A random key was generated — encrypted data will be LOST on restart! "
+                    + "Set the ENCRYPTION_KEY environment variable for production.");
         } else {
             // Decode the provided key
             byte[] decodedKey = Base64.getDecoder().decode(encryptionKey);

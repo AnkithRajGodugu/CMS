@@ -49,9 +49,9 @@ public class AuditLog {
     private String resourceId;
 
 
-    @JdbcTypeCode(SqlTypes.JSON)
+    @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
-    private String details;
+    private java.util.Map<String, Object> details;
     
     @Column(name = "ip_address", length = 45)
     private String ipAddress;

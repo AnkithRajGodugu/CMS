@@ -122,6 +122,9 @@ const SafeNavbar = () => {
                   <span className="text-xs opacity-60">{user?.role} • {user?.sector}</span>
                 </li>
                 <li><Link to="/settings">Profile & Settings</Link></li>
+                {(user?.role === 'ADMIN' || user?.role === 'MANAGER') && user?.organizationId && (
+                  <li><Link to="/organization-settings">Organization Settings</Link></li>
+                )}
                 <li><hr className="my-2" /></li>
                 <li>
                   <button 

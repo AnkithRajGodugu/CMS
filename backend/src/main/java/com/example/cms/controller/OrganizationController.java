@@ -28,9 +28,10 @@ public class OrganizationController {
      */
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<OrganizationResponse>> getAllOrganizations() {
+    public ResponseEntity<org.springframework.data.domain.Page<OrganizationResponse>> getAllOrganizations(
+            @org.springframework.data.web.PageableDefault(size = 20) org.springframework.data.domain.Pageable pageable) {
         log.info("GET /api/organizations - Fetching all organizations");
-        List<OrganizationResponse> organizations = organizationService.getAllOrganizations();
+        org.springframework.data.domain.Page<OrganizationResponse> organizations = organizationService.getAllOrganizations(pageable);
         return ResponseEntity.ok(organizations);
     }
     
@@ -52,9 +53,11 @@ public class OrganizationController {
      */
     @GetMapping("/sector/{sectorId}")
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
-    public ResponseEntity<List<OrganizationResponse>> getOrganizationsBySector(@PathVariable Long sectorId) {
+    public ResponseEntity<org.springframework.data.domain.Page<OrganizationResponse>> getOrganizationsBySector(
+            @PathVariable Long sectorId,
+            @org.springframework.data.web.PageableDefault(size = 20) org.springframework.data.domain.Pageable pageable) {
         log.info("GET /api/organizations/sector/{} - Fetching organizations by sector", sectorId);
-        List<OrganizationResponse> organizations = organizationService.getOrganizationsBySector(sectorId);
+        org.springframework.data.domain.Page<OrganizationResponse> organizations = organizationService.getOrganizationsBySector(sectorId, pageable);
         return ResponseEntity.ok(organizations);
     }
     
@@ -64,9 +67,10 @@ public class OrganizationController {
      */
     @GetMapping("/active")
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
-    public ResponseEntity<List<OrganizationResponse>> getActiveOrganizations() {
+    public ResponseEntity<org.springframework.data.domain.Page<OrganizationResponse>> getActiveOrganizations(
+            @org.springframework.data.web.PageableDefault(size = 20) org.springframework.data.domain.Pageable pageable) {
         log.info("GET /api/organizations/active - Fetching active organizations");
-        List<OrganizationResponse> organizations = organizationService.getActiveOrganizations();
+        org.springframework.data.domain.Page<OrganizationResponse> organizations = organizationService.getActiveOrganizations(pageable);
         return ResponseEntity.ok(organizations);
     }
     

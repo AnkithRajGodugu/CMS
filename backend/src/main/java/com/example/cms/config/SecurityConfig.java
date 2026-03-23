@@ -66,12 +66,16 @@ public class SecurityConfig {
                                 "/api/auth/**",
                                 "/api/health",
                                 "/api/test",
-                                "/api/public/**"
+                                "/api/public/**",
+                                "/ws/**",
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**",
+                                "/swagger-ui.html"
                         ).permitAll()
 
-
-                        // --- Actuator / Monitoring ---
-                        .requestMatchers("/actuator/**").permitAll()
+                        // --- Actuator: health & info are public; ALL other actuator endpoints require ADMIN ---
+                        .requestMatchers("/actuator/health", "/actuator/info").permitAll()
+                        .requestMatchers("/actuator/**").hasRole("ADMIN")
 
                         // --- Admin-only APIs ---
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
@@ -79,8 +83,8 @@ public class SecurityConfig {
                         // --- Sector-scoped APIs (MAIN DESIGN) ---
                         .requestMatchers("/api/v1/sectors/**").authenticated()
 
-                        // --- Any other API must be authenticated ---
-                        //.requestMatchers("/api/**").authenticated()
+                        // --- All remaining API calls must be authenticated ---
+                        .requestMatchers("/api/**").authenticated()
 
                         // --- Frontend (React) routes ---
                         .requestMatchers(
@@ -103,7 +107,7 @@ public class SecurityConfig {
                         ).permitAll()
 
                         // --- Everything else ---
-                        .anyRequest().permitAll()
+                        .anyRequest().authenticated()
 
                 )
 
@@ -129,7 +133,7 @@ public class SecurityConfig {
                 List.of("http://localhost:*", "https://yourdomain.com")
         );
         config.setAllowedMethods(
-                Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
         );
         config.setAllowedHeaders(
                 Arrays.asList("Authorization", "Content-Type", "X-Requested-With")

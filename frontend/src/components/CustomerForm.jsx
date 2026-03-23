@@ -22,7 +22,7 @@ const CustomerForm = () => {
 
     const handleSubmit = async () => {
         try {
-            await api.post('/customers', formData);
+            await api.post('/v1/sectors/customers', formData);
             navigate('/customers');
         } catch {
             setError('Failed to create customer.');

@@ -19,9 +19,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -87,10 +84,6 @@ class SectorAuthorizationFilterIntegrationTest extends TestcontainersConfig {
         bankingUser.setSector(bankingSector);
         bankingUser.setUserType(UserType.INDIVIDUAL);
         bankingUser.setEnabled(true);
-        
-        Set<String> roles = new HashSet<>();
-        roles.add("ROLE_USER");
-        bankingUser.setRoles(roles);
         
         bankingUser = userRepository.save(bankingUser);
 

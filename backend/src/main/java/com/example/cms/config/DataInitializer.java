@@ -7,7 +7,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -49,7 +48,8 @@ public class DataInitializer implements CommandLineRunner {
     private ContentAssetRepository contentAssetRepository;
 
     @Autowired
-    private PasswordEncoder passwordEncoder;
+    private com.example.cms.service.AuthService authService;
+
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -107,27 +107,13 @@ public class DataInitializer implements CommandLineRunner {
             Sector logisticsSector = sectorRepository.findByName("Logistics").orElseThrow();
             Sector contentSector = sectorRepository.findByName("Content").orElseThrow();
 
-            User admin = new User("admin", passwordEncoder.encode("admin123"), User.Role.ADMIN);
-            admin.setSector(bankingSector);
-            userRepository.save(admin);
+            authService.createUser("admin", "admin@example.com", "admin123", User.Role.ADMIN, null);
+            authService.createUser("bank_user", "banking@example.com", "bank123", User.Role.BANKING, bankingSector.getId());
+            authService.createUser("health_user", "healthcare@example.com", "health123", User.Role.HEALTHCARE, healthcareSector.getId());
+            authService.createUser("logistics_user", "logistics@example.com", "logistics123", User.Role.LOGISTICS, logisticsSector.getId());
+            authService.createUser("content_user", "content@example.com", "content123", User.Role.CONTENT, contentSector.getId());
 
-            User bankingUser = new User("bank_user", passwordEncoder.encode("bank123"), User.Role.BANKING);
-            bankingUser.setSector(bankingSector);
-            userRepository.save(bankingUser);
-
-            User healthcareUser = new User("health_user", passwordEncoder.encode("health123"), User.Role.HEALTHCARE);
-            healthcareUser.setSector(healthcareSector);
-            userRepository.save(healthcareUser);
-
-            User logisticsUser = new User("logistics_user", passwordEncoder.encode("logistics123"), User.Role.LOGISTICS);
-            logisticsUser.setSector(logisticsSector);
-            userRepository.save(logisticsUser);
-
-            User contentUser = new User("content_user", passwordEncoder.encode("content123"), User.Role.CONTENT);
-            contentUser.setSector(contentSector);
-            userRepository.save(contentUser);
-
-            System.out.println("✅ Test users initialized");
+            System.out.println("✅ Test users initialized using AuthService");
         }
 
         /* =========================
@@ -208,22 +194,44 @@ public class DataInitializer implements CommandLineRunner {
            LOGISTICS: SHIPMENTS & INVENTORY
         ========================== */
         if (shipmentRepository.count() == 0) {
-            Shipment ship1 = new Shipment("SHP-999-001", "New York", "Los Angeles", Shipment.ShipmentStatus.IN_TRANSIT);
-            ship1.setWeight(new BigDecimal("150.5"));
-            ship1.setEstimatedDelivery(LocalDateTime.now().plusDays(3));
+            Shipment ship1 = Shipment.builder()
+                .trackingId("SHP-999-001")
+                .origin("New York")
+                .destination("Los Angeles")
+                .status(Shipment.ShipmentStatus.IN_TRANSIT)
+                .weight(new BigDecimal("150.5"))
+                .estimatedDelivery(LocalDateTime.now().plusDays(3))
+                .build();
             shipmentRepository.save(ship1);
 
-            Shipment ship2 = new Shipment("SHP-999-002", "Chicago", "Houston", Shipment.ShipmentStatus.PENDING);
-            ship2.setWeight(new BigDecimal("85.0"));
-            ship2.setEstimatedDelivery(LocalDateTime.now().plusDays(5));
+            Shipment ship2 = Shipment.builder()
+                .trackingId("SHP-999-002")
+                .origin("Chicago")
+                .destination("Houston")
+                .status(Shipment.ShipmentStatus.PENDING)
+                .weight(new BigDecimal("85.0"))
+                .estimatedDelivery(LocalDateTime.now().plusDays(5))
+                .build();
             shipmentRepository.save(ship2);
             System.out.println("✅ Sample shipments initialized");
         }
 
         if (inventoryItemRepository.count() == 0) {
-            InventoryItem inv1 = new InventoryItem("SKU-1001", "Industrial Widget", 500, 100, "Warehouse A");
+            InventoryItem inv1 = InventoryItem.builder()
+                .sku("SKU-1001")
+                .productName("Industrial Widget")
+                .quantity(500)
+                .reorderPoint(100)
+                .warehouseLocation("Warehouse A")
+                .build();
             inventoryItemRepository.save(inv1);
-            InventoryItem inv2 = new InventoryItem("SKU-1002", "Electronic Component", 50, 200, "Warehouse B");
+            InventoryItem inv2 = InventoryItem.builder()
+                .sku("SKU-1002")
+                .productName("Electronic Component")
+                .quantity(50)
+                .reorderPoint(200)
+                .warehouseLocation("Warehouse B")
+                .build();
             inventoryItemRepository.save(inv2);
             System.out.println("✅ Sample inventory initialized");
         }
@@ -232,16 +240,24 @@ public class DataInitializer implements CommandLineRunner {
            CONTENT CREATION: PROJECTS & ASSETS
         ========================== */
         if (projectRepository.count() == 0) {
-            Project proj1 = new Project("Q4 Marketing Campaign", "Acme Corp", Project.ProjectStatus.IN_PROGRESS);
-            proj1.setStartDate(LocalDate.now().minusDays(10));
-            proj1.setDeadline(LocalDate.now().plusDays(20));
-            proj1.setBudget(15000.0);
+            Project proj1 = Project.builder()
+                .projectName("Q4 Marketing Campaign")
+                .clientName("Acme Corp")
+                .status(Project.ProjectStatus.IN_PROGRESS)
+                .startDate(LocalDate.now().minusDays(10))
+                .deadline(LocalDate.now().plusDays(20))
+                .budget(15000.0)
+                .build();
             projectRepository.save(proj1);
 
-            Project proj2 = new Project("Website Redesign", "Globex", Project.ProjectStatus.PLANNING);
-            proj2.setStartDate(LocalDate.now().plusDays(5));
-            proj2.setDeadline(LocalDate.now().plusMonths(2));
-            proj2.setBudget(25000.0);
+            Project proj2 = Project.builder()
+                .projectName("Website Redesign")
+                .clientName("Globex")
+                .status(Project.ProjectStatus.PLANNING)
+                .startDate(LocalDate.now().plusDays(5))
+                .deadline(LocalDate.now().plusMonths(2))
+                .budget(25000.0)
+                .build();
             projectRepository.save(proj2);
             System.out.println("✅ Sample projects initialized");
         }
@@ -249,12 +265,20 @@ public class DataInitializer implements CommandLineRunner {
         if (contentAssetRepository.count() == 0) {
             Project parentProject = projectRepository.findAll().stream().findFirst().orElse(null);
             if (parentProject != null) {
-                ContentAsset asset1 = new ContentAsset("Campaign Banner", ContentAsset.AssetType.IMAGE, "https://example.com/assets/banner.jpg");
-                asset1.setProject(parentProject);
+                ContentAsset asset1 = ContentAsset.builder()
+                    .title("Campaign Banner")
+                    .type(ContentAsset.AssetType.IMAGE)
+                    .fileUrl("https://example.com/assets/banner.jpg")
+                    .project(parentProject)
+                    .build();
                 contentAssetRepository.save(asset1);
                 
-                ContentAsset asset2 = new ContentAsset("Marketing Video Draft", ContentAsset.AssetType.VIDEO, "https://example.com/assets/draft.mp4");
-                asset2.setProject(parentProject);
+                ContentAsset asset2 = ContentAsset.builder()
+                    .title("Marketing Video Draft")
+                    .type(ContentAsset.AssetType.VIDEO)
+                    .fileUrl("https://example.com/assets/draft.mp4")
+                    .project(parentProject)
+                    .build();
                 contentAssetRepository.save(asset2);
             }
             System.out.println("✅ Sample content assets initialized");

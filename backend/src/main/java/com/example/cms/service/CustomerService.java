@@ -31,6 +31,7 @@ public class CustomerService {
     private final SectorRepository sectorRepository;
     private final AuditService auditService;
     private final MeterRegistry meterRegistry;
+    private final NotificationService notificationService;
 
     private final Counter customerCreatedCounter;
     private final Counter customerDeletedCounter;
@@ -39,12 +40,14 @@ public class CustomerService {
     public CustomerService(CustomerRepository customerRepository,
                            SectorRepository sectorRepository,
                            AuditService auditService,
-                           MeterRegistry meterRegistry) {
+                           MeterRegistry meterRegistry,
+                           NotificationService notificationService) {
 
         this.customerRepository = customerRepository;
         this.sectorRepository = sectorRepository;
         this.auditService = auditService;
         this.meterRegistry = meterRegistry;
+        this.notificationService = notificationService;
 
         // Safe metric initialization (Spring + Mockito safe)
         if (meterRegistry != null) {
@@ -224,6 +227,13 @@ public class CustomerService {
                 SecurityUtils.clientIp()
         );
 
+        notificationService.sendSectorNotification(
+                sector.getCode(),
+                "CUSTOMER_CREATED",
+                "New customer created: " + saved.getFirstName() + " " + saved.getLastName(),
+                Map.of("customerId", saved.getId())
+        );
+
         return saved;
     }
 
@@ -243,15 +253,21 @@ public class CustomerService {
 
         Customer saved = customerRepository.save(existing);
 
-        auditService.logAction(
+        auditService.logDataChange(
                 SecurityUtils.currentUserId(),
                 ctx.getSectorId(),
-                null,
-                "UPDATE_CUSTOMER",
                 "CUSTOMER",
                 saved.getId().toString(),
-                null,
+                existing, // This might be modified if Hibernate session is tricky, but usually works if not detached
+                saved,
                 SecurityUtils.clientIp()
+        );
+
+        notificationService.sendSectorNotification(
+                ctx.getSectorCode(),
+                "CUSTOMER_UPDATED",
+                "Customer updated: " + saved.getFirstName() + " " + saved.getLastName(),
+                Map.of("customerId", saved.getId())
         );
 
         return saved;
@@ -282,6 +298,13 @@ public class CustomerService {
                 id.toString(),
                 null,
                 SecurityUtils.clientIp()
+        ); // Added missing closing parenthesis here
+
+        notificationService.sendSectorNotification(
+                ctx.getSectorCode(),
+                "CUSTOMER_DELETED",
+                "Customer with ID " + id + " was deleted",
+                Map.of("customerId", id)
         );
     }
 

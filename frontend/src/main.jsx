@@ -6,9 +6,12 @@ import store from './app/store.js';
 import App from './App.jsx';
 import './global.css';
 
-console.log('Starting CMS Platform...');
+const rootElement = document.getElementById('root');
+if (!window.reactRoot) {
+    window.reactRoot = ReactDOM.createRoot(rootElement);
+}
 
-ReactDOM.createRoot(document.getElementById('root')).render(
+window.reactRoot.render(
     <React.StrictMode>
         <Provider store={store}>
             <SafeThemeProvider>

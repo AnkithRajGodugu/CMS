@@ -9,7 +9,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.Set;
 
 @Entity
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
@@ -51,21 +50,23 @@ public class User {
     private UserType userType = UserType.INDIVIDUAL;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "sector_id", nullable = false)
+    @JoinColumn(name = "sector_id") // nullable — user may not have a sector immediately after registration
     private Sector sector;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "organization_id")
     private Organization organization;
 
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
-    @Column(name = "role_name")
-    private Set<String> roles;
+    // NOTE: roles are derived from the `role` enum above.
+    // The redundant @ElementCollection user_roles table has been removed.
 
     @Column(nullable = false)
     @Builder.Default
     private boolean enabled = true;
+
+    @Column(name = "email_verified", nullable = false)
+    @Builder.Default
+    private boolean emailVerified = false;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     @Builder.Default
@@ -86,6 +87,7 @@ public class User {
         this.role = role;
         this.userType = UserType.INDIVIDUAL;
         this.enabled = true;
+        this.emailVerified = true; // explicitly verify legacy backend users
         this.createdAt = LocalDateTime.now();
     }
 }

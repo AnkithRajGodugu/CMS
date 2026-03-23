@@ -55,16 +55,8 @@ public class SectorDetectionService {
 
         Sector sector = user.getSector();
 
-        // ✅ FIX: Convert entity roles into Spring Security ROLE_ format
-        Set<String> formattedRoles = user.getRoles() == null
-                ? Set.of()
-                : user.getRoles().stream()
-                .map(role ->
-                        role.startsWith("ROLE_")
-                                ? role
-                                : "ROLE_" + role
-                )
-                .collect(Collectors.toSet());
+        // ✅ FIX: Convert single entity role into Spring Security ROLE_ format
+        Set<String> formattedRoles = Set.of("ROLE_" + user.getRole().name());
 
         SectorContext context = SectorContext.builder()
                 .sectorId(sector.getId())
@@ -111,15 +103,7 @@ public class SectorDetectionService {
 
         Sector sector = user.getSector();
 
-        Set<String> formattedRoles = user.getRoles() == null
-                ? Set.of()
-                : user.getRoles().stream()
-                .map(role ->
-                        role.startsWith("ROLE_")
-                                ? role
-                                : "ROLE_" + role
-                )
-                .collect(Collectors.toSet());
+        Set<String> formattedRoles = Set.of("ROLE_" + user.getRole().name());
 
         return SectorContext.builder()
                 .sectorId(sector.getId())

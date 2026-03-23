@@ -19,7 +19,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
@@ -63,7 +66,7 @@ class OrganizationServiceTest {
         testOrganization.setName("Test Bank");
         testOrganization.setDomain("testbank.com");
         testOrganization.setSector(testSector);
-        testOrganization.setSettings("{\"key\":\"value\"}");
+        testOrganization.setSettings(Map.of("key", "value"));
         testOrganization.setActive(true);
         testOrganization.setUsers(new ArrayList<>());
 
@@ -75,16 +78,16 @@ class OrganizationServiceTest {
     @Test
     void getAllOrganizations_ShouldReturnAllOrganizations() {
         // Arrange
-        when(organizationRepository.findAll()).thenReturn(List.of(testOrganization));
+        when(organizationRepository.findAll(any(Pageable.class))).thenReturn(new PageImpl<>(List.of(testOrganization)));
 
         // Act
-        List<OrganizationResponse> result = organizationService.getAllOrganizations();
+        Page<OrganizationResponse> result = organizationService.getAllOrganizations(PageRequest.of(0, 10));
 
         // Assert
         assertNotNull(result);
-        assertEquals(1, result.size());
-        assertEquals("Test Bank", result.get(0).getName());
-        verify(organizationRepository, times(1)).findAll();
+        assertEquals(1, result.getContent().size());
+        assertEquals("Test Bank", result.getContent().get(0).getName());
+        verify(organizationRepository, times(1)).findAll(any(Pageable.class));
     }
 
     @Test
@@ -118,30 +121,30 @@ class OrganizationServiceTest {
     @Test
     void getOrganizationsBySector_ShouldReturnFilteredOrganizations() {
         // Arrange
-        when(organizationRepository.findBySectorId(1L)).thenReturn(List.of(testOrganization));
+        when(organizationRepository.findBySectorId(eq(1L), any(Pageable.class))).thenReturn(new PageImpl<>(List.of(testOrganization)));
 
         // Act
-        List<OrganizationResponse> result = organizationService.getOrganizationsBySector(1L);
+        Page<OrganizationResponse> result = organizationService.getOrganizationsBySector(1L, PageRequest.of(0, 10));
 
         // Assert
         assertNotNull(result);
-        assertEquals(1, result.size());
-        verify(organizationRepository, times(1)).findBySectorId(1L);
+        assertEquals(1, result.getContent().size());
+        verify(organizationRepository, times(1)).findBySectorId(eq(1L), any(Pageable.class));
     }
 
     @Test
     void getActiveOrganizations_ShouldReturnOnlyActiveOrganizations() {
         // Arrange
-        when(organizationRepository.findByActiveTrue()).thenReturn(List.of(testOrganization));
+        when(organizationRepository.findAllActiveWithDetails(any(Pageable.class))).thenReturn(new PageImpl<>(List.of(testOrganization)));
 
         // Act
-        List<OrganizationResponse> result = organizationService.getActiveOrganizations();
+        Page<OrganizationResponse> result = organizationService.getActiveOrganizations(PageRequest.of(0, 10));
 
         // Assert
         assertNotNull(result);
-        assertEquals(1, result.size());
-        assertTrue(result.get(0).isActive());
-        verify(organizationRepository, times(1)).findByActiveTrue();
+        assertEquals(1, result.getContent().size());
+        assertTrue(result.getContent().get(0).isActive());
+        verify(organizationRepository, times(1)).findAllActiveWithDetails(any(Pageable.class));
     }
 
     @Test
@@ -151,7 +154,7 @@ class OrganizationServiceTest {
         request.setName("New Bank");
         request.setDomain("newbank.com");
         request.setSectorId(1L);
-        request.setSettings("{\"key\":\"value\"}");
+        request.setSettings(Map.of("key", "value"));
         request.setActive(true);
 
         when(sectorRepository.findById(1L)).thenReturn(Optional.of(testSector));
@@ -258,7 +261,6 @@ class OrganizationServiceTest {
         settings.put("key", "newValue");
 
         when(organizationRepository.findById(1L)).thenReturn(Optional.of(testOrganization));
-        when(objectMapper.writeValueAsString(settings)).thenReturn("{\"key\":\"newValue\"}");
         when(organizationRepository.save(any(Organization.class))).thenReturn(testOrganization);
 
         // Act
@@ -267,7 +269,6 @@ class OrganizationServiceTest {
         // Assert
         assertNotNull(result);
         verify(organizationRepository, times(1)).findById(1L);
-        verify(objectMapper, times(1)).writeValueAsString(settings);
         verify(organizationRepository, times(1)).save(any(Organization.class));
     }
 
@@ -277,12 +278,8 @@ class OrganizationServiceTest {
         Map<String, Object> expectedSettings = new HashMap<>();
         expectedSettings.put("key", "value");
 
+        testOrganization.setSettings(expectedSettings);
         when(organizationRepository.findById(1L)).thenReturn(Optional.of(testOrganization));
-        try {
-            when(objectMapper.readValue("{\"key\":\"value\"}", Map.class)).thenReturn(expectedSettings);
-        } catch (Exception e) {
-            fail("Should not throw exception");
-        }
 
         // Act
         Map<String, Object> result = organizationService.getOrganizationSettings(1L);

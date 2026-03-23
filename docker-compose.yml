@@ -1,5 +1,3 @@
-version: "3.9"
-
 services:
   # =====================
   # PostgreSQL Database
@@ -117,14 +115,25 @@ services:
       SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
       SPRING_JPA_HIBERNATE_DDL_AUTO: validate
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION: ${JWT_EXPIRATION:-86400000}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY}
+      MAIL_HOST: ${MAIL_HOST:-sandbox.smtp.mailtrap.io}
+      MAIL_PORT: ${MAIL_PORT:-2525}
+      MAIL_USERNAME: ${MAIL_USERNAME:-}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:-}
       JAVA_OPTS: "-Xms512m -Xmx1024m"
     ports:
-      - "8080:8080"
+      - "8081:8081"
     depends_on:
       postgres:
         condition: service_healthy
       kafka:
         condition: service_started
+      redis:
+        condition: service_healthy
     networks:
       - cms-network
 
@@ -144,6 +153,23 @@ services:
       - "--config.file=/etc/prometheus/prometheus.yml"
     depends_on:
       - backend
+    networks:
+      - cms-network
+
+  # =====================
+  # Redis (Rate Limiting)
+  # =====================
+  redis:
+    image: redis:7.2-alpine
+    container_name: cms-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
       - cms-network
 

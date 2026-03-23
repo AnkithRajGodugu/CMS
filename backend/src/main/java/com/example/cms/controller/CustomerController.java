@@ -106,7 +106,7 @@ public class CustomerController {
 
     @GetMapping("/reports/monthly")
     @PreAuthorize("hasAnyRole('ADMIN','MANAGER')")
-    public ResponseEntity<List<MonthlyCustomerCountResponse>> monthlyReport(
+    public ResponseEntity<?> monthlyReport(
             @RequestParam LocalDate start,
             @RequestParam LocalDate end,
             HttpServletRequest request

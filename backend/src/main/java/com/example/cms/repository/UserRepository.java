@@ -14,7 +14,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     
     User findByUsername(String username);
     
-    Optional<User> findByEmail(String email);
+    User findByEmail(String email);
     
     // Optimized query with fetch join to avoid N+1 problem
     @Query("SELECT u FROM User u " +
@@ -50,4 +50,11 @@ public interface UserRepository extends JpaRepository<User, Long> {
     
     @Query("SELECT COUNT(u) FROM User u WHERE u.organization.id = :organizationId AND u.enabled = true")
     long countByOrganizationIdAndEnabled(@Param("organizationId") Long organizationId);
+
+    // Metrics Queries
+    @Query("SELECT COUNT(u) FROM User u WHERE u.enabled = true")
+    long countActiveUsers();
+
+    @Query("SELECT u.sector.name, COUNT(u) FROM User u WHERE u.sector IS NOT NULL GROUP BY u.sector.name")
+    List<Object[]> countUsersBySector();
 }

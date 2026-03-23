@@ -7,7 +7,7 @@ import { logApiError, logNetworkError } from '../utils/errorLogger';
 // Axios Instance
 // ===============================
 const api = axios.create({
-  baseURL: `${import.meta.env.VITE_API_URL || 'http://localhost:8082'}/api`,
+  baseURL: `${import.meta.env.VITE_API_URL || 'http://localhost:8081'}/api`,
   headers: {
     'Content-Type': 'application/json',
   },

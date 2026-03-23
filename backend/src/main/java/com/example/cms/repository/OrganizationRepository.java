@@ -19,6 +19,8 @@ public interface OrganizationRepository extends JpaRepository<Organization, Long
     
     List<Organization> findBySectorId(Long sectorId);
     
+    org.springframework.data.domain.Page<Organization> findBySectorId(Long sectorId, org.springframework.data.domain.Pageable pageable);
+    
     Optional<Organization> findByName(String name);
     
     List<Organization> findByActiveTrue();

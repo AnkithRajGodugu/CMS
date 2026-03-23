@@ -18,6 +18,7 @@ public class LoginResponse {
     
     private boolean success;
     private String token;
+    private String refreshToken;
     private UserInfo user;
     private SectorInfo sector;
     private String message;
@@ -32,6 +33,7 @@ public class LoginResponse {
         private String email;
         private String role;
         private String userType;
+        private Long organizationId;
     }
     
     @Data

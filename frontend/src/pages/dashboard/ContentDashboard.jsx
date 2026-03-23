@@ -34,12 +34,12 @@ const ContentDashboard = () => {
   ];
 
   const quickActions = [
-    { title: 'Project Management', path: '/content-creation/ProjectManagementPage', icon: FaProjectDiagram, color: 'bg-primary' },
-    { title: 'Client Portal', path: '/content-creation/ClientPortalPage', icon: FaUsers, color: 'bg-success' },
-    { title: 'Content Calendar', path: '/content-creation/ContentCalendarPage', icon: FaCalendarAlt, color: 'bg-info' },
-    { title: 'Collaboration', path: '/content-creation/CollaborationToolsPage', icon: FaEdit, color: 'bg-warning' },
-    { title: 'Asset Management', path: '/content-creation/AssetManagementPage', icon: FaFileAlt, color: 'bg-error' },
-    { title: 'Time Tracking', path: '/content-creation/TimeTrackingPage', icon: FaClock, color: 'bg-secondary' },
+    { title: 'Project Management', path: '/dashboard/content/projects', icon: FaProjectDiagram, color: 'bg-primary' },
+    { title: 'Client Portal', path: '/dashboard/content/clients', icon: FaUsers, color: 'bg-success' },
+    { title: 'Content Calendar', path: '/dashboard/content/calendar', icon: FaCalendarAlt, color: 'bg-info' },
+    { title: 'Collaboration', path: '/dashboard/content/collaboration', icon: FaEdit, color: 'bg-warning' },
+    { title: 'Asset Management', path: '/dashboard/content/assets', icon: FaFileAlt, color: 'bg-error' },
+    { title: 'Time Tracking', path: '/dashboard/content/time', icon: FaClock, color: 'bg-secondary' },
   ];
 
   return (

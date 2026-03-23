@@ -34,12 +34,12 @@ const LogisticsDashboard = () => {
   ];
 
   const quickActions = [
-    { title: 'Shipment Tracking', path: '/logistics-&-supply/LogisticsShipmentTrackingPage', icon: FaShippingFast, color: 'bg-info' },
-    { title: 'Inventory', path: '/logistics-&-supply/LogisticsInventoryManagementPage', icon: FaBoxes, color: 'bg-success' },
-    { title: 'Fleet Management', path: '/logistics-&-supply/LogisticsFleetManagementPage', icon: FaTruck, color: 'bg-warning' },
-    { title: 'Route Optimization', path: '/logistics-&-supply/LogisticsRouteOptimizationPage', icon: FaRoute, color: 'bg-error' },
-    { title: 'Warehouse', path: '/logistics-&-supply/LogisticsWarehouseManagementPage', icon: FaWarehouse, color: 'bg-primary' },
-    { title: 'Vendor Relations', path: '/logistics-&-supply/LogisticsVendorRelationsPage', icon: FaUsers, color: 'bg-secondary' },
+    { title: 'Shipment Tracking', path: '/dashboard/logistics/tracking', icon: FaShippingFast, color: 'bg-info' },
+    { title: 'Inventory', path: '/dashboard/logistics/inventory', icon: FaBoxes, color: 'bg-success' },
+    { title: 'Fleet Management', path: '/dashboard/logistics/fleet', icon: FaTruck, color: 'bg-warning' },
+    { title: 'Route Optimization', path: '/dashboard/logistics/routes', icon: FaRoute, color: 'bg-error' },
+    { title: 'Warehouse', path: '/dashboard/logistics/warehouse', icon: FaWarehouse, color: 'bg-primary' },
+    { title: 'Vendor Relations', path: '/dashboard/logistics/vendors', icon: FaUsers, color: 'bg-secondary' },
   ];
 
   return (

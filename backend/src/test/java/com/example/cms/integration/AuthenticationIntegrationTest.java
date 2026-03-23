@@ -18,9 +18,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import static org.junit.jupiter.api.Assertions.*;
 @Disabled("Disabled until Docker/Testcontainers is enabled")
 
@@ -71,10 +68,6 @@ class AuthenticationIntegrationTest extends TestcontainersConfig {
         testUser.setSector(testSector);
         testUser.setUserType(UserType.INDIVIDUAL);
         testUser.setEnabled(true);
-        
-        Set<String> roles = new HashSet<>();
-        roles.add("ROLE_USER");
-        testUser.setRoles(roles);
         
         testUser = userRepository.save(testUser);
     }

@@ -29,3 +29,20 @@ frontend/dist/
 
 # Docker
 .idea/httpRequests/
+
+# =============================================
+# SECURITY — Never commit secrets
+# =============================================
+.env
+.env.local
+.env.production
+
+# =============================================
+# Backend build & runtime logs
+# =============================================
+backend/*.log
+backend/logs/
+logs/
+
+# Frontend build output
+frontend/build_output.txt

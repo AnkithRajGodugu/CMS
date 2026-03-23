@@ -1,11 +1,19 @@
 package com.example.cms.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "shipments")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Shipment {
 
     public enum ShipmentStatus {
@@ -41,15 +49,6 @@ public class Shipment {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    public Shipment() {}
-
-    public Shipment(String trackingId, String origin, String destination, ShipmentStatus status) {
-        this.trackingId = trackingId;
-        this.origin = origin;
-        this.destination = destination;
-        this.status = status;
-    }
-
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
@@ -60,23 +59,4 @@ public class Shipment {
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
-
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    public String getTrackingId() { return trackingId; }
-    public void setTrackingId(String trackingId) { this.trackingId = trackingId; }
-    public String getOrigin() { return origin; }
-    public void setOrigin(String origin) { this.origin = origin; }
-    public String getDestination() { return destination; }
-    public void setDestination(String destination) { this.destination = destination; }
-    public ShipmentStatus getStatus() { return status; }
-    public void setStatus(ShipmentStatus status) { this.status = status; }
-    public BigDecimal getWeight() { return weight; }
-    public void setWeight(BigDecimal weight) { this.weight = weight; }
-    public LocalDateTime getEstimatedDelivery() { return estimatedDelivery; }
-    public void setEstimatedDelivery(LocalDateTime estimatedDelivery) { this.estimatedDelivery = estimatedDelivery; }
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
-    public LocalDateTime getUpdatedAt() { return updatedAt; }
-    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
 }

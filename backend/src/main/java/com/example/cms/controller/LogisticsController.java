@@ -1,10 +1,17 @@
 package com.example.cms.controller;
 
+import com.example.cms.dto.ApiResponse;
 import com.example.cms.entity.InventoryItem;
 import com.example.cms.entity.Shipment;
+import com.example.cms.entity.Vehicle;
+import com.example.cms.entity.Route;
 import com.example.cms.repository.InventoryItemRepository;
 import com.example.cms.repository.ShipmentRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.example.cms.repository.VehicleRepository;
+import com.example.cms.repository.RouteRepository;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -14,78 +21,88 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/logistics")
 @PreAuthorize("hasRole('ADMIN') or hasRole('LOGISTICS') or hasRole('logistics')")
+@RequiredArgsConstructor
+@Tag(name = "Logistics Management", description = "Endpoints for managing shipments, inventory, fleet and routes")
 public class LogisticsController {
 
-    @Autowired
-    private ShipmentRepository shipmentRepository;
-
-    @Autowired
-    private InventoryItemRepository inventoryItemRepository;
+    private final ShipmentRepository shipmentRepository;
+    private final InventoryItemRepository inventoryItemRepository;
+    private final VehicleRepository vehicleRepository;
+    private final RouteRepository routeRepository;
 
     // --- Shipments ---
     @GetMapping("/shipments")
-    public List<Shipment> getAllShipments() {
-        return shipmentRepository.findAll();
+    @Operation(summary = "Get all shipments")
+    public ApiResponse<List<Shipment>> getAllShipments() {
+        return ApiResponse.success(shipmentRepository.findAll());
     }
 
     @PostMapping("/shipments")
-    public Shipment createShipment(@RequestBody Shipment shipment) {
-        return shipmentRepository.save(shipment);
+    @Operation(summary = "Create a new shipment")
+    public ApiResponse<Shipment> createShipment(@RequestBody Shipment shipment) {
+        return ApiResponse.success("Shipment created successfully", shipmentRepository.save(shipment));
     }
 
     @GetMapping("/shipments/{id}")
-    public ResponseEntity<Shipment> getShipmentById(@PathVariable Long id) {
+    @Operation(summary = "Get shipment by ID")
+    public ResponseEntity<ApiResponse<Shipment>> getShipmentById(@PathVariable Long id) {
         return shipmentRepository.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
-
-    @PutMapping("/shipments/{id}")
-    public ResponseEntity<Shipment> updateShipment(@PathVariable Long id, @RequestBody Shipment updated) {
-        return shipmentRepository.findById(id)
-                .map(shipment -> {
-                    shipment.setOrigin(updated.getOrigin());
-                    shipment.setDestination(updated.getDestination());
-                    shipment.setStatus(updated.getStatus());
-                    shipment.setWeight(updated.getWeight());
-                    shipment.setEstimatedDelivery(updated.getEstimatedDelivery());
-                    return ResponseEntity.ok(shipmentRepository.save(shipment));
-                })
+                .map(shipment -> ResponseEntity.ok(ApiResponse.success(shipment)))
                 .orElse(ResponseEntity.notFound().build());
     }
 
     // --- Inventory ---
     @GetMapping("/inventory")
-    public List<InventoryItem> getAllInventory() {
-        return inventoryItemRepository.findAll();
+    @Operation(summary = "Get all inventory items")
+    public ApiResponse<List<InventoryItem>> getAllInventory() {
+        return ApiResponse.success(inventoryItemRepository.findAll());
     }
 
     @PostMapping("/inventory")
-    public InventoryItem createInventoryItem(@RequestBody InventoryItem item) {
-        return inventoryItemRepository.save(item);
+    @Operation(summary = "Create a new inventory item")
+    public ApiResponse<InventoryItem> createInventoryItem(@RequestBody InventoryItem item) {
+        return ApiResponse.success("Inventory item created successfully", inventoryItemRepository.save(item));
     }
 
-    @GetMapping("/inventory/{id}")
-    public ResponseEntity<InventoryItem> getInventoryById(@PathVariable Long id) {
-        return inventoryItemRepository.findById(id)
-                .map(ResponseEntity::ok)
+    // --- Fleet (Vehicles) ---
+    @GetMapping("/vehicles")
+    @Operation(summary = "Get all vehicles in the fleet")
+    public ApiResponse<List<Vehicle>> getAllVehicles() {
+        return ApiResponse.success(vehicleRepository.findAll());
+    }
+
+    @PostMapping("/vehicles")
+    @Operation(summary = "Add a new vehicle to the fleet")
+    public ApiResponse<Vehicle> createVehicle(@RequestBody Vehicle vehicle) {
+        return ApiResponse.success("Vehicle added to fleet", vehicleRepository.save(vehicle));
+    }
+
+    @GetMapping("/vehicles/{id}")
+    @Operation(summary = "Get vehicle by ID")
+    public ResponseEntity<ApiResponse<Vehicle>> getVehicleById(@PathVariable Long id) {
+        return vehicleRepository.findById(id)
+                .map(v -> ResponseEntity.ok(ApiResponse.success(v)))
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PutMapping("/inventory/{id}")
-    public ResponseEntity<InventoryItem> updateInventoryItem(@PathVariable Long id, @RequestBody InventoryItem updated) {
-        return inventoryItemRepository.findById(id)
-                .map(item -> {
-                    item.setProductName(updated.getProductName());
-                    item.setQuantity(updated.getQuantity());
-                    item.setReorderPoint(updated.getReorderPoint());
-                    item.setWarehouseLocation(updated.getWarehouseLocation());
-                    if (updated.getLastRestocked() != null) {
-                        item.setLastRestocked(updated.getLastRestocked());
-                    }
-                    // Quantity trigger updateStatus
-                    return ResponseEntity.ok(inventoryItemRepository.save(item));
-                })
+    // --- Routes (Optimization) ---
+    @GetMapping("/routes")
+    @Operation(summary = "Get all optimized routes")
+    public ApiResponse<List<Route>> getAllRoutes() {
+        return ApiResponse.success(routeRepository.findAll());
+    }
+
+    @PostMapping("/routes")
+    @Operation(summary = "Create a new optimized route")
+    public ApiResponse<Route> createRoute(@RequestBody Route route) {
+        return ApiResponse.success("Route created successfully", routeRepository.save(route));
+    }
+
+    @GetMapping("/routes/{id}")
+    @Operation(summary = "Get route by ID")
+    public ResponseEntity<ApiResponse<Route>> getRouteById(@PathVariable Long id) {
+        return routeRepository.findById(id)
+                .map(r -> ResponseEntity.ok(ApiResponse.success(r)))
                 .orElse(ResponseEntity.notFound().build());
     }
 }
