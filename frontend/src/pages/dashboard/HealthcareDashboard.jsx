@@ -11,10 +11,10 @@ const HealthcareDashboard = () => {
   ];
 
   const quickActions = [
-    { title: 'Patient Records', path: '/healthcare/PatientRecordsPage', icon: FaUserMd, color: 'bg-success' },
-    { title: 'Appointments', path: '/healthcare/AppointmentSchedulingPage', icon: FaCalendarCheck, color: 'bg-info' },
-    { title: 'Medical History', path: '/healthcare/MedicalHistoryPage', icon: FaFileMedical, color: 'bg-warning' },
-    { title: 'Insurance', path: '/healthcare/InsuranceManagementPage', icon: FaShieldAlt, color: 'bg-error' },
+    { title: 'Patient Records', path: '/dashboard/healthcare/patients', icon: FaUserMd, color: 'bg-success' },
+    { title: 'Appointments', path: '/dashboard/healthcare/appointments', icon: FaCalendarCheck, color: 'bg-info' },
+    { title: 'Medical History', path: '/dashboard/healthcare/medical-history', icon: FaFileMedical, color: 'bg-warning' },
+    { title: 'Insurance', path: '/dashboard/healthcare/insurance', icon: FaShieldAlt, color: 'bg-error' },
   ];
 
   return (

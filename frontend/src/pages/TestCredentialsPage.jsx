@@ -1,91 +1,158 @@
 import { Link } from 'react-router-dom';
+import { FaCopy, FaCheckCircle, FaShieldAlt } from 'react-icons/fa';
+import { useState } from 'react';
+import { toast } from 'sonner';
 
 const TestCredentialsPage = () => {
+  const [copied, setCopied] = useState(null);
+
+  const copyToClipboard = (text, key) => {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(key);
+      toast.success('Copied to clipboard!');
+      setTimeout(() => setCopied(null), 2000);
+    });
+  };
+
+  // ⚠️ These match exactly what DataInitializer seeds via authService.createUser()
   const testCredentials = [
     {
       role: 'Admin',
-      username: 'admin@example.com',
-      password: 'Admin123!',
+      username: 'admin',
+      email: 'admin@example.com',
+      password: 'admin123',
       sector: 'All Sectors',
-      description: 'Full system access (Login with Email or Username: admin)'
+      dashboard: '/dashboard/banking',
+      color: 'badge-error',
+      description: 'Full system access — can view all sector dashboards'
     },
     {
       role: 'Banking User',
-      username: 'banking@example.com',
-      password: 'Banking123!',
-      sector: 'Banking',
-      description: 'Banking sector access'
+      username: 'bank_user',
+      email: 'banking@example.com',
+      password: 'bank123',
+      sector: 'Banking & Finance',
+      dashboard: '/dashboard/banking',
+      color: 'badge-info',
+      description: 'Access to banking accounts, transactions, compliance & risk'
     },
     {
       role: 'Healthcare User',
-      username: 'healthcare@example.com',
-      password: 'Healthcare123!',
+      username: 'health_user',
+      email: 'healthcare@example.com',
+      password: 'health123',
       sector: 'Healthcare',
-      description: 'Healthcare sector access'
+      dashboard: '/dashboard/healthcare',
+      color: 'badge-success',
+      description: 'Access to patient records, appointments, and medical history'
     },
     {
       role: 'Logistics User',
-      username: 'logistics@example.com',
-      password: 'Logistics123!',
-      sector: 'Logistics',
-      description: 'Logistics sector access'
+      username: 'logistics_user',
+      email: 'logistics@example.com',
+      password: 'logistics123',
+      sector: 'Logistics & Supply',
+      dashboard: '/dashboard/logistics',
+      color: 'badge-warning',
+      description: 'Access to shipments, inventory, fleet, routes, and SLA tracking'
+    },
+    {
+      role: 'Content User',
+      username: 'content_user',
+      email: 'content@example.com',
+      password: 'content123',
+      sector: 'Content Creation',
+      dashboard: '/dashboard/content',
+      color: 'badge-secondary',
+      description: 'Access to projects, assets, calendar, time tracking, and collaboration'
     }
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="container mx-auto px-4">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">Test Credentials</h1>
-          <p className="text-gray-600 mb-6">
-            Use these credentials to test different user roles and access levels
+    <div className="min-h-screen bg-base-200 py-12 px-4">
+      <div className="container mx-auto max-w-6xl">
+        {/* Header */}
+        <div className="text-center mb-10">
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <FaShieldAlt className="text-4xl text-primary" />
+            <h1 className="text-4xl font-extrabold">Test Credentials</h1>
+          </div>
+          <p className="text-base-content/60 text-lg max-w-xl mx-auto">
+            Use these credentials to test all user roles and sector dashboards. Login with <strong>username</strong> OR <strong>email</strong>.
           </p>
-          <Link to="/login" className="btn btn-primary">
-            Go to Login
+          <Link to="/login" className="btn btn-primary mt-6 gap-2">
+            → Go to Login
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+        {/* Credentials Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
           {testCredentials.map((cred, index) => (
-            <div key={index} className="card bg-white shadow-lg">
-              <div className="card-body">
-                <h3 className="card-title text-lg font-semibold text-primary">
-                  {cred.role}
-                </h3>
-                <div className="space-y-2">
-                  <div>
-                    <span className="font-medium">Username:</span>
-                    <code className="ml-2 bg-gray-100 px-2 py-1 rounded text-sm">
-                      {cred.username}
-                    </code>
-                  </div>
-                  <div>
-                    <span className="font-medium">Password:</span>
-                    <code className="ml-2 bg-gray-100 px-2 py-1 rounded text-sm">
-                      {cred.password}
-                    </code>
-                  </div>
-                  <div>
-                    <span className="font-medium">Sector:</span>
-                    <span className="ml-2 badge badge-outline">{cred.sector}</span>
-                  </div>
-                  <p className="text-sm text-gray-600 mt-2">{cred.description}</p>
+            <div key={index} className="card bg-base-100 shadow-xl border-t-4 border-primary/20 hover:shadow-2xl transition-shadow">
+              <div className="card-body gap-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="card-title font-extrabold text-lg">{cred.role}</h3>
+                  <span className={`badge ${cred.color} badge-sm`}>{cred.sector}</span>
                 </div>
+
+                <p className="text-sm text-base-content/60">{cred.description}</p>
+
+                {/* Username */}
+                <div className="bg-base-200 rounded-lg p-3">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-xs font-bold opacity-40 uppercase tracking-wider">Username</span>
+                    <button
+                      className="btn btn-ghost btn-xs gap-1"
+                      onClick={() => copyToClipboard(cred.username, `user-${index}`)}
+                    >
+                      {copied === `user-${index}` ? <FaCheckCircle className="text-success" /> : <FaCopy />}
+                    </button>
+                  </div>
+                  <code className="text-sm font-bold text-primary">{cred.username}</code>
+                </div>
+
+                {/* Email */}
+                <div className="bg-base-200 rounded-lg p-3">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-xs font-bold opacity-40 uppercase tracking-wider">Email (alt login)</span>
+                    <button
+                      className="btn btn-ghost btn-xs gap-1"
+                      onClick={() => copyToClipboard(cred.email, `email-${index}`)}
+                    >
+                      {copied === `email-${index}` ? <FaCheckCircle className="text-success" /> : <FaCopy />}
+                    </button>
+                  </div>
+                  <code className="text-sm font-bold">{cred.email}</code>
+                </div>
+
+                {/* Password */}
+                <div className="bg-base-200 rounded-lg p-3">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-xs font-bold opacity-40 uppercase tracking-wider">Password</span>
+                    <button
+                      className="btn btn-ghost btn-xs gap-1"
+                      onClick={() => copyToClipboard(cred.password, `pw-${index}`)}
+                    >
+                      {copied === `pw-${index}` ? <FaCheckCircle className="text-success" /> : <FaCopy />}
+                    </button>
+                  </div>
+                  <code className="text-sm font-bold text-success">{cred.password}</code>
+                </div>
+
+                <Link to={cred.dashboard} className="btn btn-outline btn-sm btn-primary w-full mt-2">
+                  Open Dashboard →
+                </Link>
               </div>
             </div>
           ))}
         </div>
 
-        <div className="mt-12 max-w-2xl mx-auto">
-          <div className="alert alert-info">
-            <div>
-              <h3 className="font-bold">Note:</h3>
-              <p className="text-sm">
-                These are test credentials for development and demonstration purposes only. 
-                In a production environment, users would register through the signup process 
-                and receive proper authentication tokens.
-              </p>
-            </div>
+        {/* Note */}
+        <div className="alert alert-info max-w-3xl mx-auto shadow">
+          <FaShieldAlt className="text-xl flex-shrink-0" />
+          <div>
+            <h3 className="font-bold">Development Credentials</h3>
+            <p className="text-sm">These accounts are auto-seeded on first startup. All emails are auto-verified. In production, users must register and verify their email address.</p>
           </div>
         </div>
       </div>

@@ -17,7 +17,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 @RestController
 @RequestMapping("/api/logistics")
 @PreAuthorize("hasRole('ADMIN') or hasRole('LOGISTICS') or hasRole('logistics')")
@@ -33,8 +35,8 @@ public class LogisticsController {
     // --- Shipments ---
     @GetMapping("/shipments")
     @Operation(summary = "Get all shipments")
-    public ApiResponse<List<Shipment>> getAllShipments() {
-        return ApiResponse.success(shipmentRepository.findAll());
+    public ApiResponse<Page<Shipment>> getAllShipments(@PageableDefault(size = 20) Pageable pageable) {
+        return ApiResponse.success(shipmentRepository.findAll(pageable));
     }
 
     @PostMapping("/shipments")
@@ -54,8 +56,8 @@ public class LogisticsController {
     // --- Inventory ---
     @GetMapping("/inventory")
     @Operation(summary = "Get all inventory items")
-    public ApiResponse<List<InventoryItem>> getAllInventory() {
-        return ApiResponse.success(inventoryItemRepository.findAll());
+    public ApiResponse<Page<InventoryItem>> getAllInventory(@PageableDefault(size = 20) Pageable pageable) {
+        return ApiResponse.success(inventoryItemRepository.findAll(pageable));
     }
 
     @PostMapping("/inventory")
@@ -67,8 +69,8 @@ public class LogisticsController {
     // --- Fleet (Vehicles) ---
     @GetMapping("/vehicles")
     @Operation(summary = "Get all vehicles in the fleet")
-    public ApiResponse<List<Vehicle>> getAllVehicles() {
-        return ApiResponse.success(vehicleRepository.findAll());
+    public ApiResponse<Page<Vehicle>> getAllVehicles(@PageableDefault(size = 20) Pageable pageable) {
+        return ApiResponse.success(vehicleRepository.findAll(pageable));
     }
 
     @PostMapping("/vehicles")
@@ -88,8 +90,8 @@ public class LogisticsController {
     // --- Routes (Optimization) ---
     @GetMapping("/routes")
     @Operation(summary = "Get all optimized routes")
-    public ApiResponse<List<Route>> getAllRoutes() {
-        return ApiResponse.success(routeRepository.findAll());
+    public ApiResponse<Page<Route>> getAllRoutes(@PageableDefault(size = 20) Pageable pageable) {
+        return ApiResponse.success(routeRepository.findAll(pageable));
     }
 
     @PostMapping("/routes")

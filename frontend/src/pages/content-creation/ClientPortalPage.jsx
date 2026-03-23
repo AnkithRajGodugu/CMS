@@ -1,46 +1,138 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from '../../components/layout/Header';
 import Footer from '../../components/layout/Footer';
 import { useAuth } from '../../hooks/useAuth';
 import { Link } from 'react-router-dom';
+import api from '../../services/api';
+import { FaUsers, FaCheckCircle, FaClock, FaCommentDots, FaEye, FaExclamationTriangle } from 'react-icons/fa';
+import { toast } from 'sonner';
 
 const ClientPortalPage = () => {
   const { user } = useAuth();
+  const [projects, setProjects] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchProjects = async () => {
+    try {
+      setLoading(true);
+      const res = await api.get('/content/projects');
+      if (res.data?.success) setProjects(res.data.data);
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to load client data');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (user?.role === 'content') fetchProjects();
+  }, [user]);
+
   if (!user || user.role !== 'content') {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-purple-100 to-purple-300">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-base-200">
         <Header />
-        <div className="bg-white rounded-xl shadow-lg p-8 text-center">
-          <h2 className="text-3xl font-bold mb-4 text-purple-700">Content Login Required</h2>
-          <p className="mb-6 text-purple-900/80">Please log in with your content-creation credentials to view client portal details.</p>
-          <Link to="/login" className="btn btn-primary">Login</Link>
+        <div className="card bg-base-100 shadow-xl p-8 text-center max-w-md mx-auto mt-20">
+          <FaExclamationTriangle className="text-6xl text-warning mx-auto mb-4" />
+          <h2 className="text-3xl font-bold mb-4">Content Sector Access Only</h2>
+          <p className="mb-6 text-base-content/70">Log in with content credentials to view the client portal.</p>
+          <Link to="/login" className="btn btn-primary">Go to Login</Link>
         </div>
         <Footer />
       </div>
     );
   }
+
+  const getFeedbackStatus = (status) => {
+    switch (status) {
+      case 'COMPLETED': return { label: 'Approved', cls: 'badge-success' };
+      case 'IN_PROGRESS': return { label: 'In Review', cls: 'badge-info' };
+      case 'REVIEW': return { label: 'Awaiting Feedback', cls: 'badge-warning' };
+      default: return { label: 'Pending Start', cls: 'badge-ghost' };
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-100 to-purple-300">
+    <div className="min-h-screen bg-base-200 flex flex-col">
       <Header />
-      <section className="py-20">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center mb-16">
-            <h1 className="text-4xl md:text-5xl font-bold mb-6 text-purple-700">Client Portal</h1>
-            <p className="text-xl text-purple-900/70 max-w-3xl mx-auto">Dedicated client portals for feedback, approvals, and collaboration.</p>
+      <main className="flex-grow pt-24 pb-12 px-4 md:px-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="mb-10">
+            <h1 className="text-4xl font-extrabold flex items-center gap-4">
+              <FaUsers className="text-success" /> Client Portal
+            </h1>
+            <p className="text-base-content/60 mt-2 text-lg">Dedicated workspace for client feedback, approvals, and project status visibility.</p>
           </div>
-          <div className="flex flex-col items-center justify-center">
-            <img src="https://cdn-icons-png.flaticon.com/512/1946/1946429.png" alt="Client Portal" className="rounded-lg mb-4 w-32 h-32 object-cover border" />
-            <div className="bg-white rounded-xl shadow-lg p-8 w-full md:w-2/3">
-              <h2 className="text-2xl font-bold mb-4">Active Clients</h2>
-              <ul className="list-disc ml-6 text-purple-900/80">
-                <li>Acme Corp - Feedback: Approved</li>
-                <li>Global Media - Feedback: Pending</li>
-                <li>FastTrack - Feedback: Needs Revision</li>
-              </ul>
+
+          {/* Summary Stats */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+            <div className="stats shadow bg-base-100">
+              <div className="stat">
+                <div className="stat-figure text-success"><FaCheckCircle className="text-3xl" /></div>
+                <div className="stat-title">Approved Projects</div>
+                <div className="stat-value text-success">{projects.filter(p => p.status === 'COMPLETED').length}</div>
+              </div>
+            </div>
+            <div className="stats shadow bg-base-100">
+              <div className="stat">
+                <div className="stat-figure text-warning"><FaClock className="text-3xl" /></div>
+                <div className="stat-title">Awaiting Feedback</div>
+                <div className="stat-value text-warning">{projects.filter(p => p.status === 'REVIEW').length}</div>
+              </div>
+            </div>
+            <div className="stats shadow bg-base-100">
+              <div className="stat">
+                <div className="stat-figure text-info"><FaCommentDots className="text-3xl" /></div>
+                <div className="stat-title">Active Clients</div>
+                <div className="stat-value text-info">{new Set(projects.map(p => p.clientName)).size}</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Client-Project Table */}
+          <div className="card bg-base-100 shadow-xl overflow-hidden">
+            <div className="card-body">
+              <h2 className="card-title mb-4">Active Client Projects</h2>
+              <div className="overflow-x-auto">
+                <table className="table table-zebra">
+                  <thead>
+                    <tr>
+                      <th>Client</th>
+                      <th>Project</th>
+                      <th>Deadline</th>
+                      <th>Feedback Status</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {loading ? (
+                      <tr><td colSpan="5" className="text-center py-10"><span className="loading loading-spinner loading-md text-success"></span></td></tr>
+                    ) : projects.length === 0 ? (
+                      <tr><td colSpan="5" className="text-center py-8 opacity-40 italic">No client projects found.</td></tr>
+                    ) : (
+                      projects.map(p => {
+                        const fb = getFeedbackStatus(p.status);
+                        return (
+                          <tr key={p.id} className="hover">
+                            <td className="font-bold">{p.clientName || 'N/A'}</td>
+                            <td>{p.projectName}</td>
+                            <td className="font-mono text-sm">{p.deadline ? new Date(p.deadline).toLocaleDateString() : '—'}</td>
+                            <td><span className={`badge ${fb.cls} badge-sm font-bold`}>{fb.label}</span></td>
+                            <td>
+                              <button className="btn btn-ghost btn-xs gap-1 text-success"><FaEye /> View</button>
+                            </td>
+                          </tr>
+                        );
+                      })
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         </div>
-      </section>
+      </main>
       <Footer />
     </div>
   );

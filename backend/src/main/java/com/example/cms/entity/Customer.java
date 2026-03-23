@@ -5,11 +5,14 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
-
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "customers")
+@SQLDelete(sql = "UPDATE customers SET deleted = true WHERE id=?")
+@SQLRestriction("deleted = false")
 @JsonIgnoreProperties({"sector"})
 public class Customer {
 
@@ -54,6 +57,9 @@ public class Customer {
 
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
+
+    @Column(name = "deleted", nullable = false)
+    private boolean deleted = false;
 
     /* =========================
        LIFECYCLE HOOKS
@@ -165,4 +171,7 @@ public class Customer {
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
     }
+
+    public boolean isDeleted() { return deleted; }
+    public void setDeleted(boolean deleted) { this.deleted = deleted; }
 }

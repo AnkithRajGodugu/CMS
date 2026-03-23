@@ -5,8 +5,13 @@ import jakarta.validation.constraints.NotNull;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
+
 @Entity
 @Table(name = "appointments")
+@SQLDelete(sql = "UPDATE appointments SET deleted = true WHERE id=?")
+@SQLRestriction("deleted = false")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Appointment {
     @Id
@@ -37,6 +42,9 @@ public class Appointment {
 
     @Column(updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
+
+    @Column(name = "deleted", nullable = false)
+    private boolean deleted = false;
 
     public enum AppointmentType {
         CONSULTATION, FOLLOW_UP, CHECK_UP, EMERGENCY
@@ -83,4 +91,7 @@ public class Appointment {
     public void setNotes(String notes) { this.notes = notes; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
+
+    public boolean isDeleted() { return deleted; }
+    public void setDeleted(boolean deleted) { this.deleted = deleted; }
 }

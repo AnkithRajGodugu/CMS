@@ -2,33 +2,34 @@ package com.example.cms.service;
 
 import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.Bucket;
-import io.github.bucket4j.BucketConfiguration;
 import io.github.bucket4j.Refill;
-import io.github.bucket4j.distributed.proxy.ProxyManager;
-import io.github.bucket4j.grid.jcache.JCacheProxyManager;
 import org.springframework.stereotype.Service;
-import javax.cache.CacheManager;
+
 import java.time.Duration;
-import java.util.function.Supplier;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
-import org.springframework.beans.factory.annotation.Qualifier;
-
+/**
+ * Simple in-memory rate limiter using bucket4j.
+ * Resets cleanly on each application restart — suitable for development.
+ * For production, swap the ConcurrentHashMap for a Redis-backed ProxyManager.
+ */
 @Service
 public class RateLimitService {
 
-    private final CacheManager cacheManager;
-    private final ProxyManager<String> proxyManager;
+    // ConcurrentHashMap — volatile in-memory only, resets on restart
+    private final Map<String, Bucket> buckets = new ConcurrentHashMap<>();
 
-    public RateLimitService(@Qualifier("jCacheManager") CacheManager cacheManager) {
-        this.cacheManager = cacheManager;
-        this.proxyManager = new JCacheProxyManager<>(cacheManager.getCache("rate-limit-buckets"));
-    }
-
+    /**
+     * Resolve or create a rate-limit bucket for the given key (e.g. client IP).
+     * Allows 50 attempts per 15 minutes with greedy refill.
+     */
     public Bucket resolveBucket(String key) {
-        Supplier<BucketConfiguration> configSupplier = () -> BucketConfiguration.builder()
-                .addLimit(Bandwidth.classic(5, Refill.greedy(5, Duration.ofMinutes(15))))
-                .build();
-        return proxyManager.builder().build(key, configSupplier);
+        return buckets.computeIfAbsent(key, k ->
+                Bucket.builder()
+                        .addLimit(Bandwidth.classic(50, Refill.greedy(50, Duration.ofMinutes(15))))
+                        .build()
+        );
     }
 
     public boolean tryConsume(String key) {

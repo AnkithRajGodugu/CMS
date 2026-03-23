@@ -42,6 +42,9 @@ public class DataInitializer implements CommandLineRunner {
     private InventoryItemRepository inventoryItemRepository;
 
     @Autowired
+    private VehicleRepository vehicleRepository;
+
+    @Autowired
     private ProjectRepository projectRepository;
 
     @Autowired
@@ -214,6 +217,40 @@ public class DataInitializer implements CommandLineRunner {
                 .build();
             shipmentRepository.save(ship2);
             System.out.println("✅ Sample shipments initialized");
+        }
+
+        /* =========================
+           VEHICLES
+        ========================== */
+        if (vehicleRepository.count() == 0) {
+            Vehicle v1 = Vehicle.builder()
+                .plateNumber("TN-01-AB-1234")
+                .model("Tata Ace")
+                .status(Vehicle.VehicleStatus.AVAILABLE)
+                .capacity(1.5)
+                .currentDriver("Ramesh Kumar")
+                .build();
+            vehicleRepository.save(v1);
+
+            Vehicle v2 = Vehicle.builder()
+                .plateNumber("MH-12-CD-5678")
+                .model("Ashok Leyland Dost")
+                .status(Vehicle.VehicleStatus.IN_USE)
+                .capacity(2.5)
+                .currentDriver("Suresh Patel")
+                .build();
+            vehicleRepository.save(v2);
+
+            Vehicle v3 = Vehicle.builder()
+                .plateNumber("DL-09-EF-9012")
+                .model("Mahindra Bolero Pickup")
+                .status(Vehicle.VehicleStatus.MAINTENANCE)
+                .capacity(1.0)
+                .currentDriver("Vijay Singh")
+                .build();
+            vehicleRepository.save(v3);
+
+            System.out.println("✅ Sample vehicles initialized");
         }
 
         if (inventoryItemRepository.count() == 0) {

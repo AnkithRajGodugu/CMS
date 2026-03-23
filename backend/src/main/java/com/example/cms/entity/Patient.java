@@ -6,8 +6,13 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
+
 @Entity
 @Table(name = "patients")
+@SQLDelete(sql = "UPDATE patients SET deleted = true WHERE id=?")
+@SQLRestriction("deleted = false")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Patient {
     @Id
@@ -38,6 +43,9 @@ public class Patient {
 
     @Column(updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
+
+    @Column(name = "deleted", nullable = false)
+    private boolean deleted = false;
 
     public enum PatientStatus {
         STABLE, MONITORING, CRITICAL, DISCHARGED
@@ -90,4 +98,7 @@ public class Patient {
     public void setAddress(String address) { this.address = address; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
+
+    public boolean isDeleted() { return deleted; }
+    public void setDeleted(boolean deleted) { this.deleted = deleted; }
 }

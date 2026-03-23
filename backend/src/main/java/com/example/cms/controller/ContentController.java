@@ -15,6 +15,9 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 
 @RestController
 @RequestMapping("/api/content")
@@ -29,8 +32,8 @@ public class ContentController {
     // --- Projects ---
     @GetMapping("/projects")
     @Operation(summary = "Get all projects")
-    public ApiResponse<List<Project>> getAllProjects() {
-        return ApiResponse.success(projectRepository.findAll());
+    public ApiResponse<Page<Project>> getAllProjects(@PageableDefault(size = 20) Pageable pageable) {
+        return ApiResponse.success(projectRepository.findAll(pageable));
     }
 
     @PostMapping("/projects")
@@ -50,8 +53,8 @@ public class ContentController {
     // --- Content Assets ---
     @GetMapping("/assets")
     @Operation(summary = "Get all content assets")
-    public ApiResponse<List<ContentAsset>> getAllAssets() {
-        return ApiResponse.success(contentAssetRepository.findAll());
+    public ApiResponse<Page<ContentAsset>> getAllAssets(@PageableDefault(size = 20) Pageable pageable) {
+        return ApiResponse.success(contentAssetRepository.findAll(pageable));
     }
 
     @PostMapping("/assets")

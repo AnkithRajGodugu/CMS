@@ -45,15 +45,28 @@ public class AuthService {
     ========================================================== */
 
     public Optional<User> authenticate(String login, String password) {
-        // Try username first
+        // Try exact username match first (fast path — username column is not encrypted)
         User user = userRepository.findByUsername(login);
 
+        // If no username match and looks like an email, scan in-memory
+        // NOTE: We CANNOT use findByEmail(email) because the email column is AES-GCM
+        // encrypted with a random IV per write — each ciphertext is unique,
+        // so a DB-level equality query will never match plaintext input.
         if (user == null && login.contains("@")) {
-            try {
-                user = userRepository.findByEmail(login.toLowerCase().trim());
-            } catch (Exception e) {
-                log.warn("Could not lookup user by email: {}", e.getMessage());
-            }
+            String normalised = login.toLowerCase().trim();
+            user = userRepository.findAll().stream()
+                    .filter(u -> {
+                        try {
+                            String decryptedEmail = u.getEmail(); // JPA converter decrypts here
+                            return normalised.equals(decryptedEmail);
+                        } catch (Exception ignored) {
+                            // Email was encrypted with a different key (e.g. old random key)
+                            // — skip this user safely
+                            return false;
+                        }
+                    })
+                    .findFirst()
+                    .orElse(null);
         }
 
         if (user != null && passwordEncoder.matches(password, user.getPassword())) {

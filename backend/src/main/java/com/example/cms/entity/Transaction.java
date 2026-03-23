@@ -6,6 +6,9 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
+
 @Entity
 @Table(name = "transactions", indexes = {
     @Index(name = "idx_transactions_transaction_id", columnList = "transactionId"),
@@ -16,6 +19,8 @@ import java.time.LocalDateTime;
     @Index(name = "idx_transactions_processed_at", columnList = "processedAt"),
     @Index(name = "idx_transactions_account_status_date", columnList = "accountNumber, status, createdAt")
 })
+@SQLDelete(sql = "UPDATE transactions SET deleted = true WHERE id=?")
+@SQLRestriction("deleted = false")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Transaction {
     @Id
@@ -46,6 +51,9 @@ public class Transaction {
     private LocalDateTime createdAt = LocalDateTime.now();
 
     private LocalDateTime processedAt;
+
+    @Column(name = "deleted", nullable = false)
+    private boolean deleted = false;
 
     public enum TransactionType {
         DEPOSIT, WITHDRAWAL, TRANSFER, PAYMENT
@@ -94,4 +102,7 @@ public class Transaction {
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public LocalDateTime getProcessedAt() { return processedAt; }
+
+    public boolean isDeleted() { return deleted; }
+    public void setDeleted(boolean deleted) { this.deleted = deleted; }
 }

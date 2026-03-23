@@ -12,6 +12,9 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 
 @RestController
 @RequestMapping("/api/sectors/healthcare")
@@ -26,8 +29,9 @@ public class HealthcareController {
 
     // Patient Management Endpoints
     @GetMapping("/patients")
-    public ResponseEntity<List<Patient>> getAllPatients() {
-        List<Patient> patients = patientRepository.findAll();
+    public ResponseEntity<Page<Patient>> getAllPatients(
+            @PageableDefault(size = 20, page = 0) Pageable pageable) {
+        Page<Patient> patients = patientRepository.findAll(pageable);
         return ResponseEntity.ok(patients);
     }
 
@@ -69,8 +73,9 @@ public class HealthcareController {
 
     // Appointment Management Endpoints
     @GetMapping("/appointments")
-    public ResponseEntity<List<Appointment>> getAllAppointments() {
-        List<Appointment> appointments = appointmentRepository.findAll();
+    public ResponseEntity<Page<Appointment>> getAllAppointments(
+            @PageableDefault(size = 20, page = 0) Pageable pageable) {
+        Page<Appointment> appointments = appointmentRepository.findAll(pageable);
         return ResponseEntity.ok(appointments);
     }
 

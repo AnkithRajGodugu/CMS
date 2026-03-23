@@ -27,6 +27,7 @@ const SettingsPage = lazy(() => import("./pages/profile/SettingsPage"));
 const OrganizationSettingsPage = lazy(() => import("./pages/profile/OrganizationSettingsPage"));
 const ForgotPasswordPage = lazy(() => import("./pages/auth/ForgotPasswordPage"));
 const ResetPasswordPage = lazy(() => import("./pages/auth/ResetPasswordPage"));
+const OrganizationSignupPage = lazy(() => import("./pages/auth/OrganizationSignupPage"));
 
 /* ---------------- Sector Pages ---------------- */
 
@@ -82,6 +83,24 @@ const ContentCalendarPage = lazy(() => import("./pages/content-creation/ContentC
 const CollaborationToolsPage = lazy(() => import("./pages/content-creation/CollaborationToolsPage"));
 const AssetManagementPage = lazy(() => import("./pages/content-creation/AssetManagementPage"));
 const TimeTrackingPage = lazy(() => import("./pages/content-creation/TimeTrackingPage"));
+/* ---------------- Healthcare Pages ---------------- */
+
+const PatientRecordsPage = lazy(() => import("./pages/healthcare/PatientRecordsPage"));
+const AppointmentSchedulingPage = lazy(() => import("./pages/healthcare/AppointmentSchedulingPage"));
+const MedicalHistoryPage = lazy(() => import("./pages/healthcare/MedicalHistoryPage"));
+const InsuranceManagementPage = lazy(() => import("./pages/healthcare/InsuranceManagementPage"));
+
+/* ---------------- New Logistics Pages ---------------- */
+
+const ServiceLevelAgreementPage = lazy(() => import("./pages/logistics-&-supply/ServiceLevelAgreementPage"));
+
+/* ---------------- New Content Pages ---------------- */
+
+const CreativeCollaborationPage = lazy(() => import("./pages/content-creation/CreativeCollaborationPage"));
+const ContentDistributionPage = lazy(() => import("./pages/content-creation/ContentDistributionPage"));
+const CreatorAnalyticPage = lazy(() => import("./pages/content-creation/CreatorAnalyticPage"));
+const WorkflowAutomationPage = lazy(() => import("./pages/content-creation/WorkflowAutomationPage"));
+
 /* ---------------- Loading UI ---------------- */
 
 const LoadingSpinner = () => (
@@ -107,6 +126,7 @@ function App() {
                             <Route path="/" element={<ProfessionalLandingPage />} />
                             <Route path="/login" element={<LoginPage />} />
                             <Route path="/signup" element={<SignupPage />} />
+                            <Route path="/register-organization" element={<OrganizationSignupPage />} />
                             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
                             <Route path="/reset-password" element={<ResetPasswordPage />} />
                             <Route path="/test-credentials" element={<TestCredentialsPage />} />
@@ -241,6 +261,13 @@ function App() {
                             <Route path="/dashboard/logistics/routes" element={<ProtectedRoute><LogisticsRouteOptimizationPage /></ProtectedRoute>} />
                             <Route path="/dashboard/logistics/warehouse" element={<ProtectedRoute><LogisticsWarehouseManagementPage /></ProtectedRoute>} />
                             <Route path="/dashboard/logistics/vendors" element={<ProtectedRoute><LogisticsVendorRelationsPage /></ProtectedRoute>} />
+                            <Route path="/dashboard/logistics/sla" element={<ProtectedRoute><ServiceLevelAgreementPage /></ProtectedRoute>} />
+
+                            {/* Healthcare Sub-Pages */}
+                            <Route path="/dashboard/healthcare/patients" element={<ProtectedRoute><PatientRecordsPage /></ProtectedRoute>} />
+                            <Route path="/dashboard/healthcare/appointments" element={<ProtectedRoute><AppointmentSchedulingPage /></ProtectedRoute>} />
+                            <Route path="/dashboard/healthcare/medical-history" element={<ProtectedRoute><MedicalHistoryPage /></ProtectedRoute>} />
+                            <Route path="/dashboard/healthcare/insurance" element={<ProtectedRoute><InsuranceManagementPage /></ProtectedRoute>} />
 
                             <Route
                                 path="/dashboard/content"
@@ -257,6 +284,10 @@ function App() {
                             <Route path="/dashboard/content/collaboration" element={<ProtectedRoute><CollaborationToolsPage /></ProtectedRoute>} />
                             <Route path="/dashboard/content/assets" element={<ProtectedRoute><AssetManagementPage /></ProtectedRoute>} />
                             <Route path="/dashboard/content/time" element={<ProtectedRoute><TimeTrackingPage /></ProtectedRoute>} />
+                            <Route path="/dashboard/content/creative-collab" element={<ProtectedRoute><CreativeCollaborationPage /></ProtectedRoute>} />
+                            <Route path="/dashboard/content/distribution" element={<ProtectedRoute><ContentDistributionPage /></ProtectedRoute>} />
+                            <Route path="/dashboard/content/analytics" element={<ProtectedRoute><CreatorAnalyticPage /></ProtectedRoute>} />
+                            <Route path="/dashboard/content/workflow" element={<ProtectedRoute><WorkflowAutomationPage /></ProtectedRoute>} />
 
                             {/* ---------------- INFO PAGES ---------------- */}
 
