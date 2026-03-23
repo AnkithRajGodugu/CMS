@@ -1,7 +1,5 @@
 import { useEffect, useState } from 'react';
 import { getCustomers } from '../../services/customerService';
-import Header from '../../components/layout/Header';
-import Footer from '../../components/layout/Footer';
 import ReportExportButtons from '../../components/shared/ReportExportButtons';
 
 const CustomersPage = () => {
@@ -34,7 +32,7 @@ const CustomersPage = () => {
 
     return (
         <div className="min-h-screen bg-base-200">
-            <Header />
+            
 
             <div className="max-w-6xl mx-auto p-6">
                 <div className="flex justify-between items-center mb-6">
@@ -88,8 +86,6 @@ const CustomersPage = () => {
                     </>
                 )}
             </div>
-
-            <Footer />
         </div>
     );
 };

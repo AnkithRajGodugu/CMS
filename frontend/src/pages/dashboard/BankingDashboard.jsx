@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import DashboardLayout from '../../components/dashboard/DashboardLayout';
+import { Link } from 'react-router-dom';
 import {
   getBankingDashboardStats,
   getRecentTransactions
@@ -83,10 +83,10 @@ const BankingDashboard = () => {
   };
 
   return (
-    <DashboardLayout>
+    <div className="space-y-6">
       <div className="space-y-6">
 
-        {/* Header */}
+        
         <div className="flex justify-between items-center">
           <div>
             <h1 className="text-3xl font-bold">Banking Dashboard</h1>
@@ -143,6 +143,45 @@ const BankingDashboard = () => {
 
           </div>
         )}
+
+        {/* Quick Actions */}
+        <div className="mb-8 mt-8">
+          <h2 className="text-2xl font-bold mb-4">Quick Actions</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <Link to="/dashboard/banking/accounts">
+              <div className="card bg-base-100 shadow-xl hover:shadow-2xl transition-all cursor-pointer">
+                <div className="card-body items-center text-center">
+                  <div className="p-4 rounded-full bg-primary text-white mb-2 text-2xl">💳</div>
+                  <h3 className="card-title text-sm">Accounts</h3>
+                </div>
+              </div>
+            </Link>
+            <Link to="/dashboard/banking/transactions">
+              <div className="card bg-base-100 shadow-xl hover:shadow-2xl transition-all cursor-pointer">
+                <div className="card-body items-center text-center">
+                  <div className="p-4 rounded-full bg-success text-white mb-2 text-2xl">💰</div>
+                  <h3 className="card-title text-sm">Transactions</h3>
+                </div>
+              </div>
+            </Link>
+            <Link to="/dashboard/banking/customers">
+              <div className="card bg-base-100 shadow-xl hover:shadow-2xl transition-all cursor-pointer">
+                <div className="card-body items-center text-center">
+                  <div className="p-4 rounded-full bg-info text-white mb-2 text-2xl">👥</div>
+                  <h3 className="card-title text-sm">Customers</h3>
+                </div>
+              </div>
+            </Link>
+            <Link to="/dashboard/banking/compliance">
+              <div className="card bg-base-100 shadow-xl hover:shadow-2xl transition-all cursor-pointer">
+                <div className="card-body items-center text-center">
+                  <div className="p-4 rounded-full bg-warning text-white mb-2 text-2xl">⚖️</div>
+                  <h3 className="card-title text-sm">Compliance</h3>
+                </div>
+              </div>
+            </Link>
+          </div>
+        </div>
 
         {/* Recent Transactions */}
         <div className="card bg-base-100 shadow-lg">
@@ -223,7 +262,7 @@ const BankingDashboard = () => {
         </div>
 
       </div>
-    </DashboardLayout>
+    </div>
   );
 };
 

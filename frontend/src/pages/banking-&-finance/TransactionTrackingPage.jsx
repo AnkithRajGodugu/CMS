@@ -13,8 +13,9 @@ const TransactionTrackingPage = () => {
 
     const loadTransactions = async () => {
         try {
-            const res = await getTransactions();
-            setTransactions(res.data || []);
+            // Handle both Spring Page objects (res.data.content) and raw arrays
+            const transactionData = res.data?.content || res.data || [];
+            setTransactions(Array.isArray(transactionData) ? transactionData : []);
         } catch (err) {
             console.error("Failed to load transactions", err);
         } finally {

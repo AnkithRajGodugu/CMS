@@ -71,7 +71,7 @@ const TestCredentialsPage = () => {
   return (
     <div className="min-h-screen bg-base-200 py-12 px-4">
       <div className="container mx-auto max-w-6xl">
-        {/* Header */}
+        
         <div className="text-center mb-10">
           <div className="flex items-center justify-center gap-3 mb-4">
             <FaShieldAlt className="text-4xl text-primary" />

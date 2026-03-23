@@ -1,6 +1,5 @@
 import { useContext, useState } from 'react';
 import { AuthContext } from '../../context/auth';
-import DashboardLayout from '../../components/dashboard/DashboardLayout';
 import api from '../../services/api';
 
 const SettingsPage = () => {
@@ -55,10 +54,10 @@ const SettingsPage = () => {
   };
 
   return (
-    <DashboardLayout>
+    <div className="space-y-6">
       <div className="space-y-8 max-w-2xl mx-auto">
 
-        {/* Header */}
+        
         <div>
           <h1 className="text-3xl font-bold">Account Settings</h1>
           <p className="text-base-content/60">Manage your profile and security</p>
@@ -150,7 +149,7 @@ const SettingsPage = () => {
         </div>
 
       </div>
-    </DashboardLayout>
+    </div>
   );
 };
 

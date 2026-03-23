@@ -1,7 +1,4 @@
 import { Link } from "react-router-dom";
-import Header from "../../components/layout/Header";
-import Footer from "../../components/layout/Footer";
-
 const BankingSectorPage = () => {
   const features = [
     {
@@ -67,7 +64,7 @@ const BankingSectorPage = () => {
 
   return (
     <div className="min-h-screen">
-      <Header />
+      
 
       {/* Hero Section */}
       <section className="hero min-h-[60vh] bg-gradient-to-r from-blue-500 to-blue-700">
@@ -259,8 +256,6 @@ const BankingSectorPage = () => {
           </div>
         </div>
       </section>
-
-      <Footer />
     </div>
   );
 };

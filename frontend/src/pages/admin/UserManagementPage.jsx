@@ -63,7 +63,7 @@ const UserManagementPage = () => {
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl animate-fade-in flex flex-col gap-6">
       
-      {/* Header */}
+      
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-base-content tracking-tight">User Management</h1>

@@ -1,6 +1,4 @@
 import React, { useState } from 'react';
-import Header from '../../components/layout/Header';
-import Footer from '../../components/layout/Footer';
 import { useAuth } from '../../hooks/useAuth';
 import { Link } from 'react-router-dom';
 
@@ -11,13 +9,12 @@ const MedicalHistoryPage = () => {
   if (!user || user.role !== 'healthcare') {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-green-100 to-green-300">
-        <Header />
+        
         <div className="bg-white rounded-xl shadow-lg p-8 text-center">
           <h2 className="text-3xl font-bold mb-4 text-green-700">Healthcare Login Required</h2>
           <p className="mb-6 text-green-900/80">Please log in with your healthcare credentials to access medical history.</p>
           <Link to="/login" className="btn btn-primary">Login</Link>
         </div>
-        <Footer />
       </div>
     );
   }
@@ -49,7 +46,7 @@ const MedicalHistoryPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-100 to-green-300">
-      <Header />
+      
       <section className="py-20">
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center mb-16">
@@ -208,7 +205,6 @@ const MedicalHistoryPage = () => {
           </div>
         </div>
       </section>
-      <Footer />
     </div>
   );
 };

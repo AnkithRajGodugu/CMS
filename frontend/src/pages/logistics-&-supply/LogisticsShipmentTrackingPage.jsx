@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import Header from '../../components/layout/Header';
-import Footer from '../../components/layout/Footer';
 import { useAuth } from '../../hooks/useAuth';
 import { Link } from 'react-router-dom';
 import api from '../../services/api';
@@ -83,21 +81,20 @@ const LogisticsShipmentTrackingPage = () => {
   if (!user || user.role !== 'logistics') {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-base-200">
-        <Header />
+        
         <div className="card bg-base-100 shadow-xl p-8 text-center max-w-md mx-auto mt-20">
           <FaExclamationTriangle className="text-6xl text-warning mx-auto mb-4" />
           <h2 className="text-3xl font-bold mb-4">Logistics Access Only</h2>
           <p className="mb-6 text-base-content/70">Please log in with your logistics credentials to track shipments.</p>
           <Link to="/login" className="btn btn-primary">Go to Login</Link>
         </div>
-        <Footer />
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-base-200 flex flex-col">
-      <Header />
+      
       
       <main className="flex-grow pt-24 pb-12 px-4 md:px-8">
         <div className="max-w-7xl mx-auto">
@@ -284,8 +281,6 @@ const LogisticsShipmentTrackingPage = () => {
           </div>
         </div>
       )}
-
-      <Footer />
     </div>
   );
 };

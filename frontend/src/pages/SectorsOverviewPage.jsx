@@ -1,7 +1,4 @@
 import { Link } from 'react-router-dom';
-import Header from '../components/layout/Header';
-import Footer from '../components/layout/Footer';
-
 const SectorsOverviewPage = () => {
   const sectors = [
     {
@@ -44,7 +41,7 @@ const SectorsOverviewPage = () => {
 
   return (
     <div className="min-h-screen">
-      <Header />
+      
       
       {/* Hero Section */}
       <section className="hero min-h-[50vh] gradient-bg">
@@ -195,8 +192,6 @@ const SectorsOverviewPage = () => {
           </div>
         </div>
       </section>
-
-      <Footer />
     </div>
   );
 };

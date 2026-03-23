@@ -1,7 +1,4 @@
 import { Link } from 'react-router-dom';
-import Header from '../../components/layout/Header';
-import Footer from '../../components/layout/Footer';
-
 const ContentCreationSectorPage = () => {
   const features = [
     {
@@ -62,7 +59,7 @@ const ContentCreationSectorPage = () => {
 
   return (
     <div className="min-h-screen">
-      <Header />
+      
       
       {/* Hero Section */}
       <section className="hero min-h-[60vh] bg-gradient-to-r from-purple-500 to-purple-700">
@@ -325,8 +322,6 @@ const ContentCreationSectorPage = () => {
           </div>
         </div>
       </section>
-
-      <Footer />
     </div>
   );
 };

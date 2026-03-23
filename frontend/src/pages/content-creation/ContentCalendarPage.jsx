@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import Header from '../../components/layout/Header';
-import Footer from '../../components/layout/Footer';
 import { useAuth } from '../../hooks/useAuth';
 import { Link } from 'react-router-dom';
 import api from '../../services/api';
@@ -42,13 +40,12 @@ const ContentCalendarPage = () => {
   if (!user || user.role !== 'content') {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-base-200">
-        <Header />
+        
         <div className="card bg-base-100 shadow-xl p-8 text-center max-w-md mx-auto mt-20">
           <FaExclamationTriangle className="text-6xl text-warning mx-auto mb-4" />
           <h2 className="text-3xl font-bold mb-4">Content Sector Access Only</h2>
           <Link to="/login" className="btn btn-primary">Go to Login</Link>
         </div>
-        <Footer />
       </div>
     );
   }
@@ -60,7 +57,7 @@ const ContentCalendarPage = () => {
 
   return (
     <div className="min-h-screen bg-base-200 flex flex-col">
-      <Header />
+      
       <main className="flex-grow pt-24 pb-12 px-4 md:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
@@ -127,7 +124,6 @@ const ContentCalendarPage = () => {
           </div>
         </div>
       </main>
-      <Footer />
     </div>
   );
 };

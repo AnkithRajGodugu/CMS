@@ -1,8 +1,8 @@
 import { Link } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
-import { useTheme } from '../context/SafeThemeContext';
-import DynamicLogo from './logos/DynamicLogo';
-import NotificationsDropdown from './NotificationsDropdown';
+import { useAuth } from '../../hooks/useAuth';
+import { useTheme } from '../../context/SafeThemeContext';
+import DynamicLogo from '../logos/DynamicLogo';
+import NotificationsDropdown from '../NotificationsDropdown';
 
 const SafeNavbar = () => {
   const { user, logout, isAuthenticated } = useAuth();
@@ -39,14 +39,7 @@ const SafeNavbar = () => {
                 Sectors
               </Link>
             </li>
-            <li>
-              <Link 
-                to="/customers"
-                className="hover:text-primary transition-colors"
-              >
-                Customers
-              </Link>
-            </li>
+
             {user?.role === 'ADMIN' && (
               <li>
                 <Link 

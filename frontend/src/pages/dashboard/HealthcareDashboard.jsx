@@ -20,7 +20,7 @@ const HealthcareDashboard = () => {
   return (
     <div className="min-h-screen bg-base-200">
       <div className="container mx-auto p-6">
-        {/* Header */}
+        
           <div className="flex justify-between items-end mb-2">
             <div>
               <div className="flex items-center gap-3 mb-2">

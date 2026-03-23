@@ -483,7 +483,7 @@ For critical issues affecting business operations:
 
   return (
     <div className="min-h-screen bg-base-100">
-      {/* Header */}
+      
       <div 
         className="bg-gradient-to-r text-white py-16"
         style={{ 

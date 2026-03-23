@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../../context/auth';
-import DashboardLayout from '../../components/dashboard/DashboardLayout';
 import api from '../../services/api';
 import { toast } from 'sonner';
 import { Shield } from 'lucide-react';
@@ -58,14 +57,14 @@ const AuditLogsPage = () => {
 
     if (user?.role !== 'ADMIN') {
         return (
-            <DashboardLayout>
+            <div className="space-y-6">
                 <div className="alert alert-error">Unauthorized</div>
-            </DashboardLayout>
+            </div>
         );
     }
 
     return (
-        <DashboardLayout>
+        <div className="space-y-6">
             <div className="space-y-6">
                 <div>
                     <h1 className="text-3xl font-bold flex items-center gap-2">
@@ -204,7 +203,7 @@ const AuditLogsPage = () => {
                     )}
                 </div>
             </div>
-        </DashboardLayout>
+        </div>
     );
 };
 

@@ -1,26 +1,11 @@
 import React, { useState } from 'react';
-import Header from '../../components/layout/Header';
-import Footer from '../../components/layout/Footer';
 import { useAuth } from '../../hooks/useAuth';
 import { Link } from 'react-router-dom';
 
 const ComplianceToolsPage = () => {
   const { user } = useAuth();
   const [selectedReport, setSelectedReport] = useState('aml');
-    //if(!user){
-  if (!user || user.role !== 'banking') {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-100 to-blue-300">
-        <Header />
-        <div className="bg-white rounded-xl shadow-lg p-8 text-center">
-          <h2 className="text-3xl font-bold mb-4 text-blue-700">Banking Login Required</h2>
-          <p className="mb-6 text-blue-900/80">Please log in with your banking credentials to access compliance tools.</p>
-          <Link to="/login" className="btn btn-primary">Login</Link>
-        </div>
-        <Footer />
-      </div>
-    );
-  }
+  // ProtectedRoute handles auth validation, removing fake login error blocks.
 
   const complianceMetrics = [
     { name: 'AML Compliance', score: 98, status: 'Excellent', color: 'text-green-600' },
@@ -38,7 +23,7 @@ const ComplianceToolsPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-100 to-blue-300">
-      <Header />
+      
       <section className="py-20">
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center mb-16">
@@ -156,7 +141,6 @@ const ComplianceToolsPage = () => {
           </div>
         </div>
       </section>
-      <Footer />
     </div>
   );
 };

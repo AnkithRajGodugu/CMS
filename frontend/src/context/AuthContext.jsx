@@ -70,6 +70,7 @@ export const AuthProvider = ({ children }) => {
     authLogout();
     setUser(null);
     setSector(null);
+    window.location.href = '/login';
   };
 
   /**

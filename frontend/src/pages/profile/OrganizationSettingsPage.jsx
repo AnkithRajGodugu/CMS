@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../../context/auth';
-import DashboardLayout from '../../components/dashboard/DashboardLayout';
 import api from '../../services/api';
 import { toast } from 'sonner';
 import { Save, Plus, Trash2, Building, Webhook, Eye, EyeOff } from 'lucide-react';
@@ -147,7 +146,7 @@ const OrganizationSettingsPage = () => {
     };
 
     return (
-        <DashboardLayout>
+        <div className="space-y-6">
             <div className="max-w-4xl mx-auto space-y-6">
                 <div>
                     <h1 className="text-3xl font-bold flex items-center gap-2">
@@ -355,7 +354,7 @@ const OrganizationSettingsPage = () => {
                     </form>
                 )}
             </div>
-        </DashboardLayout>
+        </div>
     );
 };
 

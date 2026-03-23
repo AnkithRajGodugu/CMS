@@ -1,6 +1,4 @@
 import React, { useState } from 'react';
-import Header from '../../components/layout/Header';
-import Footer from '../../components/layout/Footer';
 import { useAuth } from '../../hooks/useAuth';
 import { Link } from 'react-router-dom';
 
@@ -8,20 +6,7 @@ const RiskAssessmentPage = () => {
   const { user } = useAuth();
   const [selectedCustomer, setSelectedCustomer] = useState('');
   
-  if (!user || user.role !== 'banking') {
-    //if(!user){
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-100 to-blue-300">
-        <Header />
-        <div className="bg-white rounded-xl shadow-lg p-8 text-center">
-          <h2 className="text-3xl font-bold mb-4 text-blue-700">Banking Login Required</h2>
-          <p className="mb-6 text-blue-900/80">Please log in with your banking credentials to access risk assessment tools.</p>
-          <Link to="/login" className="btn btn-primary">Login</Link>
-        </div>
-        <Footer />
-      </div>
-    );
-  }
+  // ProtectedRoute handles auth validation.
 
   const riskProfiles = [
     { id: 'CUST001', name: 'John Doe', riskScore: 25, level: 'Low', factors: ['Stable Income', 'Good Credit'] },
@@ -39,7 +24,7 @@ const RiskAssessmentPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-100 to-blue-300">
-      <Header />
+      
       <section className="py-20">
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center mb-16">
@@ -203,7 +188,6 @@ const RiskAssessmentPage = () => {
           </div>
         </div>
       </section>
-      <Footer />
     </div>
   );
 };
