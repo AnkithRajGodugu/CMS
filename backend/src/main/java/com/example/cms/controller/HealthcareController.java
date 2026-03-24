@@ -2,23 +2,30 @@ package com.example.cms.controller;
 
 import com.example.cms.entity.Patient;
 import com.example.cms.entity.Appointment;
+import com.example.cms.entity.User;
 import com.example.cms.repository.PatientRepository;
 import com.example.cms.repository.AppointmentRepository;
+import com.example.cms.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
 
 @RestController
 @RequestMapping("/api/sectors/healthcare")
-@PreAuthorize("hasRole('ADMIN') or hasRole('healthcare')")
+@PreAuthorize("hasRole('ADMIN') or hasRole('USER') or hasRole('healthcare')")
 public class HealthcareController {
 
     @Autowired
@@ -26,6 +33,54 @@ public class HealthcareController {
 
     @Autowired
     private AppointmentRepository appointmentRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    private User getCurrentUser() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated() || auth.getPrincipal().equals("anonymousUser")) {
+            return null;
+        }
+
+        Object principal = auth.getPrincipal();
+        if (principal instanceof com.example.cms.security.CustomUserDetails customUserDetails) {
+            return customUserDetails.getUser();
+        }
+
+        return null;
+    }
+
+    @GetMapping("/my-dashboard")
+    public ResponseEntity<Map<String, Object>> getMyDashboard() {
+        User user = getCurrentUser();
+        if (user == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+
+        Map<String, Object> stats = new HashMap<>();
+        List<Appointment> appointments = appointmentRepository.findByUser(user);
+        
+        stats.put("totalAppointments", appointments.size());
+        stats.put("confirmedAppointments", appointments.stream().filter(a -> a.getStatus() == Appointment.AppointmentStatus.CONFIRMED).count());
+        stats.put("pendingAppointments", appointments.stream().filter(a -> a.getStatus() == Appointment.AppointmentStatus.PENDING).count());
+        
+        // Sample vitals for the dashboard (since we don't have a Vitals entity yet, we'll return some static real-looking data linked to user)
+        stats.put("vitals", Map.of(
+            "heartRate", "72 bpm",
+            "bloodPressure", "120/80",
+            "temperature", "98.6°F",
+            "weight", "70 kg"
+        ));
+
+        return ResponseEntity.ok(stats);
+    }
+
+    @GetMapping("/my-appointments")
+    public ResponseEntity<Page<Appointment>> getMyAppointments(
+            @PageableDefault(size = 20, page = 0) Pageable pageable) {
+        User user = getCurrentUser();
+        if (user == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        return ResponseEntity.ok(appointmentRepository.findByUser(user, pageable));
+    }
 
     // Patient Management Endpoints
     @GetMapping("/patients")

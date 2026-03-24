@@ -5,6 +5,7 @@ import {
   getRecentTransactions
 } from '../../services/bankingService';
 import ReportExportButtons from '../../components/shared/ReportExportButtons';
+import SystemMetricsWidget from '../../components/shared/SystemMetricsWidget';
 
 const BankingDashboard = () => {
 
@@ -100,6 +101,9 @@ const BankingDashboard = () => {
             <button className="btn btn-primary">New Account</button>
           </div>
         </div>
+
+        {/* System Metrics (Visible only to Admins) */}
+        <SystemMetricsWidget />
 
         {/* Stats Cards */}
         {loadingStats ? (

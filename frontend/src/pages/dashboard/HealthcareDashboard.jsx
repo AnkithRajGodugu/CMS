@@ -1,8 +1,11 @@
 import { Link } from 'react-router-dom';
 import { FaHospital, FaUserMd, FaCalendarCheck, FaFileMedical, FaShieldAlt } from 'react-icons/fa';
 import ReportExportButtons from '../../components/shared/ReportExportButtons';
+import { useAuth } from '../../hooks/useAuth';
+import SystemMetricsWidget from '../../components/shared/SystemMetricsWidget';
 
 const HealthcareDashboard = () => {
+  const { user } = useAuth();
   const stats = [
     { label: 'Total Patients', value: '1,234', change: '+12%', icon: FaUserMd, color: 'text-success' },
     { label: 'Appointments Today', value: '45', change: '+5%', icon: FaCalendarCheck, color: 'text-info' },
@@ -31,6 +34,8 @@ const HealthcareDashboard = () => {
             </div>
             <ReportExportButtons sectorCode="HEALTHCARE" />
           </div>
+
+        {user?.role === 'ADMIN' && <SystemMetricsWidget />}
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">

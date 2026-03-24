@@ -76,7 +76,7 @@ public class User {
     private LocalDateTime lastLogin;
 
     public enum Role {
-        ADMIN, MANAGER, USER, BANKING, HEALTHCARE, LOGISTICS, CONTENT
+        ADMIN, MANAGER, USER, SUPERADMIN
     }
 
     // Backward compatibility constructor

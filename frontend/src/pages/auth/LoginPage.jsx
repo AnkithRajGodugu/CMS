@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { login as authLogin } from '../../utils/auth';
+import { getHomeRoute } from '../../utils/roleUtils';
 
 const LoginPage = () => {
     const [formData, setFormData] = useState({
@@ -39,24 +40,9 @@ const LoginPage = () => {
 
             console.log("SECTOR CODE:", sectorCode);
 
-            // 🔥 Safe navigation
-            switch (sectorCode) {
-                case 'banking':
-                    navigate('/dashboard/banking');
-                    break;
-                case 'healthcare':
-                    navigate('/dashboard/healthcare');
-                    break;
-                case 'logistics':
-                    navigate('/dashboard/logistics');
-                    break;
-                case 'content':
-                    navigate('/dashboard/content');
-                    break;
-                default:
-                    console.warn('Unknown sector → redirecting to /sectors');
-                    navigate('/sectors');
-            }
+            // 🔥 Safe navigation using roleUtils
+            const redirectPath = getHomeRoute(loginData.user, sectorCode);
+            navigate(redirectPath);
 
         } catch (err) {
             console.error('Login error:', err);
@@ -71,6 +57,10 @@ const LoginPage = () => {
             ...formData,
             [e.target.name]: e.target.value
         });
+    };
+
+    const fillCredentials = (username, password) => {
+        setFormData({ username, password });
     };
 
     return (
@@ -169,10 +159,29 @@ const LoginPage = () => {
                         <div className="text-center">
                             <Link
                                 to="/test-credentials"
-                                className="btn btn-outline btn-sm"
+                                className="btn btn-ghost btn-sm text-base-content/60 mb-2"
                             >
-                                View Test Credentials
+                                View All Test Credentials
                             </Link>
+                            
+                            <div className="bg-base-200 rounded-lg p-3">
+                                <p className="text-xs font-bold uppercase tracking-wider opacity-60 mb-2">Quick Login (Auto-fill)</p>
+                                
+                                <div className="grid grid-cols-2 gap-2 mb-2">
+                                    <button onClick={() => fillCredentials('bank_user1', 'bank123')} type="button" className="btn btn-xs btn-outline btn-info">Bank User</button>
+                                    <button onClick={() => fillCredentials('bank_admin', 'admin123')} type="button" className="btn btn-xs btn-info">Bank Admin</button>
+                                    
+                                    <button onClick={() => fillCredentials('health_user', 'health123')} type="button" className="btn btn-xs btn-outline btn-success">Health User</button>
+                                    <button onClick={() => fillCredentials('health_admin', 'admin123')} type="button" className="btn btn-xs btn-success">Health Admin</button>
+                                    
+                                    <button onClick={() => fillCredentials('logistics_user', 'logistics123')} type="button" className="btn btn-xs btn-outline btn-warning">Logistics User</button>
+                                    <button onClick={() => fillCredentials('logistics_admin', 'admin123')} type="button" className="btn btn-xs btn-warning">Logistics Admin</button>
+                                    
+                                    <button onClick={() => fillCredentials('content_user', 'content123')} type="button" className="btn btn-xs btn-outline btn-secondary">Content User</button>
+                                    <button onClick={() => fillCredentials('content_admin', 'admin123')} type="button" className="btn btn-xs btn-secondary">Content Admin</button>
+                                </div>
+                                <button onClick={() => fillCredentials('admin', 'admin123')} type="button" className="btn btn-xs btn-error w-full">Super Admin</button>
+                            </div>
                         </div>
 
                         <div className="text-center mt-6">

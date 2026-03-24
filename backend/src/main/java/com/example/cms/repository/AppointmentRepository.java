@@ -1,6 +1,9 @@
 package com.example.cms.repository;
 
 import com.example.cms.entity.Appointment;
+import com.example.cms.entity.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -13,6 +16,10 @@ import java.util.Optional;
 @Repository
 public interface AppointmentRepository extends JpaRepository<Appointment, Long> {
     
+    List<Appointment> findByUser(User user);
+    
+    Page<Appointment> findByUser(User user, Pageable pageable);
+
     Optional<Appointment> findByAppointmentId(String appointmentId);
     
     List<Appointment> findByPatientNameContainingIgnoreCase(String patientName);

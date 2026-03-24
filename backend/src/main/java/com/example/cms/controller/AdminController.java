@@ -65,19 +65,19 @@ public class AdminController {
                 admin.setSector(bankingSector);
                 userRepository.save(admin);
 
-                User bankingUser = new User("bank_user", passwordEncoder.encode("bank123"), User.Role.BANKING);
+                User bankingUser = new User("bank_user", passwordEncoder.encode("bank123"), User.Role.USER);
                 bankingUser.setSector(bankingSector);
                 userRepository.save(bankingUser);
 
-                User healthcareUser = new User("health_user", passwordEncoder.encode("health123"), User.Role.HEALTHCARE);
+                User healthcareUser = new User("health_user", passwordEncoder.encode("health123"), User.Role.USER);
                 healthcareUser.setSector(healthcareSector);
                 userRepository.save(healthcareUser);
 
-                User logisticsUser = new User("logistics_user", passwordEncoder.encode("logistics123"), User.Role.LOGISTICS);
+                User logisticsUser = new User("logistics_user", passwordEncoder.encode("logistics123"), User.Role.USER);
                 logisticsUser.setSector(logisticsSector);
                 userRepository.save(logisticsUser);
 
-                User contentUser = new User("content_user", passwordEncoder.encode("content123"), User.Role.CONTENT);
+                User contentUser = new User("content_user", passwordEncoder.encode("content123"), User.Role.USER);
                 contentUser.setSector(contentSector);
                 userRepository.save(contentUser);
 

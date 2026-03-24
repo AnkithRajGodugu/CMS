@@ -8,6 +8,7 @@
     import org.springframework.data.repository.query.Param;
     import org.springframework.stereotype.Repository;
 
+    import com.example.cms.entity.User;
     import java.math.BigDecimal;
     import java.util.List;
     import java.util.Optional;
@@ -16,6 +17,10 @@
     public interface BankAccountRepository extends JpaRepository<BankAccount, Long> {
 
         Optional<BankAccount> findByAccountNumber(String accountNumber);
+
+        List<BankAccount> findByUser(User user);
+
+        Page<BankAccount> findByUser(User user, Pageable pageable);
 
         List<BankAccount> findByCustomerNameContainingIgnoreCase(String customerName);
 

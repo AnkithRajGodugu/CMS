@@ -94,14 +94,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 // ❌ RLS DISABLED (IMPORTANT FIX)
                 // =========================
                 try {
-                    User user = userRepository.findByUsername(username);
-
-                    if (user != null && user.getId() != null) {
-
-                        // 🔥 COMMENTED TO FIX 500 ERROR
-                        // databaseContextService.setUserContext(user.getId());
-
-                        logger.debug("⚠️ RLS DISABLED - skipping DB context for user: {}", username);
+                    if (userDetails instanceof com.example.cms.security.CustomUserDetails customUserDetails) {
+                        User user = customUserDetails.getUser();
+                        if (user != null && user.getId() != null) {
+                            // databaseContextService.setUserContext(user.getId());
+                            logger.debug("⚠️ RLS DISABLED - skipping DB context for user: {}", username);
+                        }
                     }
 
                 } catch (Exception e) {

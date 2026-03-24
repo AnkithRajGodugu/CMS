@@ -1,16 +1,17 @@
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
-import { useTheme } from '../../context/SafeThemeContext';
+import { useTheme } from '../../context/SectorThemeProvider';
+import { getHomeRoute } from '../../utils/roleUtils';
 import DynamicLogo from '../logos/DynamicLogo';
 import NotificationsDropdown from '../NotificationsDropdown';
 
-const SafeNavbar = () => {
+const SafeNavbar = ({ hideSectorSwitcher = false }) => {
   const { user, logout, isAuthenticated } = useAuth();
-  const { currentTheme, changeSector, getAllSectors } = useTheme();
+  const { currentTheme, changeSector, getAllSectors, isDarkMode, toggleDarkMode } = useTheme();
 
   return (
     <div 
-      className="navbar bg-base-100 shadow-lg transition-all duration-300"
+      className="navbar bg-base-100 shadow-lg transition-all duration-300 z-50 relative"
       style={{ borderBottom: `2px solid ${currentTheme?.primary || '#1e40af'}` }}
     >
       <div className="navbar-start">
@@ -25,20 +26,22 @@ const SafeNavbar = () => {
           <ul className="menu menu-horizontal px-1">
             <li>
               <Link 
-                to={`/dashboard/${user?.sector?.toLowerCase() || 'banking'}`}
+                to={getHomeRoute(user, currentTheme?.id || 'banking')}
                 className="hover:text-primary transition-colors"
               >
                 Dashboard
               </Link>
             </li>
-            <li>
-              <Link 
-                to="/sectors"
-                className="hover:text-primary transition-colors"
-              >
-                Sectors
-              </Link>
-            </li>
+            {!hideSectorSwitcher && (
+              <li>
+                <Link 
+                  to="/sectors"
+                  className="hover:text-primary transition-colors"
+                >
+                  Sectors
+                </Link>
+              </li>
+            )}
 
             {user?.role === 'ADMIN' && (
               <li>
@@ -60,6 +63,16 @@ const SafeNavbar = () => {
                 </Link>
               </li>
             )}
+            {(user?.role === 'ADMIN' || user?.role === 'MANAGER') && (
+              <li>
+                <Link
+                  to="/admin/webhooks"
+                  className="hover:text-primary transition-colors"
+                >
+                  Webhooks
+                </Link>
+              </li>
+            )}
           </ul>
         )}
       </div>
@@ -67,11 +80,28 @@ const SafeNavbar = () => {
       <div className="navbar-end">
         <div className="flex items-center gap-2">
 
+          {/* Global Search Bar (Phase C Stretch) */}
+          {isAuthenticated && (
+            <div className="hidden md:flex relative mr-1 group">
+              <input 
+                type="text" 
+                placeholder="Search everywhere..." 
+                className="input input-sm input-bordered w-48 focus:w-64 transition-all duration-300 rounded-full bg-base-200/50 pr-8 border-transparent focus:border-primary/50"
+              />
+              <div className="absolute right-2 top-1.5 opacity-50 group-hover:opacity-100 transition-opacity flex items-center gap-1 cursor-pointer">
+                <kbd className="kbd kbd-xs bg-base-300">Ctrl</kbd>
+                <kbd className="kbd kbd-xs bg-base-300">K</kbd>
+              </div>
+            </div>
+          )}
+
           {/* Live notifications bell */}
           {isAuthenticated && <NotificationsDropdown />}
 
-          {/* Sector switcher for desktop */}
-          {isAuthenticated && (
+          {/* Theme Toggle Removed */}
+
+          {/* Sector switcher for desktop (hidden for regular users) */}
+          {isAuthenticated && !hideSectorSwitcher && (
             <div className="dropdown dropdown-end hidden lg:block">
               <div tabIndex={0} role="button" className="btn btn-ghost btn-sm flex items-center gap-2">
                 <DynamicLogo size={20} animated={false} />

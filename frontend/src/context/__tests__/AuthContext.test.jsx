@@ -87,7 +87,7 @@ describe('AuthContext', () => {
     authUtils.getSectorData.mockReturnValue(null);
 
     const mockSectorData = { code: 'BANKING', routePath: '/banking' };
-    api.get.mockResolvedValue({ data: mockSectorData });
+    api.get.mockResolvedValue({ data: { sector: mockSectorData } });
 
     const { result } = renderHook(() => useAuth(), {
       wrapper: AuthProvider,
@@ -146,6 +146,50 @@ describe('AuthContext', () => {
       expect(result.current.user).toBeNull();
       expect(result.current.sector).toBeNull();
       expect(authUtils.logout).toHaveBeenCalled();
+    });
+  });
+
+  describe('Role Helpers', () => {
+    it('should correctly evaluate hasRole', async () => {
+      authUtils.isAuthenticated.mockReturnValue(true);
+      authUtils.getUserData.mockReturnValue({ id: 1, username: 'manager', role: 'MANAGER' });
+      
+      const { result } = renderHook(() => useAuth(), { wrapper: AuthProvider });
+      
+      await waitFor(() => {
+        expect(result.current.user).toBeTruthy();
+      });
+
+      expect(result.current.hasRole('MANAGER')).toBe(true);
+      expect(result.current.hasRole('ADMIN')).toBe(false);
+      expect(result.current.hasRole('USER')).toBe(false);
+    });
+
+    it('should correctly evaluate isAdmin', async () => {
+      authUtils.isAuthenticated.mockReturnValue(true);
+      authUtils.getUserData.mockReturnValue({ id: 2, username: 'admin', role: 'ADMIN' });
+      
+      const { result } = renderHook(() => useAuth(), { wrapper: AuthProvider });
+      
+      await waitFor(() => {
+        expect(result.current.user).toBeTruthy();
+      });
+
+      expect(result.current.isAdmin()).toBe(true);
+      expect(result.current.hasRole('ADMIN')).toBe(true);
+    });
+
+    it('isAdmin should return false for non-admins', async () => {
+      authUtils.isAuthenticated.mockReturnValue(true);
+      authUtils.getUserData.mockReturnValue({ id: 3, username: 'user', role: 'USER' });
+      
+      const { result } = renderHook(() => useAuth(), { wrapper: AuthProvider });
+      
+      await waitFor(() => {
+        expect(result.current.user).toBeTruthy();
+      });
+
+      expect(result.current.isAdmin()).toBe(false);
     });
   });
 });

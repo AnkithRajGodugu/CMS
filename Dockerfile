@@ -50,7 +50,7 @@ COPY --from=frontend-build /build/frontend/dist /app/static
 RUN chown -R appuser:appuser /app
 USER appuser
 
-EXPOSE 8080
+EXPOSE 8081
 
 # JVM container tuning
 ENV JAVA_OPTS="\
@@ -63,6 +63,6 @@ ENV SPRING_PROFILES_ACTIVE=prod
 
 # Healthcheck (requires actuator health enabled)
 HEALTHCHECK --interval=30s --timeout=3s --start-period=60s --retries=3 \
-  CMD wget -qO- http://localhost:8080/actuator/health || exit 1
+  CMD wget -qO- http://localhost:8081/actuator/health || exit 1
 
 ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]

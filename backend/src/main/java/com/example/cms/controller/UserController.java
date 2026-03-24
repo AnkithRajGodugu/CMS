@@ -34,8 +34,8 @@ public class UserController {
         }
 
         Object principal = auth.getPrincipal();
-        if (principal instanceof UserDetails userDetails) {
-            return userRepository.findByUsername(userDetails.getUsername());
+        if (principal instanceof com.example.cms.security.CustomUserDetails customUserDetails) {
+            return customUserDetails.getUser();
         }
 
         return null;

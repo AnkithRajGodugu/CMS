@@ -46,6 +46,10 @@ public class Project {
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
     
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
+
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 

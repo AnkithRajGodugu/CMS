@@ -33,6 +33,7 @@ public class ContentAsset {
     @Column(name = "type", nullable = false)
     private AssetType type;
 
+    @Builder.Default
     @Column(name = "version")
     private Integer version = 1;
 
@@ -43,6 +44,10 @@ public class ContentAsset {
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
     
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
+
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 

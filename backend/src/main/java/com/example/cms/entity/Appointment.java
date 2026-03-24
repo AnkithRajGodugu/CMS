@@ -55,14 +55,20 @@ public class Appointment {
     }
 
     // Constructors
-    public Appointment() {}
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
 
-    public Appointment(String appointmentId, String patientName, String doctorName, LocalDateTime appointmentTime, AppointmentType type) {
+    public User getUser() { return user; }
+    public void setUser(User user) { this.user = user; }
+
+    public Appointment(String appointmentId, String patientName, String doctorName, LocalDateTime appointmentTime, AppointmentType type, User user) {
         this.appointmentId = appointmentId;
         this.patientName = patientName;
         this.doctorName = doctorName;
         this.appointmentTime = appointmentTime;
         this.type = type;
+        this.user = user;
     }
 
     // Getters and Setters

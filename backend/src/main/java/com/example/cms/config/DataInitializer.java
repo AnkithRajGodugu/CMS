@@ -103,31 +103,39 @@ public class DataInitializer implements CommandLineRunner {
         /* =========================
            USER INITIALIZATION
         ========================== */
-        if (userRepository.count() == 0) {
+        Sector bankingSector = sectorRepository.findByName("Banking").orElseThrow();
+        Sector healthcareSector = sectorRepository.findByName("Healthcare").orElseThrow();
+        Sector logisticsSector = sectorRepository.findByName("Logistics").orElseThrow();
+        Sector contentSector = sectorRepository.findByName("Content").orElseThrow();
 
-            Sector bankingSector = sectorRepository.findByName("Banking").orElseThrow();
-            Sector healthcareSector = sectorRepository.findByName("Healthcare").orElseThrow();
-            Sector logisticsSector = sectorRepository.findByName("Logistics").orElseThrow();
-            Sector contentSector = sectorRepository.findByName("Content").orElseThrow();
+        if (userRepository.findByUsername("admin") == null) authService.createUser("admin", "admin@example.com", "admin123", User.Role.ADMIN, null);
+        if (userRepository.findByUsername("bank_user1") == null) authService.createUser("bank_user1", "banking@example.com", "bank123", User.Role.USER, bankingSector.getId());
+        if (userRepository.findByUsername("health_user") == null) authService.createUser("health_user", "healthcare@example.com", "health123", User.Role.USER, healthcareSector.getId());
+        if (userRepository.findByUsername("logistics_user") == null) authService.createUser("logistics_user", "logistics@example.com", "logistics123", User.Role.USER, logisticsSector.getId());
+        if (userRepository.findByUsername("content_user") == null) authService.createUser("content_user", "content@example.com", "content123", User.Role.USER, contentSector.getId());
 
-            authService.createUser("admin", "admin@example.com", "admin123", User.Role.ADMIN, null);
-            authService.createUser("bank_user", "banking@example.com", "bank123", User.Role.BANKING, bankingSector.getId());
-            authService.createUser("health_user", "healthcare@example.com", "health123", User.Role.HEALTHCARE, healthcareSector.getId());
-            authService.createUser("logistics_user", "logistics@example.com", "logistics123", User.Role.LOGISTICS, logisticsSector.getId());
-            authService.createUser("content_user", "content@example.com", "content123", User.Role.CONTENT, contentSector.getId());
+        // Add Sector-Specific Admins
+        if (userRepository.findByUsername("bank_admin") == null) authService.createUser("bank_admin", "bank_admin@example.com", "admin123", User.Role.ADMIN, bankingSector.getId());
+        if (userRepository.findByUsername("health_admin") == null) authService.createUser("health_admin", "health_admin@example.com", "admin123", User.Role.ADMIN, healthcareSector.getId());
+        if (userRepository.findByUsername("logistics_admin") == null) authService.createUser("logistics_admin", "logistics_admin@example.com", "admin123", User.Role.ADMIN, logisticsSector.getId());
+        if (userRepository.findByUsername("content_admin") == null) authService.createUser("content_admin", "content_admin@example.com", "admin123", User.Role.ADMIN, contentSector.getId());
 
-            System.out.println("✅ Test users initialized using AuthService");
-        }
+        System.out.println("✅ Test users explicitly verified/initialized");
+
+        User bankUser = userRepository.findByUsername("bank_user");
+        User healthUser = userRepository.findByUsername("health_user");
+        User logisticsUser = userRepository.findByUsername("logistics_user");
+        User contentUser = userRepository.findByUsername("content_user");
 
         /* =========================
            BANK ACCOUNTS
         ========================== */
         if (bankAccountRepository.count() == 0) {
 
-            createAccount("ACC001", BankAccount.AccountType.CHECKING, "John Doe", "15420.50");
-            createAccount("ACC002", BankAccount.AccountType.SAVINGS, "Jane Smith", "45230.75");
-            createAccount("ACC003", BankAccount.AccountType.BUSINESS, "ABC Corp", "125000.00");
-            createAccount("ACC004", BankAccount.AccountType.CREDIT, "Mike Johnson", "-2500.00");
+            createAccount("ACC001", BankAccount.AccountType.CHECKING, "John Doe", "15420.50", bankUser);
+            createAccount("ACC002", BankAccount.AccountType.SAVINGS, "John Doe", "45230.75", bankUser);
+            createAccount("ACC003", BankAccount.AccountType.BUSINESS, "ABC Corp", "125000.00", null);
+            createAccount("ACC004", BankAccount.AccountType.CREDIT, "Mike Johnson", "-2500.00", null);
 
             System.out.println("✅ Sample bank accounts initialized");
         }
@@ -151,7 +159,7 @@ public class DataInitializer implements CommandLineRunner {
                     "TXN002",
                     Transaction.TransactionType.WITHDRAWAL,
                     new BigDecimal("150.00"),
-                    "ACC002"
+                    "ACC001"
             );
             txn2.setStatus(Transaction.TransactionStatus.COMPLETED);
             txn2.setDescription("ATM withdrawal");
@@ -185,7 +193,8 @@ public class DataInitializer implements CommandLineRunner {
                     "Sarah Johnson",
                     "Dr. Smith",
                     LocalDateTime.of(2024, 1, 20, 9, 0),
-                    Appointment.AppointmentType.CONSULTATION
+                    Appointment.AppointmentType.CONSULTATION,
+                    healthUser
             );
             apt.setStatus(Appointment.AppointmentStatus.CONFIRMED);
             appointmentRepository.save(apt);
@@ -204,6 +213,7 @@ public class DataInitializer implements CommandLineRunner {
                 .status(Shipment.ShipmentStatus.IN_TRANSIT)
                 .weight(new BigDecimal("150.5"))
                 .estimatedDelivery(LocalDateTime.now().plusDays(3))
+                .user(logisticsUser)
                 .build();
             shipmentRepository.save(ship1);
 
@@ -214,6 +224,7 @@ public class DataInitializer implements CommandLineRunner {
                 .status(Shipment.ShipmentStatus.PENDING)
                 .weight(new BigDecimal("85.0"))
                 .estimatedDelivery(LocalDateTime.now().plusDays(5))
+                .user(logisticsUser)
                 .build();
             shipmentRepository.save(ship2);
             System.out.println("✅ Sample shipments initialized");
@@ -284,6 +295,7 @@ public class DataInitializer implements CommandLineRunner {
                 .startDate(LocalDate.now().minusDays(10))
                 .deadline(LocalDate.now().plusDays(20))
                 .budget(15000.0)
+                .user(contentUser)
                 .build();
             projectRepository.save(proj1);
 
@@ -294,6 +306,7 @@ public class DataInitializer implements CommandLineRunner {
                 .startDate(LocalDate.now().plusDays(5))
                 .deadline(LocalDate.now().plusMonths(2))
                 .budget(25000.0)
+                .user(contentUser)
                 .build();
             projectRepository.save(proj2);
             System.out.println("✅ Sample projects initialized");
@@ -307,6 +320,7 @@ public class DataInitializer implements CommandLineRunner {
                     .type(ContentAsset.AssetType.IMAGE)
                     .fileUrl("https://example.com/assets/banner.jpg")
                     .project(parentProject)
+                    .user(contentUser)
                     .build();
                 contentAssetRepository.save(asset1);
                 
@@ -315,6 +329,7 @@ public class DataInitializer implements CommandLineRunner {
                     .type(ContentAsset.AssetType.VIDEO)
                     .fileUrl("https://example.com/assets/draft.mp4")
                     .project(parentProject)
+                    .user(contentUser)
                     .build();
                 contentAssetRepository.save(asset2);
             }
@@ -344,8 +359,8 @@ public class DataInitializer implements CommandLineRunner {
         return sector;
     }
 
-    private void createAccount(String accNo, BankAccount.AccountType type, String name, String balance) {
-        BankAccount acc = new BankAccount(accNo, type, name);
+    private void createAccount(String accNo, BankAccount.AccountType type, String name, String balance, User user) {
+        BankAccount acc = new BankAccount(accNo, type, name, user);
         acc.setBalance(new BigDecimal(balance));
         bankAccountRepository.save(acc);
     }

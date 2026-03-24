@@ -6,7 +6,8 @@ import {
   applyThemeColors,
   getDaisyTheme,
   isSectorValid,
-  ANIMATION_DURATIONS
+  ANIMATION_DURATIONS,
+  getAllSectors
 } from '../config/themes';
 import { useAuth } from '../hooks/useAuth';
 
@@ -41,6 +42,16 @@ export const SectorThemeProvider = ({ children }) => {
   const { sector } = useAuth();
   const [currentSector, setCurrentSector] = useState(DEFAULT_SECTOR);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  
+  // Dark mode state
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('theme-mode');
+      if (saved) return saved === 'dark';
+      return window.matchMedia('(prefers-color-scheme: dark)').matches;
+    }
+    return false;
+  });
 
   // Get current theme based on sector
   const currentTheme = getTheme(currentSector);
@@ -48,7 +59,7 @@ export const SectorThemeProvider = ({ children }) => {
   /**
    * Apply theme to document
    */
-  const applyTheme = useCallback((sectorCode) => {
+  const applyTheme = useCallback((sectorCode, darkMode) => {
     if (typeof document === 'undefined') return;
 
     const theme = getTheme(sectorCode);
@@ -59,7 +70,7 @@ export const SectorThemeProvider = ({ children }) => {
       applyThemeColors(theme);
 
       // Update DaisyUI data-theme attribute
-      const daisyTheme = getDaisyTheme(sectorCode);
+      const daisyTheme = darkMode ? 'dark' : getDaisyTheme(sectorCode);
       root.setAttribute('data-theme', daisyTheme);
 
       // Add sector class for additional styling
@@ -91,7 +102,7 @@ export const SectorThemeProvider = ({ children }) => {
     }
 
     // Apply new theme
-    applyTheme(newSector);
+    applyTheme(newSector, isDarkMode);
     setCurrentSector(newSector);
 
     // Remove transition class after animation completes
@@ -103,14 +114,29 @@ export const SectorThemeProvider = ({ children }) => {
     }, ANIMATION_DURATIONS.THEME_TRANSITION);
 
     return () => clearTimeout(timeoutId);
-  }, [currentSector, isTransitioning, applyTheme]);
+  }, [currentSector, isTransitioning, applyTheme, isDarkMode]);
+
+  /**
+   * Toggle dark mode
+   */
+  const toggleDarkMode = useCallback(() => {
+    setIsDarkMode(prev => {
+      const next = !prev;
+      localStorage.setItem('theme-mode', next ? 'dark' : 'light');
+      applyTheme(currentSector, next);
+      return next;
+    });
+  }, [currentSector, applyTheme]);
 
   /**
    * Sync with AuthContext sector
    */
   useEffect(() => {
-    if (sector && sector.code && isSectorValid(sector.code)) {
-      changeSector(sector.code);
+    if (sector && sector.code) {
+      const normalizedCode = sector.code.toLowerCase();
+      if (isSectorValid(normalizedCode)) {
+        changeSector(normalizedCode);
+      }
     }
   }, [sector, changeSector]);
 
@@ -118,16 +144,19 @@ export const SectorThemeProvider = ({ children }) => {
    * Apply initial theme on mount
    */
   useEffect(() => {
-    applyTheme(currentSector);
-  }, [currentSector, applyTheme]);
+    applyTheme(currentSector, isDarkMode);
+  }, [currentSector, isDarkMode, applyTheme]);
 
   const value = {
     currentSector,
     currentTheme,
     isTransitioning,
     changeSector,
+    getAllSectors,
     getThemeForSector: getTheme,
-    applyTheme
+    applyTheme,
+    isDarkMode,
+    toggleDarkMode
   };
 
   return (
@@ -136,5 +165,8 @@ export const SectorThemeProvider = ({ children }) => {
     </SectorThemeContext.Provider>
   );
 };
+
+// Backward-compat alias — Navbar and other files import `useTheme` from here
+export const useTheme = useSectorTheme;
 
 export default SectorThemeProvider;

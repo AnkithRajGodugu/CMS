@@ -1,16 +1,51 @@
-import React, { useEffect, useRef, useState, useContext } from 'react';
+import React, { useEffect, useRef, useState, useContext, useCallback } from 'react';
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import { toast } from 'sonner';
 import { AuthContext } from '../../context/auth';
 import { NotificationContext } from '../../context/NotificationContext';
+import { getToken } from '../../utils/auth';
 
-const WS_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:8082'}/ws`;
+const WS_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:8081'}/ws`;
 
 export const NotificationProvider = ({ children }) => {
   const { user, sector, isAuthenticated } = useContext(AuthContext);
+  const [notifications, setNotifications] = useState([]);
   const [connected, setConnected] = useState(false);
   const clientRef = useRef(null);
+
+  // Derived
+  const unreadCount = notifications.filter((n) => !n.read).length;
+
+  // Add a notification to the list
+  const addNotification = useCallback((notification) => {
+    setNotifications((prev) => [
+      {
+        id: notification.id || Date.now(),
+        type: notification.type || 'INFO',
+        title: notification.title || notification.type || 'Notification',
+        message: notification.message || (typeof notification.payload === 'string' ? notification.payload : JSON.stringify(notification.payload || '')),
+        read: false,
+        createdAt: notification.timestamp || new Date().toISOString(),
+        link: notification.data?.link || null,
+      },
+      ...prev.slice(0, 99), // keep max 100
+    ]);
+  }, []);
+
+  const markRead = useCallback((id) => {
+    setNotifications((prev) =>
+      prev.map((n) => (n.id === id ? { ...n, read: true } : n))
+    );
+  }, []);
+
+  const markAllRead = useCallback(() => {
+    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+  }, []);
+
+  const clearAll = useCallback(() => {
+    setNotifications([]);
+  }, []);
 
   useEffect(() => {
     if (!isAuthenticated || !user) {
@@ -22,6 +57,9 @@ export const NotificationProvider = ({ children }) => {
 
     const client = new Client({
       webSocketFactory: () => new SockJS(WS_URL),
+      connectHeaders: {
+        Authorization: `Bearer ${getToken()}`
+      },
       debug: (str) => {
         if (import.meta.env.DEV) console.log('STOMP: ' + str);
       },
@@ -32,14 +70,25 @@ export const NotificationProvider = ({ children }) => {
 
     client.onConnect = (frame) => {
       setConnected(true);
-      console.log('Connected to WebSocket');
+      console.log('NotificationProvider: Connected to WebSocket');
 
       // 1. Subscribe to Sector Updates
       if (sector?.code) {
         const sectorTopic = `/topic/${sector.code.toLowerCase()}/updates`;
         client.subscribe(sectorTopic, (message) => {
-          const notification = JSON.parse(message.body);
-          handleIncomingNotification(notification, 'sector');
+          try {
+            const notification = JSON.parse(message.body);
+            addNotification(notification);
+            toast(notification.message || 'New sector update', {
+              description: `Sector: ${sector?.name || sector?.code}`,
+              action: notification.data?.link ? {
+                label: 'View',
+                onClick: () => window.location.href = notification.data.link,
+              } : null,
+            });
+          } catch (e) {
+            console.error('Failed to parse sector notification:', e);
+          }
         });
         console.log(`Subscribed to ${sectorTopic}`);
       }
@@ -47,20 +96,30 @@ export const NotificationProvider = ({ children }) => {
       // 2. Subscribe to Private User Notifications
       const userQueue = `/user/queue/notifications`;
       client.subscribe(userQueue, (message) => {
-        const notification = JSON.parse(message.body);
-        handleIncomingNotification(notification, 'private');
+        try {
+          const notification = JSON.parse(message.body);
+          addNotification(notification);
+          toast(notification.message || 'New notification', {
+            description: 'Private',
+            action: notification.data?.link ? {
+              label: 'View',
+              onClick: () => window.location.href = notification.data.link,
+            } : null,
+          });
+        } catch (e) {
+          console.error('Failed to parse private notification:', e);
+        }
       });
       console.log(`Subscribed to ${userQueue}`);
     };
 
     client.onStompError = (frame) => {
       console.error('Broker reported error: ' + frame.headers['message']);
-      console.error('Additional details: ' + frame.body);
     };
 
     client.onDisconnect = () => {
       setConnected(false);
-      console.log('Disconnected from WebSocket');
+      console.log('NotificationProvider: Disconnected from WebSocket');
     };
 
     client.activate();
@@ -71,23 +130,20 @@ export const NotificationProvider = ({ children }) => {
         clientRef.current.deactivate();
       }
     };
-  }, [isAuthenticated, user, sector?.code]);
+  }, [isAuthenticated, user, sector?.code, addNotification]);
 
-  const handleIncomingNotification = (notification, source) => {
-    const { type, message, data } = notification;
-
-    // Show toast with custom styling based on type
-    toast(message || 'New update received', {
-      description: source === 'sector' ? `Sector: ${sector?.name}` : 'Private',
-      action: data?.link ? {
-        label: 'View',
-        onClick: () => window.location.href = data.link
-      } : null,
-    });
+  const contextValue = {
+    notifications,
+    unreadCount,
+    connected,
+    addNotification,
+    markRead,
+    markAllRead,
+    clearAll,
   };
 
   return (
-    <NotificationContext.Provider value={{ connected }}>
+    <NotificationContext.Provider value={contextValue}>
       {children}
     </NotificationContext.Provider>
   );

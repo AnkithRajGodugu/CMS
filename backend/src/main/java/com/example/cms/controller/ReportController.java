@@ -8,6 +8,7 @@ import com.example.cms.repository.SectorRepository;
 import com.example.cms.repository.UserRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -43,10 +44,17 @@ public class ReportController {
     }
 
     private User getCurrentUser() {
-        String username = SecurityContextHolder.getContext()
-                .getAuthentication()
-                .getName();
-        return userRepository.findByUsername(username);
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated() || auth.getPrincipal().equals("anonymousUser")) {
+            return null;
+        }
+
+        Object principal = auth.getPrincipal();
+        if (principal instanceof com.example.cms.security.CustomUserDetails customUserDetails) {
+            return customUserDetails.getUser();
+        }
+
+        return null;
     }
 
     /**

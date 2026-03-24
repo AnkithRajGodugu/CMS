@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 import java.util.Optional;
 
 @Repository
@@ -72,4 +73,22 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
     long countByAccountNumberAndStatus(
         @Param("accountNumber") String accountNumber,
         @Param("status") Transaction.TransactionStatus status);
+
+    // User-scoped: all transactions across a set of account numbers
+    @Query("SELECT t FROM Transaction t " +
+           "WHERE t.accountNumber IN :accountNumbers " +
+           "ORDER BY t.createdAt DESC")
+    Page<Transaction> findByAccountNumbersIn(
+        @Param("accountNumbers") Set<String> accountNumbers,
+        Pageable pageable);
+
+    // User statements: date-range filter across a set of account numbers
+    @Query("SELECT t FROM Transaction t " +
+           "WHERE t.accountNumber IN :accountNumbers " +
+           "AND t.createdAt BETWEEN :from AND :to " +
+           "ORDER BY t.createdAt DESC")
+    List<Transaction> findUserStatements(
+        @Param("accountNumbers") Set<String> accountNumbers,
+        @Param("from") LocalDateTime from,
+        @Param("to") LocalDateTime to);
 }

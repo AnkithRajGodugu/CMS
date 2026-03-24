@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { FaTruck, FaBoxes, FaRoute, FaWarehouse, FaUsers, FaShippingFast } from 'react-icons/fa';
 import ReportExportButtons from '../../components/shared/ReportExportButtons';
 import api from '../../services/api';
+import SystemMetricsWidget from '../../components/shared/SystemMetricsWidget';
 
 const LogisticsDashboard = () => {
   const [shipments, setShipments] = useState([]);
@@ -56,6 +57,9 @@ const LogisticsDashboard = () => {
             </div>
             <ReportExportButtons sectorCode="LOGISTICS" />
           </div>
+
+        {/* System Metrics (Visible only to Admins) */}
+        <SystemMetricsWidget />
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">

@@ -2,9 +2,12 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FaEdit, FaProjectDiagram, FaUsers, FaCalendarAlt, FaFileAlt, FaClock } from 'react-icons/fa';
 import ReportExportButtons from '../../components/shared/ReportExportButtons';
+import { useAuth } from '../../hooks/useAuth';
+import SystemMetricsWidget from '../../components/shared/SystemMetricsWidget';
 import api from '../../services/api';
 
 const ContentDashboard = () => {
+  const { user } = useAuth();
   const [projects, setProjects] = useState([]);
   const [assets, setAssets] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -56,6 +59,8 @@ const ContentDashboard = () => {
             </div>
             <ReportExportButtons sectorCode="CONTENT" />
           </div>
+
+        {user?.role === 'ADMIN' && <SystemMetricsWidget />}
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">

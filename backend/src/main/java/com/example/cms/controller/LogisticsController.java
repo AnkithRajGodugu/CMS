@@ -5,24 +5,32 @@ import com.example.cms.entity.InventoryItem;
 import com.example.cms.entity.Shipment;
 import com.example.cms.entity.Vehicle;
 import com.example.cms.entity.Route;
+import com.example.cms.entity.User;
 import com.example.cms.repository.InventoryItemRepository;
 import com.example.cms.repository.ShipmentRepository;
 import com.example.cms.repository.VehicleRepository;
 import com.example.cms.repository.RouteRepository;
+import com.example.cms.repository.UserRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+
 @RestController
 @RequestMapping("/api/logistics")
-@PreAuthorize("hasRole('ADMIN') or hasRole('LOGISTICS') or hasRole('logistics')")
+@PreAuthorize("hasRole('ADMIN') or hasRole('USER') or hasRole('LOGISTICS') or hasRole('logistics')")
 @RequiredArgsConstructor
 @Tag(name = "Logistics Management", description = "Endpoints for managing shipments, inventory, fleet and routes")
 public class LogisticsController {
@@ -31,6 +39,47 @@ public class LogisticsController {
     private final InventoryItemRepository inventoryItemRepository;
     private final VehicleRepository vehicleRepository;
     private final RouteRepository routeRepository;
+    private final UserRepository userRepository;
+
+    private User getCurrentUser() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated() || auth.getPrincipal().equals("anonymousUser")) {
+            return null;
+        }
+
+        Object principal = auth.getPrincipal();
+        if (principal instanceof com.example.cms.security.CustomUserDetails customUserDetails) {
+            return customUserDetails.getUser();
+        }
+
+        return null;
+    }
+
+    @GetMapping("/my-dashboard")
+    @Operation(summary = "Get current user's logistics dashboard stats")
+    public ApiResponse<Map<String, Object>> getMyDashboard() {
+        User user = getCurrentUser();
+        if (user == null) return ApiResponse.error("User not found");
+
+        Map<String, Object> stats = new HashMap<>();
+        Page<Shipment> userPage = shipmentRepository.findByUser(user, Pageable.unpaged());
+        List<Shipment> shipments = userPage.getContent();
+
+        stats.put("totalShipments", shipments.size());
+        stats.put("inTransit", shipments.stream().filter(s -> s.getStatus() == Shipment.ShipmentStatus.IN_TRANSIT).count());
+        stats.put("delivered", shipments.stream().filter(s -> s.getStatus() == Shipment.ShipmentStatus.DELIVERED).count());
+        stats.put("pending", shipments.stream().filter(s -> s.getStatus() == Shipment.ShipmentStatus.PENDING).count());
+
+        return ApiResponse.success(stats);
+    }
+
+    @GetMapping("/my-shipments")
+    @Operation(summary = "Get current user's shipments")
+    public ApiResponse<Page<Shipment>> getMyShipments(@PageableDefault(size = 20) Pageable pageable) {
+        User user = getCurrentUser();
+        if (user == null) return ApiResponse.error("User not found");
+        return ApiResponse.success(shipmentRepository.findByUser(user, pageable));
+    }
 
     // --- Shipments ---
     @GetMapping("/shipments")

@@ -61,10 +61,19 @@ public class BankAccount {
     // Constructors
     public BankAccount() {}
 
-    public BankAccount(String accountNumber, AccountType accountType, String customerName) {
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    private User user;
+
+    public User getUser() { return user; }
+    public void setUser(User user) { this.user = user; }
+
+    public BankAccount(String accountNumber, AccountType accountType, String customerName, User user) {
         this.accountNumber = accountNumber;
         this.accountType = accountType;
         this.customerName = customerName;
+        this.user = user;
     }
 
     // Getters and Setters

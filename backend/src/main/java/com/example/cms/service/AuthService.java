@@ -69,8 +69,13 @@ public class AuthService {
                     .orElse(null);
         }
 
-        if (user != null && passwordEncoder.matches(password, user.getPassword())) {
-            return Optional.of(user);
+        if (user != null) {
+            boolean matches = passwordEncoder.matches(password, user.getPassword());
+            log.info("Auth comparison for user {}: input={}, hash={}, match={}", 
+                user.getUsername(), password, user.getPassword(), matches);
+            if (matches) {
+                return Optional.of(user);
+            }
         }
         return Optional.empty();
     }

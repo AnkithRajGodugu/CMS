@@ -2,17 +2,24 @@ package com.example.cms.controller;
 
 import com.example.cms.entity.BankAccount;
 import com.example.cms.entity.Transaction;
+import com.example.cms.entity.User;
 import com.example.cms.service.BankingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -23,13 +30,87 @@ public class BankingController {
 
     private final BankingService bankingService;
 
-    // ─── Accounts ─────────────────────────────────────────────────────────────
+    private User getCurrentUser() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated() || auth.getPrincipal().equals("anonymousUser")) {
+            return null;
+        }
+        Object principal = auth.getPrincipal();
+        if (principal instanceof com.example.cms.security.CustomUserDetails customUserDetails) {
+            return customUserDetails.getUser();
+        }
+        return null;
+    }
+
+    // ─── User-facing: My Dashboard & Accounts ─────────────────────────────────
+
+    @GetMapping("/my-dashboard")
+    public ResponseEntity<Map<String, Object>> getMyDashboard() {
+        User user = getCurrentUser();
+        if (user == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        return ResponseEntity.ok(bankingService.getUserDashboardStats(user));
+    }
+
+    @GetMapping("/my-accounts")
+    public ResponseEntity<List<BankAccount>> getMyAccounts() {
+        User user = getCurrentUser();
+        if (user == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        return ResponseEntity.ok(bankingService.getUserAccounts(user));
+    }
+
+    // ─── User-facing: My Transactions ─────────────────────────────────────────
+
+    @GetMapping("/my-transactions")
+    public ResponseEntity<Page<Transaction>> getMyTransactions(
+            @RequestParam(defaultValue = "0")  int page,
+            @RequestParam(defaultValue = "20") int size) {
+        User user = getCurrentUser();
+        if (user == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        return ResponseEntity.ok(bankingService.getUserTransactions(user, pageable));
+    }
+
+    // ─── User-facing: My Statements ───────────────────────────────────────────
+
+    @GetMapping("/my-statements")
+    public ResponseEntity<List<Transaction>> getMyStatements(
+            @RequestParam(defaultValue = "#{T(java.time.LocalDate).now().minusDays(30).toString()}")
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @RequestParam(defaultValue = "#{T(java.time.LocalDate).now().toString()}")
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
+        User user = getCurrentUser();
+        if (user == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        return ResponseEntity.ok(bankingService.getUserStatements(user, from, to));
+    }
+
+    // ─── User-facing: Transfer ────────────────────────────────────────────────
+
+    @PostMapping("/my-transfer")
+    public ResponseEntity<Map<String, Object>> doTransfer(@RequestBody Map<String, Object> body) {
+        User user = getCurrentUser();
+        if (user == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+
+        try {
+            String from   = (String) body.get("fromAccount");
+            String to     = (String) body.get("toAccount");
+            BigDecimal amt = new BigDecimal(body.get("amount").toString());
+            String desc   = (String) body.getOrDefault("description", "Transfer");
+
+            Map<String, Object> result = bankingService.transferBetweenAccounts(from, to, amt, desc, user);
+            return ResponseEntity.ok(result);
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        } catch (SecurityException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    // ─── Admin: Accounts ──────────────────────────────────────────────────────
 
     @GetMapping("/accounts")
     public ResponseEntity<Page<BankAccount>> getAllAccounts(
             @RequestParam(defaultValue = "0")  int page,
             @RequestParam(defaultValue = "20") int size) {
-
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         return ResponseEntity.ok(bankingService.getAccounts(pageable));
     }
@@ -56,13 +137,12 @@ public class BankingController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // ─── Transactions ──────────────────────────────────────────────────────────
+    // ─── Admin: Transactions ──────────────────────────────────────────────────
 
     @GetMapping("/transactions")
     public ResponseEntity<Page<Transaction>> getAllTransactions(
             @RequestParam(defaultValue = "0")  int page,
             @RequestParam(defaultValue = "20") int size) {
-
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         return ResponseEntity.ok(bankingService.getTransactions(pageable));
     }
@@ -85,26 +165,25 @@ public class BankingController {
             @PathVariable String accountNumber,
             @RequestParam(defaultValue = "0")  int page,
             @RequestParam(defaultValue = "20") int size) {
-
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         return ResponseEntity.ok(bankingService.getTransactionsByAccount(accountNumber, pageable));
     }
 
-    // ─── Dashboard ─────────────────────────────────────────────────────────────
+    // ─── Admin: Dashboard ─────────────────────────────────────────────────────
 
     @GetMapping("/dashboard/stats")
     public ResponseEntity<Map<String, Object>> getDashboardStats() {
         return ResponseEntity.ok(bankingService.getDashboardStats());
     }
 
-    // ─── Risk Assessment ───────────────────────────────────────────────────────
+    // ─── Admin: Risk Assessment ───────────────────────────────────────────────
 
     @GetMapping("/risk-assessment")
     public ResponseEntity<Map<String, Object>> getRiskAssessment() {
         return ResponseEntity.ok(bankingService.getRiskAssessment());
     }
 
-    // ─── Compliance ────────────────────────────────────────────────────────────
+    // ─── Admin: Compliance ────────────────────────────────────────────────────
 
     @GetMapping("/compliance/metrics")
     public ResponseEntity<Map<String, Object>> getComplianceMetrics() {

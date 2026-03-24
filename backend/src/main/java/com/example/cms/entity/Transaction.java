@@ -102,6 +102,7 @@ public class Transaction {
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public LocalDateTime getProcessedAt() { return processedAt; }
+    public void setProcessedAt(LocalDateTime processedAt) { this.processedAt = processedAt; }
 
     public boolean isDeleted() { return deleted; }
     public void setDeleted(boolean deleted) { this.deleted = deleted; }

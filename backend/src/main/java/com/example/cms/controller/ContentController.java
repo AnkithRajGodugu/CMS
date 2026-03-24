@@ -3,13 +3,18 @@ package com.example.cms.controller;
 import com.example.cms.dto.ApiResponse;
 import com.example.cms.entity.ContentAsset;
 import com.example.cms.entity.Project;
+import com.example.cms.entity.User;
 import com.example.cms.repository.ContentAssetRepository;
 import com.example.cms.repository.ProjectRepository;
+import com.example.cms.repository.UserRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,13 +26,56 @@ import org.springframework.data.web.PageableDefault;
 
 @RestController
 @RequestMapping("/api/content")
-@PreAuthorize("hasRole('ADMIN') or hasRole('CONTENT') or hasRole('content')")
+@PreAuthorize("hasRole('ADMIN') or hasRole('USER') or hasRole('CONTENT') or hasRole('content')")
 @RequiredArgsConstructor
 @Tag(name = "Content Management", description = "Endpoints for managing projects and content assets")
 public class ContentController {
 
     private final ProjectRepository projectRepository;
     private final ContentAssetRepository contentAssetRepository;
+    private final UserRepository userRepository;
+
+    private User getCurrentUser() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated() || auth.getPrincipal().equals("anonymousUser")) {
+            return null;
+        }
+
+        Object principal = auth.getPrincipal();
+        if (principal instanceof com.example.cms.security.CustomUserDetails customUserDetails) {
+            return customUserDetails.getUser();
+        }
+
+        return null;
+    }
+
+    @GetMapping("/my-dashboard")
+    @Operation(summary = "Get current user's content dashboard stats")
+    public ApiResponse<Map<String, Object>> getMyDashboard() {
+        User user = getCurrentUser();
+        if (user == null) return ApiResponse.error("User not found");
+
+        Map<String, Object> stats = new HashMap<>();
+        Page<Project> projectsPage = projectRepository.findByUser(user, Pageable.unpaged());
+        List<Project> projects = projectsPage.getContent();
+
+        stats.put("totalProjects", projects.size());
+        stats.put("activeProjects", projects.stream().filter(p -> p.getStatus() == Project.ProjectStatus.IN_PROGRESS).count());
+        stats.put("completedProjects", projects.stream().filter(p -> p.getStatus() == Project.ProjectStatus.COMPLETED).count());
+        
+        Page<ContentAsset> assetsPage = contentAssetRepository.findByUser(user, Pageable.unpaged());
+        stats.put("totalAssets", assetsPage.getTotalElements());
+
+        return ApiResponse.success(stats);
+    }
+
+    @GetMapping("/my-projects")
+    @Operation(summary = "Get current user's projects")
+    public ApiResponse<Page<Project>> getMyProjects(@PageableDefault(size = 20) Pageable pageable) {
+        User user = getCurrentUser();
+        if (user == null) return ApiResponse.error("User not found");
+        return ApiResponse.success(projectRepository.findByUser(user, pageable));
+    }
 
     // --- Projects ---
     @GetMapping("/projects")

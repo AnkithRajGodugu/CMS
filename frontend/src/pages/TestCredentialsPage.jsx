@@ -28,13 +28,23 @@ const TestCredentialsPage = () => {
     },
     {
       role: 'Banking User',
-      username: 'bank_user',
+      username: 'bank_user1',
       email: 'banking@example.com',
       password: 'bank123',
       sector: 'Banking & Finance',
       dashboard: '/dashboard/banking',
       color: 'badge-info',
       description: 'Access to banking accounts, transactions, compliance & risk'
+    },
+    {
+      role: 'Banking Admin',
+      username: 'bank_admin',
+      email: 'bank_admin@example.com',
+      password: 'admin123',
+      sector: 'Banking & Finance',
+      dashboard: '/dashboard/banking',
+      color: 'badge-info',
+      description: 'Sector Admin with access to Banking management'
     },
     {
       role: 'Healthcare User',
@@ -47,6 +57,16 @@ const TestCredentialsPage = () => {
       description: 'Access to patient records, appointments, and medical history'
     },
     {
+      role: 'Healthcare Admin',
+      username: 'health_admin',
+      email: 'health_admin@example.com',
+      password: 'admin123',
+      sector: 'Healthcare',
+      dashboard: '/dashboard/healthcare',
+      color: 'badge-success',
+      description: 'Sector Admin with access to Healthcare management'
+    },
+    {
       role: 'Logistics User',
       username: 'logistics_user',
       email: 'logistics@example.com',
@@ -57,6 +77,16 @@ const TestCredentialsPage = () => {
       description: 'Access to shipments, inventory, fleet, routes, and SLA tracking'
     },
     {
+      role: 'Logistics Admin',
+      username: 'logistics_admin',
+      email: 'logistics_admin@example.com',
+      password: 'admin123',
+      sector: 'Logistics & Supply',
+      dashboard: '/dashboard/logistics',
+      color: 'badge-warning',
+      description: 'Sector Admin with access to Logistics management'
+    },
+    {
       role: 'Content User',
       username: 'content_user',
       email: 'content@example.com',
@@ -65,6 +95,16 @@ const TestCredentialsPage = () => {
       dashboard: '/dashboard/content',
       color: 'badge-secondary',
       description: 'Access to projects, assets, calendar, time tracking, and collaboration'
+    },
+    {
+      role: 'Content Admin',
+      username: 'content_admin',
+      email: 'content_admin@example.com',
+      password: 'admin123',
+      sector: 'Content Creation',
+      dashboard: '/dashboard/content',
+      color: 'badge-secondary',
+      description: 'Sector Admin with access to Content management'
     }
   ];
 
