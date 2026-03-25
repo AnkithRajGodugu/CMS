@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useTheme } from '../../context/SafeThemeContext';
+import { useTheme } from '../../context/SectorThemeProvider';
 import DynamicLogo from '../../components/logos/DynamicLogo';
 import api from '../../services/api';
 

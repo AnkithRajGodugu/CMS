@@ -1,9 +1,11 @@
 package com.example.cms.controller;
 
 import com.example.cms.entity.BankAccount;
+import com.example.cms.entity.Notification.NotificationType;
 import com.example.cms.entity.Transaction;
 import com.example.cms.entity.User;
 import com.example.cms.service.BankingService;
+import com.example.cms.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -29,6 +31,7 @@ import java.util.Map;
 public class BankingController {
 
     private final BankingService bankingService;
+    private final NotificationService notificationService;
 
     private User getCurrentUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -97,6 +100,44 @@ public class BankingController {
             String desc   = (String) body.getOrDefault("description", "Transfer");
 
             Map<String, Object> result = bankingService.transferBetweenAccounts(from, to, amt, desc, user);
+            // Notify the user of successful transfer
+            notificationService.createAndSend(
+                user.getId(), user.getUsername(),
+                NotificationType.TRANSACTION,
+                "Transfer Completed",
+                String.format("₹%s transferred from %s to %s", amt, from, to),
+                "/user/banking/transactions"
+            );
+            return ResponseEntity.ok(result);
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        } catch (SecurityException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/my-external-transfer")
+    public ResponseEntity<Map<String, Object>> doExternalTransfer(@RequestBody Map<String, Object> body) {
+        User user = getCurrentUser();
+        if (user == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+
+        try {
+            String from   = (String) body.get("fromAccount");
+            String routing = (String) body.get("routingNumber");
+            String toExt  = (String) body.get("externalAccount");
+            BigDecimal amt = new BigDecimal(body.get("amount").toString());
+            String desc   = (String) body.getOrDefault("description", "External Transfer");
+
+            Map<String, Object> result = bankingService.performExternalTransfer(from, routing, toExt, amt, desc, user);
+            
+            // Notify the user of successful external transfer initiation
+            notificationService.createAndSend(
+                user.getId(), user.getUsername(),
+                NotificationType.TRANSACTION,
+                "External Transfer Initiated",
+                String.format("₹%s transfer to routing %s initiated (Subject to 0.5%% fee)", amt, routing),
+                "/user/banking/transactions"
+            );
             return ResponseEntity.ok(result);
         } catch (IllegalArgumentException | IllegalStateException e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));

@@ -1,6 +1,5 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { SafeThemeProvider } from './context/SafeThemeContext.jsx';
 import App from './App.jsx';
 import './global.css';
 
@@ -11,8 +10,6 @@ if (!window.reactRoot) {
 
 window.reactRoot.render(
     <React.StrictMode>
-        <SafeThemeProvider>
-            <App />
-        </SafeThemeProvider>
+        <App />
     </React.StrictMode>
 );

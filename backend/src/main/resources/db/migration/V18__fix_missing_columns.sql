@@ -1,47 +1,15 @@
 -- Add missing 'deleted' columns to support soft deletion in entities
--- Use simplified IF NOT EXISTS for robustness
+-- Use basic ALTER TABLE for H2 test database compatibility
 
-DO $$ 
-BEGIN 
-    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'bank_accounts' AND column_name = 'deleted') THEN
-        ALTER TABLE bank_accounts ADD COLUMN deleted BOOLEAN NOT NULL DEFAULT FALSE;
-    END IF;
+ALTER TABLE bank_accounts ADD COLUMN IF NOT EXISTS deleted BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE customers ADD COLUMN IF NOT EXISTS deleted BOOLEAN NOT NULL DEFAULT FALSE;
 
-    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'customers' AND column_name = 'deleted') THEN
-        ALTER TABLE customers ADD COLUMN deleted BOOLEAN NOT NULL DEFAULT FALSE;
-    END IF;
+-- Ensure audit fields are consistent for customers
+ALTER TABLE customers ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
+ALTER TABLE customers ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
 
-    -- Ensure audit fields are consistent for customers
-    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'customers' AND column_name = 'created_at') THEN
-        ALTER TABLE customers ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
-    END IF;
-    
-    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'customers' AND column_name = 'updated_at') THEN
-        ALTER TABLE customers ADD COLUMN updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
-    END IF;
-
-    -- Optional: Check other sector tables
-    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'shipments') THEN
-        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'shipments' AND column_name = 'deleted') THEN
-            ALTER TABLE shipments ADD COLUMN deleted BOOLEAN NOT NULL DEFAULT FALSE;
-        END IF;
-    END IF;
-
-    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'appointments') THEN
-        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'appointments' AND column_name = 'deleted') THEN
-            ALTER TABLE appointments ADD COLUMN deleted BOOLEAN NOT NULL DEFAULT FALSE;
-        END IF;
-    END IF;
-
-    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'projects') THEN
-        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'projects' AND column_name = 'deleted') THEN
-            ALTER TABLE projects ADD COLUMN deleted BOOLEAN NOT NULL DEFAULT FALSE;
-        END IF;
-    END IF;
-
-    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'content_assets') THEN
-        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'content_assets' AND column_name = 'deleted') THEN
-            ALTER TABLE content_assets ADD COLUMN deleted BOOLEAN NOT NULL DEFAULT FALSE;
-        END IF;
-    END IF;
-END $$;
+-- Sector tables
+ALTER TABLE shipments ADD COLUMN IF NOT EXISTS deleted BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE appointments ADD COLUMN IF NOT EXISTS deleted BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE projects ADD COLUMN IF NOT EXISTS deleted BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE content_assets ADD COLUMN IF NOT EXISTS deleted BOOLEAN NOT NULL DEFAULT FALSE;

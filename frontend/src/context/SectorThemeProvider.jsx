@@ -43,15 +43,8 @@ export const SectorThemeProvider = ({ children }) => {
   const [currentSector, setCurrentSector] = useState(DEFAULT_SECTOR);
   const [isTransitioning, setIsTransitioning] = useState(false);
   
-  // Dark mode state
-  const [isDarkMode, setIsDarkMode] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('theme-mode');
-      if (saved) return saved === 'dark';
-      return window.matchMedia('(prefers-color-scheme: dark)').matches;
-    }
-    return false;
-  });
+  // Dark mode state - Forced to false (light/sector mode) as requested
+  const [isDarkMode, setIsDarkMode] = useState(false);
 
   // Get current theme based on sector
   const currentTheme = getTheme(currentSector);

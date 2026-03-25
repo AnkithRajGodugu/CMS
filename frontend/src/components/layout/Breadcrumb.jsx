@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { useTheme } from '../../context/SafeThemeContext';
+import { useTheme } from '../../context/SectorThemeProvider';
 
 const Breadcrumb = ({ customItems = null }) => {
   const location = useLocation();

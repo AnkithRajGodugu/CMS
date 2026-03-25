@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import api from '../../../services/api';
+import ExternalTransferForm from '../../../components/banking/ExternalTransferForm';
 
 const BankingTransferPage = () => {
   const [accounts, setAccounts]   = useState([]);
@@ -10,6 +11,7 @@ const BankingTransferPage = () => {
   const [description, setDesc]    = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [loadingAcc, setLoadingAcc] = useState(true);
+  const [activeTab, setActiveTab]   = useState('internal');
 
   useEffect(() => {
     api.get('/sectors/banking/my-accounts')
@@ -57,17 +59,33 @@ const BankingTransferPage = () => {
     <div className="p-6 max-w-2xl mx-auto space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Transfer Money</h1>
-        <p className="text-base-content/60 mt-1">Move funds between your own accounts</p>
+        <p className="text-base-content/60 mt-1">Move funds between accounts easily</p>
+      </div>
+
+      <div className="tabs tabs-boxed">
+        <a 
+          className={`tab ${activeTab === 'internal' ? 'tab-active' : ''}`} 
+          onClick={() => setActiveTab('internal')}
+        >
+          Internal Transfer
+        </a>
+        <a 
+          className={`tab ${activeTab === 'external' ? 'tab-active' : ''}`} 
+          onClick={() => setActiveTab('external')}
+        >
+          External Transfer
+        </a>
       </div>
 
       {loadingAcc ? (
         <div className="flex justify-center py-16"><span className="loading loading-spinner loading-lg" /></div>
-      ) : accounts.length < 2 ? (
-        <div className="alert alert-warning">You need at least 2 accounts to make a transfer.</div>
-      ) : (
-        <form onSubmit={handleSubmit} className="card bg-base-100 border border-base-200 shadow-sm p-6 space-y-5">
-          {/* From */}
-          <div className="form-control">
+      ) : activeTab === 'internal' ? (
+        accounts.length < 2 ? (
+          <div className="alert alert-warning">You need at least 2 accounts to make an internal transfer.</div>
+        ) : (
+          <form onSubmit={handleSubmit} className="card bg-base-100 border border-base-200 shadow-sm p-6 space-y-5">
+            {/* From */}
+            <div className="form-control">
             <label className="label"><span className="label-text font-medium">From Account</span></label>
             <select
               className="select select-bordered w-full"
@@ -138,6 +156,16 @@ const BankingTransferPage = () => {
             {submitting ? <span className="loading loading-spinner loading-sm" /> : 'Confirm Transfer'}
           </button>
         </form>
+        ) 
+      ) : (
+        <div className="card bg-base-100 border border-base-200 shadow-sm p-6">
+            <ExternalTransferForm 
+                accounts={accounts} 
+                onTransferComplete={() => {
+                    api.get('/sectors/banking/my-accounts').then(r => setAccounts(r.data ?? []));
+                }} 
+            />
+        </div>
       )}
     </div>
   );

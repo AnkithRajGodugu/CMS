@@ -17,12 +17,10 @@ const HealthcareUserDashboard = () => {
                     getMyAppointments()
                 ]);
 
-                if (statsRes.data?.success) {
-                    setStats(statsRes.data.data);
-                }
-                if (apptsRes.data?.success) {
-                    setAppointments(apptsRes.data.data.content || []);
-                }
+                // Backend returns data directly (no .success wrapper)
+                setStats(statsRes.data?.data ?? statsRes.data ?? {});
+                const apptList = apptsRes.data?.content ?? apptsRes.data ?? [];
+                setAppointments(Array.isArray(apptList) ? apptList : []);
             } catch (err) {
                 console.error('Error fetching healthcare dashboard data:', err);
                 setError('Failed to load healthcare data.');
@@ -42,7 +40,7 @@ const HealthcareUserDashboard = () => {
         );
     }
 
-    const nextAppointment = appointments.find(a => a.status === 'SCHEDULED' || a.status === 'scheduled');
+    const nextAppointment = appointments.find(a => ['CONFIRMED', 'PENDING', 'URGENT'].includes(a.status));
     const vitals = stats?.latestVitals || {};
 
     return (
@@ -76,7 +74,7 @@ const HealthcareUserDashboard = () => {
                             </div>
                             <div className="flex justify-between items-center border-b pb-2 border-base-200">
                                 <span className="text-base-content/60">Weight</span>
-                                <span className="font-bold">{vitals.weight || '-- lbs'}</span>
+                                <span className="font-bold">{vitals.weight || '--'}</span>
                             </div>
                             <div className="flex justify-between items-center">
                                 <span className="text-base-content/60">Last Updated</span>
@@ -100,7 +98,7 @@ const HealthcareUserDashboard = () => {
                                 <div>
                                     <h3 className="font-bold text-base-content">Upcoming Appointment</h3>
                                     <p className="text-sm text-base-content/80">
-                                        {nextAppointment.reason || 'Routine Checkup'} • {new Date(nextAppointment.appointmentDate).toLocaleString()}
+                                        {nextAppointment.type || nextAppointment.notes || 'Routine Checkup'} • {new Date(nextAppointment.appointmentTime).toLocaleString()}
                                     </p>
                                 </div>
                             </div>
@@ -144,8 +142,8 @@ const HealthcareUserDashboard = () => {
                                     {appointments.slice(0, 2).map((appt) => (
                                         <div key={appt.id} className="flex justify-between items-center p-3 border border-base-200 rounded-lg">
                                             <div>
-                                                <h4 className="font-semibold">{appt.reason}</h4>
-                                                <p className="text-xs text-base-content/60">{new Date(appt.appointmentDate).toLocaleDateString()}</p>
+                                                <h4 className="font-semibold">{appt.type || appt.notes || 'Appointment'}</h4>
+                                                <p className="text-xs text-base-content/60">{new Date(appt.appointmentTime).toLocaleDateString()}</p>
                                             </div>
                                             <div className={`badge badge-sm ${appt.status === 'COMPLETED' ? 'badge-success' : 'badge-ghost'}`}>
                                                 {appt.status}

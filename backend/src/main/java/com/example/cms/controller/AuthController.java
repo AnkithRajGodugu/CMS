@@ -3,6 +3,8 @@ package com.example.cms.controller;
 import com.example.cms.entity.User;
 import com.example.cms.security.JwtUtil;
 import com.example.cms.service.AuthService;
+import com.example.cms.service.TotpService;
+import com.example.cms.repository.UserRepository;
 import com.example.cms.dto.LoginRequest;
 import com.example.cms.dto.RegisterRequest;
 import com.example.cms.dto.RegisterOrgRequest;
@@ -13,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.Authentication;
 
 import org.springframework.web.bind.annotation.*;
 import jakarta.servlet.http.Cookie;
@@ -30,9 +33,10 @@ public class AuthController {
 
     private final AuthService authService;
     private final JwtUtil jwtUtil;
-
     private final com.example.cms.service.RateLimitService rateLimitService;
     private final com.example.cms.service.KafkaProducerService kafkaProducerService;
+    private final TotpService totpService;
+    private final UserRepository userRepository;
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request,
@@ -53,6 +57,17 @@ public class AuthController {
             com.example.cms.dto.LoginResponse loginResponse = authService.login(request.getUsername(), request.getPassword());
             
             if (loginResponse.isSuccess()) {
+                // If user has 2FA enabled, don't return the token yet
+                Optional<User> userOpt = authService.findByUsername(request.getUsername());
+                if (userOpt.isPresent() && userOpt.get().isTotpEnabled()) {
+                    Map<String, Object> response = new HashMap<>();
+                    response.put("success", false);
+                    response.put("requires2FA", true);
+                    response.put("username", request.getUsername());
+                    response.put("message", "2FA code required");
+                    return ResponseEntity.ok(response);
+                }
+
                 // Set secure HttpOnly cookie for refresh token
                 Cookie refreshCookie = new Cookie("refresh_token", loginResponse.getRefreshToken());
                 refreshCookie.setHttpOnly(true);
@@ -343,6 +358,142 @@ public class AuthController {
         }
     }
     // DTOs moved to com.example.cms.dto package — see LoginRequest.java, RegisterRequest.java, RegisterOrgRequest.java
+
+    // ─── Two-Factor Authentication (TOTP) ──────────────────────────────────────
+
+    /**
+     * POST /api/auth/2fa/setup — generates a TOTP secret + QR code URL for the current user.
+     * Does NOT enable 2FA yet — the user must first verify a code.
+     */
+    @PostMapping("/2fa/setup")
+    public ResponseEntity<?> setup2FA() {
+        try {
+            Authentication authentication = org.springframework.security.core.context.SecurityContextHolder
+                    .getContext().getAuthentication();
+            String username = authentication.getName();
+
+            Optional<User> userOpt = authService.findByUsername(username);
+            if (userOpt.isEmpty()) return ResponseEntity.notFound().build();
+
+            String secret = totpService.generateSecret();
+            User user = userOpt.get();
+            user.setTotpSecret(secret);
+            userRepository.save(user);
+
+            String qrImageUrl = totpService.buildQrImageUrl(username, secret, "CMS Platform");
+
+            return ResponseEntity.ok(Map.of(
+                "success", true,
+                "secret", secret,
+                "qrImageUrl", qrImageUrl
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("success", false, "message", e.getMessage()));
+        }
+    }
+
+    /**
+     * POST /api/auth/2fa/enable — verifies a TOTP code and enables 2FA for the account.
+     */
+    @PostMapping("/2fa/enable")
+    public ResponseEntity<?> enable2FA(@RequestBody Map<String, Object> body) {
+        try {
+            Authentication authentication = org.springframework.security.core.context.SecurityContextHolder
+                    .getContext().getAuthentication();
+            Optional<User> userOpt = authService.findByUsername(authentication.getName());
+            if (userOpt.isEmpty()) return ResponseEntity.notFound().build();
+
+            User user = userOpt.get();
+            int code = Integer.parseInt(body.get("code").toString());
+
+            if (user.getTotpSecret() == null || !totpService.verify(user.getTotpSecret(), code)) {
+                return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Invalid 2FA code."));
+            }
+
+            user.setTotpEnabled(true);
+            userRepository.save(user);
+            return ResponseEntity.ok(Map.of("success", true, "message", "2FA enabled successfully."));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("success", false, "message", e.getMessage()));
+        }
+    }
+
+    /**
+     * POST /api/auth/2fa/authenticate — called after login when requires2FA=true.
+     * Verifies the TOTP code and returns the JWT access token.
+     */
+    @PostMapping("/2fa/authenticate")
+    public ResponseEntity<?> authenticate2FA(@RequestBody Map<String, String> body,
+                                              HttpServletResponse httpResponse) {
+        try {
+            String username = body.get("username");
+            String codeStr = body.get("code");
+            if (username == null || codeStr == null) {
+                return ResponseEntity.badRequest().body(Map.of("success", false, "message", "username and code required"));
+            }
+
+            Optional<User> userOpt = authService.findByUsername(username);
+            if (userOpt.isEmpty()) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("success", false, "message", "User not found"));
+
+            User user = userOpt.get();
+            int code = Integer.parseInt(codeStr);
+
+            if (!user.isTotpEnabled() || user.getTotpSecret() == null || !totpService.verify(user.getTotpSecret(), code)) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(Map.of("success", false, "message", "Invalid 2FA code."));
+            }
+
+            String sectorName = user.getSector() != null ? user.getSector().getName() : "NONE";
+            String token = jwtUtil.generateToken(user.getUsername(), user.getRole().toString(), sectorName);
+            String refreshToken = jwtUtil.generateRefreshToken(user.getUsername());
+
+            Cookie refreshCookie = new Cookie("refresh_token", refreshToken);
+            refreshCookie.setHttpOnly(true);
+            refreshCookie.setPath("/api/auth/refresh");
+            refreshCookie.setMaxAge(7 * 24 * 60 * 60);
+            httpResponse.addCookie(refreshCookie);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("token", token);
+            response.put("username", user.getUsername());
+            response.put("role", user.getRole().toString());
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("success", false, "message", e.getMessage()));
+        }
+    }
+
+    /**
+     * POST /api/auth/2fa/disable — disables 2FA for the current user (requires valid code).
+     */
+    @PostMapping("/2fa/disable")
+    public ResponseEntity<?> disable2FA(@RequestBody Map<String, Object> body) {
+        try {
+            Authentication authentication = org.springframework.security.core.context.SecurityContextHolder
+                    .getContext().getAuthentication();
+            Optional<User> userOpt = authService.findByUsername(authentication.getName());
+            if (userOpt.isEmpty()) return ResponseEntity.notFound().build();
+
+            User user = userOpt.get();
+            int code = Integer.parseInt(body.get("code").toString());
+
+            if (!totpService.verify(user.getTotpSecret(), code)) {
+                return ResponseEntity.badRequest().body(Map.of("success", false, "message", "Invalid 2FA code."));
+            }
+
+            user.setTotpEnabled(false);
+            user.setTotpSecret(null);
+            userRepository.save(user);
+            return ResponseEntity.ok(Map.of("success", true, "message", "2FA disabled."));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("success", false, "message", e.getMessage()));
+        }
+    }
 
     // ─── Forgot Password & Email Verification ────────────────────────────────
 

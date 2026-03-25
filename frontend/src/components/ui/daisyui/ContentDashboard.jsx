@@ -1,5 +1,5 @@
 import React from 'react';
-import { useTheme } from '../../../context/SafeThemeContext';
+import { useTheme } from '../../../context/SectorThemeProvider';
 
 const ContentDashboard = () => {
   

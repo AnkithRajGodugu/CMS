@@ -1,23 +1,33 @@
 package com.example.cms.controller;
 
-import com.example.cms.entity.Patient;
 import com.example.cms.entity.Appointment;
+import com.example.cms.entity.Notification.NotificationType;
+import com.example.cms.entity.Patient;
 import com.example.cms.entity.User;
-import com.example.cms.repository.PatientRepository;
+import com.example.cms.entity.HealthRecord;
+import com.example.cms.entity.UserVitals;
 import com.example.cms.repository.AppointmentRepository;
+import com.example.cms.repository.HealthRecordRepository;
+import com.example.cms.repository.InsuranceClaimRepository;
+import com.example.cms.repository.PatientRepository;
 import com.example.cms.repository.UserRepository;
+import com.example.cms.repository.UserVitalsRepository;
+import com.example.cms.service.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -36,6 +46,18 @@ public class HealthcareController {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private HealthRecordRepository healthRecordRepository;
+
+    @Autowired
+    private UserVitalsRepository userVitalsRepository;
+
+    @Autowired
+    private InsuranceClaimRepository insuranceClaimRepository;
+
+    @Autowired
+    private NotificationService notificationService;
 
     private User getCurrentUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -63,13 +85,16 @@ public class HealthcareController {
         stats.put("confirmedAppointments", appointments.stream().filter(a -> a.getStatus() == Appointment.AppointmentStatus.CONFIRMED).count());
         stats.put("pendingAppointments", appointments.stream().filter(a -> a.getStatus() == Appointment.AppointmentStatus.PENDING).count());
         
-        // Sample vitals for the dashboard (since we don't have a Vitals entity yet, we'll return some static real-looking data linked to user)
-        stats.put("vitals", Map.of(
-            "heartRate", "72 bpm",
-            "bloodPressure", "120/80",
-            "temperature", "98.6°F",
-            "weight", "70 kg"
-        ));
+        UserVitals vitals = userVitalsRepository.findByUser(user).orElse(new UserVitals(user, "--/--", "-- bpm", "-- kg", "--°F"));
+        Map<String, String> vitalsMap = new HashMap<>();
+        vitalsMap.put("heartRate", vitals.getHeartRate());
+        vitalsMap.put("bloodPressure", vitals.getBloodPressure());
+        vitalsMap.put("temperature", vitals.getTemperature());
+        vitalsMap.put("weight", vitals.getWeight());
+        vitalsMap.put("lastUpdated", vitals.getLastUpdated().toString());
+        
+        // Frontend uses latestVitals instead of vitals
+        stats.put("latestVitals", vitalsMap);
 
         return ResponseEntity.ok(stats);
     }
@@ -80,6 +105,13 @@ public class HealthcareController {
         User user = getCurrentUser();
         if (user == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         return ResponseEntity.ok(appointmentRepository.findByUser(user, pageable));
+    }
+
+    @GetMapping("/my-records")
+    public ResponseEntity<List<HealthRecord>> getMyHealthRecords() {
+        User user = getCurrentUser();
+        if (user == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        return ResponseEntity.ok(healthRecordRepository.findByUserOrderByRecordDateDesc(user));
     }
 
     // Patient Management Endpoints
@@ -141,9 +173,89 @@ public class HealthcareController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    // ─── Smart Scheduling: Get Available Slots ────────────────────────────────
+    @GetMapping("/doctors/{doctorName}/availability")
+    public ResponseEntity<List<String>> getDoctorAvailability(
+            @PathVariable String doctorName,
+            @RequestParam String date) { // YYYY-MM-DD
+        
+        LocalDate targetDate = LocalDate.parse(date);
+        LocalDateTime startOfDay = targetDate.atStartOfDay();
+        LocalDateTime endOfDay = targetDate.atTime(LocalTime.MAX);
+
+        // Fetch all non-cancelled appointments for this doctor on this day
+        List<Appointment> bookedAppointments = appointmentRepository.findDoctorAppointmentsInWindow(
+                doctorName, startOfDay, endOfDay);
+
+        // Define standard clinic hours: 09:00 to 17:00, 30-min slots
+        List<String> allSlots = new ArrayList<>();
+        LocalTime time = LocalTime.of(9, 0);
+        LocalTime endTime = LocalTime.of(17, 0);
+        while (time.isBefore(endTime)) {
+            allSlots.add(time.toString());
+            time = time.plusMinutes(30);
+        }
+
+        // Remove booked slots
+        List<String> bookedTimes = bookedAppointments.stream()
+                .map(appt -> appt.getAppointmentTime().toLocalTime().toString())
+                .collect(Collectors.toList());
+
+        allSlots.removeAll(bookedTimes);
+
+        return ResponseEntity.ok(allSlots);
+    }
+
+    // ─── Smart Scheduling: Conflict Detection on Create ───────────────────────
     @PostMapping("/appointments")
-    public ResponseEntity<Appointment> createAppointment(@RequestBody Appointment appointment) {
+    public ResponseEntity<?> createAppointment(@RequestBody Appointment appointment) {
+        User currentUser = getCurrentUser();
+        
+        // Conflict Check: 30-minute window for the same doctor
+        if (appointment.getDoctorName() != null && appointment.getAppointmentTime() != null) {
+            LocalDateTime slotStart = appointment.getAppointmentTime();
+            LocalDateTime slotEnd = slotStart.plusMinutes(30);
+            
+            List<Appointment> conflicts = appointmentRepository.findDoctorAppointmentsInWindow(
+                    appointment.getDoctorName(), slotStart, slotEnd);
+            
+            if (!conflicts.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.CONFLICT)
+                        .body(Map.of("success", false, "message", "The selected time slot is already booked for this doctor."));
+            }
+        }
+
+        if (currentUser != null) {
+            appointment.setUser(currentUser);
+            // If patient name not provided by user, use their email/username
+            if (appointment.getPatientName() == null || appointment.getPatientName().isEmpty()) {
+                appointment.setPatientName(currentUser.getUsername());
+            }
+        }
+
+        if (appointment.getAppointmentId() == null || appointment.getAppointmentId().isEmpty()) {
+            appointment.setAppointmentId("APT-" + System.currentTimeMillis());
+        }
+
+        if (appointment.getDoctorName() == null || appointment.getDoctorName().isEmpty()) {
+            appointment.setDoctorName("To be assigned");
+        }
+
+        if (appointment.getStatus() == null) {
+            appointment.setStatus(Appointment.AppointmentStatus.PENDING);
+        }
+
         Appointment savedAppointment = appointmentRepository.save(appointment);
+        // Notify user about the new appointment
+        if (currentUser != null) {
+            notificationService.createAndSend(
+                currentUser.getId(), currentUser.getUsername(),
+                NotificationType.APPOINTMENT,
+                "Appointment Booked",
+                "Your appointment with " + savedAppointment.getDoctorName() + " is pending confirmation.",
+                "/user/healthcare/appointments"
+            );
+        }
         return ResponseEntity.ok(savedAppointment);
     }
 
@@ -157,7 +269,19 @@ public class HealthcareController {
                     appointment.setType(appointmentDetails.getType());
                     appointment.setStatus(appointmentDetails.getStatus());
                     appointment.setNotes(appointmentDetails.getNotes());
-                    return ResponseEntity.ok(appointmentRepository.save(appointment));
+                    Appointment savedAppt = appointmentRepository.save(appointment);
+                    // Notify patient when appointment is confirmed
+                    if (appointmentDetails.getStatus() == Appointment.AppointmentStatus.CONFIRMED
+                            && appointment.getUser() != null) {
+                        notificationService.createAndSend(
+                            appointment.getUser().getId(), appointment.getUser().getUsername(),
+                            NotificationType.APPOINTMENT,
+                            "Appointment Confirmed",
+                            "Your appointment with " + savedAppt.getDoctorName() + " has been confirmed.",
+                            "/user/healthcare/appointments"
+                        );
+                    }
+                    return ResponseEntity.ok(savedAppt);
                 })
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -191,18 +315,45 @@ public class HealthcareController {
         return ResponseEntity.ok(stats);
     }
 
+    @GetMapping("/activity/recent")
+    public ResponseEntity<List<Appointment>> getRecentActivity() {
+        return ResponseEntity.ok(appointmentRepository.findTop5ByOrderByCreatedAtDesc());
+    }
+
     // Insurance Management Endpoints
     @GetMapping("/insurance/claims")
     public ResponseEntity<Map<String, Object>> getInsuranceClaims() {
         Map<String, Object> claimsData = new HashMap<>();
         
-        // Sample insurance data - in real implementation, this would come from database
-        claimsData.put("approvedClaims", 45230.00);
-        claimsData.put("pendingClaims", 12850.00);
-        claimsData.put("deniedClaims", 3450.00);
-        claimsData.put("successRate", 87.5);
+        Double approved = insuranceClaimRepository.sumApprovedClaims();
+        Double pending = insuranceClaimRepository.sumPendingClaims();
+        Double denied = insuranceClaimRepository.sumDeniedClaims();
+        
+        approved = approved != null ? approved : 0.0;
+        pending = pending != null ? pending : 0.0;
+        denied = denied != null ? denied : 0.0;
+        
+        double total = approved + pending + denied;
+        double successRate = total > 0 ? (approved / total) * 100.0 : 0.0;
+        
+        claimsData.put("approvedClaims", approved);
+        claimsData.put("pendingClaims", pending);
+        claimsData.put("deniedClaims", denied);
+        claimsData.put("successRate", Math.round(successRate * 10.0) / 10.0);
         
         return ResponseEntity.ok(claimsData);
+    }
+
+    // Admin - all insurance claims (full detail list)
+    @GetMapping("/insurance/claims/all")
+    public ResponseEntity<List<com.example.cms.entity.InsuranceClaim>> getAllInsuranceClaims() {
+        return ResponseEntity.ok(insuranceClaimRepository.findAll());
+    }
+
+    // Admin - all health records across all users
+    @GetMapping("/records/all")
+    public ResponseEntity<List<HealthRecord>> getAllHealthRecords() {
+        return ResponseEntity.ok(healthRecordRepository.findAll());
     }
 
     // Medical History Endpoints
@@ -210,11 +361,19 @@ public class HealthcareController {
     public ResponseEntity<Map<String, Object>> getPatientHistory(@PathVariable String patientId) {
         Map<String, Object> historyData = new HashMap<>();
         
-        // Sample medical history data
-        historyData.put("totalVisits", 4);
-        historyData.put("activeMedications", 3);
-        historyData.put("knownAllergies", 2);
-        historyData.put("labResults", 4);
+        Patient patient = patientRepository.findById(Long.parseLong(patientId)).orElse(null);
+        if (patient == null) {
+            return ResponseEntity.notFound().build();
+        }
+        
+        String fullName = patient.getFirstName() + " " + patient.getLastName();
+        long totalVisits = appointmentRepository.countByPatientName(fullName);
+        
+        // Use deterministic simple logic for missing data until tables expand.
+        historyData.put("totalVisits", totalVisits);
+        historyData.put("activeMedications", (patient.getId() % 3) + 1); // Mocked deterministic value based on ID
+        historyData.put("knownAllergies", (patient.getId() % 2));
+        historyData.put("labResults", totalVisits > 0 ? totalVisits * 2 : 1);
         
         return ResponseEntity.ok(historyData);
     }

@@ -11,13 +11,18 @@ export const ROLES = {
     USER: 'USER',
 };
 
+/** Normalizes the role string by removing Spring Security's ROLE_ prefix */
+export const normalizeRole = (role) => (role || '').replace(/^ROLE_/, '').toUpperCase();
+
 /** True if the user holds a platform/sector admin level role */
-export const isAdmin = (user) =>
-    user?.role === ROLES.ADMIN || user?.role === ROLES.SUPERADMIN;
+export const isAdmin = (user) => {
+    const r = normalizeRole(user?.role);
+    return r === ROLES.ADMIN || r === ROLES.SUPERADMIN;
+};
 
 /** True if the user is a manager (sub-set of admin privileges) */
 export const isManager = (user) =>
-    user?.role === ROLES.MANAGER;
+    normalizeRole(user?.role) === ROLES.MANAGER;
 
 /** True for ADMIN + MANAGER (i.e. can access admin dashboards) */
 export const isSectorAdmin = (user) =>
@@ -25,7 +30,7 @@ export const isSectorAdmin = (user) =>
 
 /** True if the user is a regular end-user */
 export const isUser = (user) =>
-    user?.role === ROLES.USER;
+    normalizeRole(user?.role) === ROLES.USER;
 
 /**
  * Returns the post-login redirect path for a given user.
@@ -38,7 +43,9 @@ export const getHomeRoute = (user, sector) => {
         sector?.code || sector?.name || ''
     ).toLowerCase();
 
-    switch (user?.role) {
+    const r = normalizeRole(user?.role);
+    
+    switch (r) {
         case ROLES.SUPERADMIN:
         case ROLES.ADMIN:
         case ROLES.MANAGER:
@@ -119,13 +126,14 @@ export const getSectorNavItems = (sector, role) => {
     };
 
     const s = (sector || 'banking').toLowerCase();
+    const r = normalizeRole(role);
 
-    if (role === ROLES.USER) {
+    if (r === ROLES.USER) {
         return userNavs[s] || [];
     }
     
     const links = adminNavs[s] || [];
-    if (role === ROLES.MANAGER) {
+    if (r === ROLES.MANAGER) {
         return links.filter(item => !item.adminOnly);
     }
     return links;

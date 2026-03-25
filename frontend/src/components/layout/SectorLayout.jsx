@@ -4,16 +4,13 @@ import Sidebar from './Sidebar';
 
 const SectorLayout = () => {
     return (
-        <div className="min-h-screen flex flex-col bg-base-200">
-            {/* Top Navbar spans full width */}
-            <div className="sticky top-0 z-50">
-                <Navbar />
-            </div>
+        <div className="drawer lg:drawer-open min-h-screen bg-base-200">
+            <input id="mobile-sidebar-drawer" type="checkbox" className="drawer-toggle" />
             
-            <div className="flex flex-1 overflow-hidden">
-                {/* Fixed Sidebar */}
-                <div className="hidden lg:block z-40">
-                    <Sidebar />
+            <div className="drawer-content flex flex-col min-h-screen">
+                {/* Navbar */}
+                <div className="sticky top-0 z-40 w-full">
+                    <Navbar />
                 </div>
                 
                 {/* Scrollable Main Content */}
@@ -22,6 +19,14 @@ const SectorLayout = () => {
                         <Outlet />
                     </div>
                 </main>
+            </div> 
+            
+            {/* Drawer Side (Sidebar) */}
+            <div className="drawer-side z-50">
+                <label htmlFor="mobile-sidebar-drawer" aria-label="close sidebar" className="drawer-overlay"></label> 
+                <div className="w-72 min-h-full bg-base-100/50">
+                    <Sidebar />
+                </div>
             </div>
         </div>
     );

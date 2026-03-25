@@ -1,13 +1,17 @@
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import { normalizeRole } from '../utils/roleUtils';
 
 /**
  * ProtectedRoute
  *
  * Props:
- *  - requiredRoles: string[] - if provided, user.role must be in this array.
+ *  - requiredRoles: string[] - if provided, the user's normalized role must be in this array.
  *    Example: requiredRoles={['ADMIN', 'MANAGER']}
  *    Leave undefined to allow any authenticated user.
+ *
+ * Note: normalizeRole strips the Spring Security 'ROLE_' prefix before comparing,
+ *       so 'ROLE_USER' and 'USER' are treated as equivalent.
  */
 const ProtectedRoute = ({ children, requiredRoles = null }) => {
     const { user, isAuthenticated } = useAuth();
@@ -17,9 +21,12 @@ const ProtectedRoute = ({ children, requiredRoles = null }) => {
         return <Navigate to="/login" replace />;
     }
 
-    // Role check — requiredRoles must be an array and user.role must be in it
-    if (requiredRoles && Array.isArray(requiredRoles) && !requiredRoles.includes(user?.role)) {
-        return <Navigate to="/unauthorized" replace />;
+    // Role check — normalize first to handle Spring Security's ROLE_ prefix
+    if (requiredRoles && Array.isArray(requiredRoles)) {
+        const normalizedUserRole = normalizeRole(user?.role);
+        if (!requiredRoles.includes(normalizedUserRole)) {
+            return <Navigate to="/unauthorized" replace />;
+        }
     }
 
     return children;

@@ -75,6 +75,26 @@ public class User {
     @Column(name = "last_login")
     private LocalDateTime lastLogin;
 
+    @Column(name = "totp_secret", length = 64)
+    private String totpSecret;
+
+    @Column(name = "totp_enabled", nullable = false)
+    @Builder.Default
+    private boolean totpEnabled = false;
+
+    // Feature #8: Enhanced Profiles
+    @Column(name = "avatar_url")
+    private String avatarUrl;
+
+    @Column(name = "bio", length = 500)
+    private String bio;
+
+    @Column(name = "phone", length = 20)
+    private String phone;
+
+    @Column(name = "preferences", columnDefinition = "text")
+    private String preferences; // Store JSON as text for simplicity, or use native JSONB if PostgreSQL specific config is added.
+
     public enum Role {
         ADMIN, MANAGER, USER, SUPERADMIN
     }

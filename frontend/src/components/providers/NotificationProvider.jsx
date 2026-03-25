@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 import { AuthContext } from '../../context/auth';
 import { NotificationContext } from '../../context/NotificationContext';
 import { getToken } from '../../utils/auth';
+import api from '../../services/api';
 
 const WS_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:8081'}/ws`;
 
@@ -17,7 +18,27 @@ export const NotificationProvider = ({ children }) => {
   // Derived
   const unreadCount = notifications.filter((n) => !n.read).length;
 
-  // Add a notification to the list
+  // Fetch initial notification history from REST API
+  useEffect(() => {
+    if (!isAuthenticated || !user) return;
+    api.get('/notifications?page=0&size=50')
+      .then(res => {
+        if (res.data?.notifications) {
+          setNotifications(res.data.notifications.map(n => ({
+            id: n.id,
+            type: n.type || 'SYSTEM',
+            title: n.title || 'Notification',
+            message: n.message || '',
+            read: n.read,
+            createdAt: n.createdAt,
+            link: n.link || null,
+          })));
+        }
+      })
+      .catch(err => console.warn('Could not fetch notification history:', err));
+  }, [isAuthenticated, user?.id]);
+
+  // Add a notification to the list (from live WebSocket)
   const addNotification = useCallback((notification) => {
     setNotifications((prev) => [
       {
@@ -27,19 +48,21 @@ export const NotificationProvider = ({ children }) => {
         message: notification.message || (typeof notification.payload === 'string' ? notification.payload : JSON.stringify(notification.payload || '')),
         read: false,
         createdAt: notification.timestamp || new Date().toISOString(),
-        link: notification.data?.link || null,
+        link: notification.data?.link || notification.link || null,
       },
       ...prev.slice(0, 99), // keep max 100
     ]);
   }, []);
 
   const markRead = useCallback((id) => {
+    api.post(`/notifications/${id}/read`).catch(() => {});
     setNotifications((prev) =>
       prev.map((n) => (n.id === id ? { ...n, read: true } : n))
     );
   }, []);
 
   const markAllRead = useCallback(() => {
+    api.post('/notifications/read-all').catch(() => {});
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
   }, []);
 

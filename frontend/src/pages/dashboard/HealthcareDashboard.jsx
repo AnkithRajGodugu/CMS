@@ -1,16 +1,39 @@
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FaHospital, FaUserMd, FaCalendarCheck, FaFileMedical, FaShieldAlt } from 'react-icons/fa';
 import ReportExportButtons from '../../components/shared/ReportExportButtons';
 import { useAuth } from '../../hooks/useAuth';
 import SystemMetricsWidget from '../../components/shared/SystemMetricsWidget';
+import AppointmentCalendarView from '../../components/healthcare/AppointmentCalendarView';
+import { getHealthcareAdminStats, getRecentHealthcareActivity } from '../../services/healthcareService';
 
 const HealthcareDashboard = () => {
   const { user } = useAuth();
+  const [adminStats, setAdminStats] = useState(null);
+  const [recentActivity, setRecentActivity] = useState([]);
+
+  useEffect(() => {
+      const fetchData = async () => {
+          try {
+              const [statsRes, activityRes] = await Promise.all([
+                  getHealthcareAdminStats(),
+                  getRecentHealthcareActivity()
+              ]);
+              setAdminStats(statsRes.data?.data || statsRes.data);
+              setRecentActivity(activityRes.data?.data || activityRes.data || []);
+          } catch (error) {
+              console.error('Error fetching healthcare admin data', error);
+          }
+      };
+      // Fetch even if not admin, maybe they are HEALTHCARE role
+      fetchData();
+  }, []);
+
   const stats = [
-    { label: 'Total Patients', value: '1,234', change: '+12%', icon: FaUserMd, color: 'text-success' },
-    { label: 'Appointments Today', value: '45', change: '+5%', icon: FaCalendarCheck, color: 'text-info' },
-    { label: 'Active Cases', value: '89', change: '-3%', icon: FaFileMedical, color: 'text-warning' },
-    { label: 'Compliance Score', value: '98%', change: '+2%', icon: FaShieldAlt, color: 'text-success' },
+    { label: 'Total Patients', value: adminStats?.totalPatients || '0', change: '+12%', icon: FaUserMd, color: 'text-success' },
+    { label: 'Appointments Today', value: adminStats?.todaysAppointments || '0', change: '+5%', icon: FaCalendarCheck, color: 'text-info' },
+    { label: 'Active Cases', value: adminStats?.activeCases || '0', change: '-3%', icon: FaFileMedical, color: 'text-warning' },
+    { label: 'Pending Appointments', value: adminStats?.pendingAppointments || '0', change: '+2%', icon: FaShieldAlt, color: 'text-success' },
   ];
 
   const quickActions = [
@@ -19,6 +42,16 @@ const HealthcareDashboard = () => {
     { title: 'Medical History', path: '/dashboard/healthcare/medical-history', icon: FaFileMedical, color: 'bg-warning' },
     { title: 'Insurance', path: '/dashboard/healthcare/insurance', icon: FaShieldAlt, color: 'bg-error' },
   ];
+
+  const getStatusBadge = (status) => {
+    switch (status) {
+      case 'CONFIRMED': return 'badge-success';
+      case 'PENDING': return 'badge-warning';
+      case 'COMPLETED': return 'badge-info';
+      case 'URGENT': return 'badge-error';
+      default: return 'badge-ghost';
+    }
+  };
 
   return (
     <div className="min-h-screen bg-base-200">
@@ -55,6 +88,11 @@ const HealthcareDashboard = () => {
           ))}
         </div>
 
+        {/* Smart Appointment Scheduling */}
+        <div className="mb-8">
+            <AppointmentCalendarView />
+        </div>
+
         {/* Quick Actions */}
         <div className="mb-8">
           <h2 className="text-2xl font-bold mb-4">Quick Actions</h2>
@@ -77,7 +115,7 @@ const HealthcareDashboard = () => {
         {/* Recent Activity */}
         <div className="card bg-base-100 shadow-xl">
           <div className="card-body">
-            <h2 className="card-title">Recent Activity</h2>
+            <h2 className="card-title">Recent Appointments</h2>
             <div className="overflow-x-auto">
               <table className="table">
                 <thead>
@@ -89,24 +127,18 @@ const HealthcareDashboard = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  <tr>
-                    <td>John Doe</td>
-                    <td>Appointment Scheduled</td>
-                    <td>10 minutes ago</td>
-                    <td><span className="badge badge-success">Confirmed</span></td>
-                  </tr>
-                  <tr>
-                    <td>Jane Smith</td>
-                    <td>Medical Record Updated</td>
-                    <td>1 hour ago</td>
-                    <td><span className="badge badge-info">Updated</span></td>
-                  </tr>
-                  <tr>
-                    <td>Bob Johnson</td>
-                    <td>Prescription Issued</td>
-                    <td>2 hours ago</td>
-                    <td><span className="badge badge-success">Completed</span></td>
-                  </tr>
+                  {recentActivity.length > 0 ? recentActivity.map((activity, idx) => (
+                    <tr key={idx}>
+                      <td>{activity.patientName}</td>
+                      <td>{activity.type} Appointment</td>
+                      <td>{new Date(activity.createdAt).toLocaleString()}</td>
+                      <td><span className={`badge ${getStatusBadge(activity.status)}`}>{activity.status}</span></td>
+                    </tr>
+                  )) : (
+                    <tr>
+                        <td colSpan="4" className="text-center opacity-50 py-4">No recent activity found.</td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>

@@ -26,6 +26,15 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     
     List<Appointment> findByDoctorName(String doctorName);
     
+    // Smart Scheduling
+    @Query("SELECT a FROM Appointment a WHERE a.doctorName = :doctorName AND a.status != 'CANCELLED' " +
+           "AND a.appointmentTime >= :start AND a.appointmentTime < :end")
+    List<Appointment> findDoctorAppointmentsInWindow(
+        @Param("doctorName") String doctorName,
+        @Param("start") LocalDateTime start,
+        @Param("end") LocalDateTime end
+    );
+
     List<Appointment> findByStatus(Appointment.AppointmentStatus status);
     
     List<Appointment> findByType(Appointment.AppointmentType type);
@@ -44,4 +53,11 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     
     @Query("SELECT COUNT(a) FROM Appointment a WHERE a.status = 'URGENT' AND CAST(a.appointmentTime AS date) = CURRENT_DATE")
     Long countTodaysUrgentAppointments();
+    
+    List<Appointment> findTop5ByOrderByCreatedAtDesc();
+    // Calculate total visits for a specific patient
+    long countByPatientName(String patientName);
+
+    // Get appointments by patient name
+    List<Appointment> findByPatientName(String patientName);
 }

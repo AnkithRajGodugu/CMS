@@ -1,13 +1,13 @@
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { useTheme } from '../../context/SectorThemeProvider';
-import { getHomeRoute } from '../../utils/roleUtils';
+import { getHomeRoute, isAdmin, isManager } from '../../utils/roleUtils';
 import DynamicLogo from '../logos/DynamicLogo';
 import NotificationsDropdown from '../NotificationsDropdown';
 
 const SafeNavbar = ({ hideSectorSwitcher = false }) => {
   const { user, logout, isAuthenticated } = useAuth();
-  const { currentTheme, changeSector, getAllSectors, isDarkMode, toggleDarkMode } = useTheme();
+  const { currentTheme, changeSector, getAllSectors } = useTheme();
 
   return (
     <div 
@@ -15,9 +15,17 @@ const SafeNavbar = ({ hideSectorSwitcher = false }) => {
       style={{ borderBottom: `2px solid ${currentTheme?.primary || '#1e40af'}` }}
     >
       <div className="navbar-start">
+        {/* Mobile Sidebar Toggle */}
+        <div className="lg:hidden mr-2">
+            <label htmlFor="mobile-sidebar-drawer" className="btn btn-ghost btn-circle">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h7" />
+                </svg>
+            </label>
+        </div>
         <Link to="/" className="btn btn-ghost text-xl flex items-center gap-2">
           <DynamicLogo size={28} animated={true} />
-          <span className="gradient-text">CMS Platform</span>
+          <span className="gradient-text hidden sm:inline">CMS Platform</span>
         </Link>
       </div>
       
@@ -43,7 +51,7 @@ const SafeNavbar = ({ hideSectorSwitcher = false }) => {
               </li>
             )}
 
-            {user?.role === 'ADMIN' && (
+            {isAdmin(user) && (
               <li>
                 <Link 
                   to="/users"
@@ -53,7 +61,7 @@ const SafeNavbar = ({ hideSectorSwitcher = false }) => {
                 </Link>
               </li>
             )}
-            {user?.role === 'ADMIN' && (
+            {isAdmin(user) && (
               <li>
                 <Link
                   to="/admin/audit-logs"
@@ -63,7 +71,7 @@ const SafeNavbar = ({ hideSectorSwitcher = false }) => {
                 </Link>
               </li>
             )}
-            {(user?.role === 'ADMIN' || user?.role === 'MANAGER') && (
+            {(isAdmin(user) || isManager(user)) && (
               <li>
                 <Link
                   to="/admin/webhooks"
@@ -133,10 +141,14 @@ const SafeNavbar = ({ hideSectorSwitcher = false }) => {
             <div className="dropdown dropdown-end">
               <div tabIndex={0} role="button" className="btn btn-ghost btn-circle avatar">
                 <div 
-                  className="w-10 rounded-full text-white flex items-center justify-center font-semibold"
-                  style={{ backgroundColor: currentTheme?.primary || '#1e40af' }}
+                  className={`w-10 rounded-full text-white flex items-center justify-center font-semibold overflow-hidden ${user?.avatarUrl ? 'bg-base-200' : ''}`}
+                  style={{ backgroundColor: user?.avatarUrl ? 'transparent' : (currentTheme?.primary || '#1e40af') }}
                 >
-                  {user?.username?.charAt(0).toUpperCase() || 'U'}
+                  {user?.avatarUrl ? (
+                    <img src={user.avatarUrl} alt="User Avatar" className="w-full h-full object-cover" />
+                  ) : (
+                    user?.username?.charAt(0).toUpperCase() || 'U'
+                  )}
                 </div>
               </div>
               <ul tabIndex={0} className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
@@ -145,7 +157,7 @@ const SafeNavbar = ({ hideSectorSwitcher = false }) => {
                   <span className="text-xs opacity-60">{user?.role} • {user?.sector}</span>
                 </li>
                 <li><Link to="/settings">Profile & Settings</Link></li>
-                {(user?.role === 'ADMIN' || user?.role === 'MANAGER') && user?.organizationId && (
+                {(isAdmin(user) || isManager(user)) && user?.organizationId && (
                   <li><Link to="/organization-settings">Organization Settings</Link></li>
                 )}
                 <li><hr className="my-2" /></li>

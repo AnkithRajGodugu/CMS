@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { login as authLogin } from '../../utils/auth';
 import { getHomeRoute } from '../../utils/roleUtils';
+import api from '../../services/api';
 
 const LoginPage = () => {
     const [formData, setFormData] = useState({
@@ -12,6 +13,8 @@ const LoginPage = () => {
 
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
+    const [requires2FA, setRequires2FA] = useState(false);
+    const [twoFaCode, setTwoFaCode] = useState('');
 
     const navigate = useNavigate();
     const { login } = useAuth();
@@ -23,6 +26,12 @@ const LoginPage = () => {
 
         try {
             const loginData = await authLogin(formData.username, formData.password);
+
+            if (loginData.requires2FA) {
+                setRequires2FA(true);
+                setIsLoading(false);
+                return;
+            }
 
             console.log("LOGIN DATA:", loginData);
 
@@ -47,6 +56,36 @@ const LoginPage = () => {
         } catch (err) {
             console.error('Login error:', err);
             setError(err.message || 'Login failed. Please check your credentials.');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handle2FASubmit = async (e) => {
+        e.preventDefault();
+        setIsLoading(true);
+        setError('');
+
+        try {
+            const res = await api.post('/auth/2fa/authenticate', {
+                username: formData.username,
+                code: twoFaCode
+            });
+            const loginData = res.data;
+
+            login(loginData);
+
+            let sectorCode = null;
+            if (typeof loginData?.sector === 'string') {
+                sectorCode = loginData.sector.toLowerCase();
+            } else if (loginData?.sector?.code) {
+                sectorCode = loginData.sector.code.toLowerCase();
+            }
+            const redirectPath = getHomeRoute(loginData.user || { role: loginData.role }, sectorCode);
+            navigate(redirectPath);
+        } catch (err) {
+            console.error('2FA error:', err);
+            setError(err.response?.data?.message || 'Invalid 2FA code.');
         } finally {
             setIsLoading(false);
         }
@@ -91,14 +130,56 @@ const LoginPage = () => {
                             </div>
                         )}
 
-                        <form onSubmit={handleSubmit} className="space-y-6">
+                        {requires2FA ? (
+                            <form onSubmit={handle2FASubmit} className="space-y-6">
+                                <div className="text-center mb-4 text-sm text-base-content/70">
+                                    Enter the 6-digit code from your authenticator app.
+                                </div>
+                                <div className="form-control">
+                                    <label className="label">
+                                        <span className="label-text">Authenticator Code</span>
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={twoFaCode}
+                                        onChange={(e) => setTwoFaCode(e.target.value)}
+                                        className="input input-bordered text-center tracking-[0.5em] font-mono text-xl"
+                                        placeholder="000000"
+                                        maxLength="6"
+                                        required
+                                        autoFocus
+                                        disabled={isLoading}
+                                    />
+                                </div>
+                                <div className="form-control">
+                                    <button
+                                        type="submit"
+                                        className={`btn btn-primary ${isLoading ? 'loading' : ''}`}
+                                        disabled={isLoading || twoFaCode.length !== 6}
+                                    >
+                                        Verify Code
+                                    </button>
+                                </div>
+                                <div className="text-center mt-4">
+                                    <button
+                                        type="button"
+                                        onClick={() => { setRequires2FA(false); setTwoFaCode(''); }}
+                                        className="btn btn-ghost btn-sm"
+                                        disabled={isLoading}
+                                    >
+                                        Back to Login
+                                    </button>
+                                </div>
+                            </form>
+                        ) : (
+                            <form onSubmit={handleSubmit} className="space-y-6">
 
-                            <div className="form-control">
-                                <label className="label">
-                  <span className="label-text">
-                    Username
-                  </span>
-                                </label>
+                                <div className="form-control">
+                                    <label className="label">
+                                        <span className="label-text">
+                                            Username
+                                        </span>
+                                    </label>
 
                                 <input
                                     type="text"
@@ -153,6 +234,7 @@ const LoginPage = () => {
                             </div>
 
                         </form>
+                        )}
 
                         <div className="divider">OR</div>
 

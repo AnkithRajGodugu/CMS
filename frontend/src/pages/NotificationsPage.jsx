@@ -1,71 +1,142 @@
-import { useContext } from 'react';
+import { useState, useContext } from 'react';
 import { NotificationContext } from '../context/NotificationContext';
+import { Link } from 'react-router-dom';
+
+const typeIcons = {
+    APPOINTMENT: { icon: '🗓️', color: 'text-blue-500', bg: 'bg-blue-50' },
+    TRANSACTION: { icon: '💳', color: 'text-green-600', bg: 'bg-green-50' },
+    CLAIM: { icon: '📋', color: 'text-purple-500', bg: 'bg-purple-50' },
+    SECURITY: { icon: '🔐', color: 'text-red-500', bg: 'bg-red-50' },
+    SYSTEM: { icon: '⚙️', color: 'text-base-content/60', bg: 'bg-base-200' },
+};
+
+function relativeTime(isoString) {
+    const now = Date.now();
+    const then = new Date(isoString).getTime();
+    const diff = Math.floor((now - then) / 1000);
+    if (diff < 60) return 'Just now';
+    if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+    return `${Math.floor(diff / 86400)}d ago`;
+}
 
 const NotificationsPage = () => {
     const { notifications, unreadCount, markAllRead, markRead } = useContext(NotificationContext);
+    const [activeTab, setActiveTab] = useState('all');
+
+    const filtered = notifications.filter(n => {
+        if (activeTab === 'unread') return !n.read;
+        if (activeTab === 'system') return n.type === 'SYSTEM' || n.type === 'SECURITY';
+        return true;
+    });
 
     return (
-        <div className="max-w-4xl mx-auto space-y-6">
-            <div className="flex justify-between items-center sm:items-end border-b border-base-200 pb-4">
+        <div className="max-w-3xl mx-auto space-y-6">
+            {/* Header */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-3 border-b border-base-200 pb-5">
                 <div>
                     <h1 className="text-3xl font-bold flex items-center gap-3">
                         Notifications
-                        {unreadCount > 0 && <span className="badge badge-primary">{unreadCount} New</span>}
+                        {unreadCount > 0 && (
+                            <span className="badge badge-primary badge-md animate-pulse">{unreadCount} New</span>
+                        )}
                     </h1>
-                    <p className="text-base-content/60 mt-1">Stay updated with system alerts and account activities.</p>
+                    <p className="text-base-content/60 mt-1 text-sm">Stay updated with your activity and alerts.</p>
                 </div>
                 {unreadCount > 0 && (
-                    <button className="btn btn-sm btn-outline text-primary" onClick={markAllRead}>
-                        Mark All as Read
+                    <button
+                        className="btn btn-sm btn-outline text-primary border-primary/30 hover:bg-primary/10"
+                        onClick={markAllRead}
+                    >
+                        ✓ Mark All Read
                     </button>
                 )}
             </div>
 
-            <div className="tabs tabs-boxed bg-base-200/50 p-1 w-fit mb-6">
-                <button className="tab px-6 tab-active bg-primary text-primary-content">All</button>
-                <button className="tab px-6">Unread</button>
-                <button className="tab px-6">System</button>
+            {/* Tabs */}
+            <div className="flex gap-1 bg-base-200/60 rounded-xl p-1 w-fit">
+                {['all', 'unread', 'system'].map(tab => (
+                    <button
+                        key={tab}
+                        onClick={() => setActiveTab(tab)}
+                        className={`px-5 py-1.5 rounded-lg text-sm font-medium transition-all capitalize ${
+                            activeTab === tab
+                                ? 'bg-primary text-primary-content shadow'
+                                : 'text-base-content/60 hover:text-base-content'
+                        }`}
+                    >
+                        {tab === 'unread' ? `Unread (${unreadCount})` : tab.charAt(0).toUpperCase() + tab.slice(1)}
+                    </button>
+                ))}
             </div>
 
-            <div className="space-y-4">
-                {notifications.length === 0 ? (
-                    <div className="text-center py-12 text-base-content/50">
-                        <svg className="w-12 h-12 mx-auto mb-4 opacity-30" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
-                        <p>No new notifications at this time.</p>
+            {/* List */}
+            <div className="space-y-3">
+                {filtered.length === 0 ? (
+                    <div className="text-center py-16 text-base-content/40">
+                        <div className="text-5xl mb-4">🔔</div>
+                        <p className="font-medium">No notifications here yet.</p>
+                        <p className="text-sm mt-1">
+                            {activeTab === 'unread' ? 'You\'re all caught up!' : 'Activity will appear here.'}
+                        </p>
                     </div>
                 ) : (
-                    notifications.map((notif) => (
-                        <div key={notif.id} className={`card shadow-sm border ${notif.read ? 'bg-base-100 border-base-200' : 'bg-primary/5 border-primary/20'} transition-colors`}>
-                            <div className="card-body p-4 sm:p-5 flex-row gap-4 items-start">
-                                <div className={`mt-1 flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${notif.read ? 'bg-base-200 text-base-content/50' : 'bg-primary/20 text-primary'}`}>
-                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                </div>
-                                <div className="flex-1">
-                                    <div className="flex justify-between items-start">
-                                        <h3 className={`font-semibold text-base sm:text-lg ${notif.read ? 'text-base-content/80' : 'text-base-content'}`}>{notif.title}</h3>
-                                        <span className="text-xs text-base-content/50 font-mono whitespace-nowrap ml-4">
-                                            {new Date(notif.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                        </span>
+                    filtered.map((notif) => {
+                        const style = typeIcons[notif.type] || typeIcons['SYSTEM'];
+                        const card = (
+                            <div
+                                key={notif.id}
+                                className={`card border transition-all duration-200 hover:shadow-md ${
+                                    notif.read
+                                        ? 'bg-base-100 border-base-200'
+                                        : 'bg-primary/5 border-primary/25 shadow-sm'
+                                }`}
+                            >
+                                <div className="card-body p-4 sm:p-5 flex-row gap-4 items-start">
+                                    {/* Icon */}
+                                    <div className={`mt-0.5 flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-lg ${style.bg}`}>
+                                        {style.icon}
                                     </div>
-                                    <p className={`text-sm mt-1 ${notif.read ? 'text-base-content/60' : 'text-base-content/80'}`}>{notif.message}</p>
-                                    
+
+                                    {/* Content */}
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex justify-between items-start gap-2">
+                                            <h3 className={`font-semibold text-sm sm:text-base leading-snug ${notif.read ? 'text-base-content/75' : 'text-base-content'}`}>
+                                                {notif.title}
+                                            </h3>
+                                            <span className="text-xs text-base-content/45 whitespace-nowrap flex-shrink-0 font-mono">
+                                                {relativeTime(notif.createdAt)}
+                                            </span>
+                                        </div>
+                                        <p className={`text-sm mt-1 leading-relaxed ${notif.read ? 'text-base-content/55' : 'text-base-content/75'}`}>
+                                            {notif.message}
+                                        </p>
+                                        {!notif.read && (
+                                            <button
+                                                className="btn btn-ghost btn-xs text-primary mt-2 hover:bg-primary/10 -ml-2"
+                                                onClick={(e) => { e.preventDefault(); markRead(notif.id); }}
+                                            >
+                                                Mark as read
+                                            </button>
+                                        )}
+                                    </div>
+
+                                    {/* Unread dot */}
                                     {!notif.read && (
-                                        <button 
-                                            className="btn btn-ghost btn-xs text-primary mt-3 hover:bg-primary/10"
-                                            onClick={() => markRead(notif.id)}
-                                        >
-                                            Mark as read
-                                        </button>
+                                        <div className="w-2.5 h-2.5 rounded-full bg-primary mt-2 flex-shrink-0 animate-pulse" />
                                     )}
                                 </div>
-                                {!notif.read && (
-                                    <div className="w-2 h-2 rounded-full bg-primary mt-2 flex-shrink-0 animate-pulse"></div>
-                                )}
                             </div>
-                        </div>
-                    ))
+                        );
+
+                        return notif.link ? (
+                            <Link key={notif.id} to={notif.link} className="block no-underline">
+                                {card}
+                            </Link>
+                        ) : (
+                            <div key={notif.id}>{card}</div>
+                        );
+                    })
                 )}
             </div>
         </div>

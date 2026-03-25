@@ -189,6 +189,69 @@ public class BankingService {
                       "from", fromAccountNumber, "to", toAccountNumber);
     }
 
+    @Transactional
+    public Map<String, Object> performExternalTransfer(
+            String fromAccountNumber,
+            String routingNumber,
+            String externalAccountNumber,
+            BigDecimal amount,
+            String description,
+            User user) {
+
+        BankAccount from = bankAccountRepository.findByAccountNumber(fromAccountNumber)
+                .orElseThrow(() -> new IllegalArgumentException("Source account not found"));
+
+        if (from.getUser() == null || !from.getUser().getId().equals(user.getId())) {
+            throw new SecurityException("You do not own the source account");
+        }
+
+        // Validate Routing Number (simple 9-digit check for ABA routing)
+        if (routingNumber == null || !routingNumber.matches("\\d{9}")) {
+            throw new IllegalArgumentException("Invalid routing number format. Must be 9 digits.");
+        }
+
+        // Apply 0.5% fee for external transfers
+        BigDecimal fee = amount.multiply(new BigDecimal("0.005"));
+        BigDecimal totalDeduction = amount.add(fee);
+
+        if (from.getBalance().compareTo(totalDeduction) < 0) {
+            throw new IllegalStateException("Insufficient balance to cover transfer and 0.5% fee");
+        }
+
+        from.setBalance(from.getBalance().subtract(totalDeduction));
+        bankAccountRepository.save(from);
+
+        String ref  = "EXT-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+        String desc = (description != null && !description.isBlank()) ? description : "External Transfer";
+
+        Transaction debit = new Transaction();
+        debit.setTransactionId(ref + "-D");
+        debit.setType(Transaction.TransactionType.TRANSFER); // or EXTERNAL_TRANSFER if enum supported
+        debit.setAmount(totalDeduction); // we record total deduction (amount + fee)
+        debit.setAccountNumber(fromAccountNumber);
+        debit.setStatus(Transaction.TransactionStatus.PENDING); // external takes time
+        debit.setDescription(desc + " \u2192 Routing: " + routingNumber + " Acct: " + externalAccountNumber + " (Inc. fee $" + String.format("%.2f", fee) + ")");
+        debit.setProcessedAt(LocalDateTime.now());
+        transactionRepository.save(debit);
+
+        notificationService.sendSectorNotification(
+                "BANKING", "TRANSFER_PENDING",
+                "External transfer of $" + amount + " initiated from " + fromAccountNumber,
+                Map.of("ref", ref, "amount", amount, "fee", fee)
+        );
+
+        return Map.of(
+            "success", true,
+            "reference", ref,
+            "amount", amount,
+            "fee", fee,
+            "totalDeducted", totalDeduction,
+            "from", fromAccountNumber,
+            "routingNumber", routingNumber,
+            "status", "PENDING"
+        );
+    }
+
     // ─── Dashboard Stats ───────────────────────────────────────────────────────
 
     public Map<String, Object> getDashboardStats() {

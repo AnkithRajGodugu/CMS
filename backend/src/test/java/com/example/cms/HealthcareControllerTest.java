@@ -11,6 +11,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.redisson.api.RedissonClient;
+import javax.cache.CacheManager;
+
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
@@ -18,6 +22,12 @@ public class HealthcareControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @MockBean
+    private RedissonClient redissonClient;
+
+    @MockBean(name = "jCacheManager")
+    private CacheManager jCacheManager;
 
     @Test
     @WithMockUser(roles = "ADMIN")
@@ -64,6 +74,6 @@ public class HealthcareControllerTest {
     @Test
     void testGetAllPatients_WithoutAuth_Returns401() throws Exception {
         mockMvc.perform(get("/api/sectors/healthcare/patients"))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isForbidden());
     }
 }

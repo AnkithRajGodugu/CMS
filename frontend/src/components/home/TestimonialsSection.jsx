@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useTheme } from '../../context/SafeThemeContext';
+import { useTheme } from '../../context/SectorThemeProvider';
 
 const TestimonialsSection = () => {
   const { currentTheme } = useTheme();

@@ -1,5 +1,5 @@
 import { useAuth } from './useAuth';
-import { useTheme } from '../context/SafeThemeContext';
+import { useTheme } from '../context/SectorThemeProvider';
 
 /**
  * Custom hook for sector-related functionality

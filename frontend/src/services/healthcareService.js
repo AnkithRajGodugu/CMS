@@ -1,37 +1,58 @@
 import api from './api';
 
-/**
- * Get the current user's patient records
- */
-export const getMyPatientRecord = () => {
-  return api.get('/healthcare/patient/records/me');
-};
+/** User - healthcare dashboard stats */
+export const getUserHealthcareDashboardStats = () =>
+  api.get('/sectors/healthcare/my-dashboard');
 
-/**
- * Get the current user's healthcare dashboard statistics
- */
-export const getUserHealthcareDashboardStats = () => {
-  return api.get('/sectors/healthcare/my-dashboard');
-};
+/** User - my appointments (paginated) */
+export const getMyAppointments = (page = 0, size = 20) =>
+  api.get(`/sectors/healthcare/my-appointments?page=${page}&size=${size}`);
 
-/**
- * Get the current user's appointments
- */
-export const getMyAppointments = (page = 0, size = 20) => {
-  return api.get(`/sectors/healthcare/my-appointments?page=${page}&size=${size}`);
-};
+/** User - my health records */
+export const getMyHealthRecords = () =>
+  api.get('/sectors/healthcare/my-records');
 
-/**
- * Book a new healthcare appointment
- * @param {Object} data - Appointment details (date, reason, etc.)
- */
-export const bookAppointment = (data) => {
-  return api.post('/healthcare/appointments', data);
-};
+/** User - my insurance */
+export const getMyInsurance = () =>
+  api.get('/healthcare/insurance/me');
 
-/**
- * Get the current user's insurance policy and claims details
- */
-export const getMyInsurance = () => {
-  return api.get('/healthcare/insurance/me');
-};
+/** Admin - recent activity */
+export const getRecentHealthcareActivity = () =>
+  api.get('/sectors/healthcare/activity/recent');
+
+/** Admin - dashboard stats */
+export const getHealthcareAdminStats = () =>
+  api.get('/sectors/healthcare/dashboard/stats');
+
+/** Admin - all patients (paginated) */
+export const getAllPatients = (page = 0, size = 50) =>
+  api.get(`/sectors/healthcare/patients?page=${page}&size=${size}`);
+
+/** Admin - search patients */
+export const searchPatients = (query) =>
+  api.get(`/sectors/healthcare/patients/search?query=${encodeURIComponent(query)}`);
+
+/** Admin - all appointments (paginated) */
+export const getAllAppointments = (page = 0, size = 50) =>
+  api.get(`/sectors/healthcare/appointments?page=${page}&size=${size}`);
+
+/** Admin - all insurance claims (with full detail) */
+export const getAllInsuranceClaims = () =>
+  api.get('/sectors/healthcare/insurance/claims/all');
+
+/** Admin - insurance claims summary stats */
+export const getInsuranceClaimStats = () =>
+  api.get('/sectors/healthcare/insurance/claims');
+
+/** Admin - all health records across all users */
+export const getAllHealthRecords = () =>
+  api.get('/sectors/healthcare/records/all');
+
+/** Admin - patient history by ID */
+export const getPatientHistory = (patientId) =>
+  api.get(`/sectors/healthcare/patients/${patientId}/history`);
+
+/** User - book a new appointment */
+export const bookAppointment = (data) =>
+  api.post('/sectors/healthcare/appointments', data);
+
