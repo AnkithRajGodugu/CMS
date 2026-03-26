@@ -44,15 +44,18 @@ const TrackShipmentPage = () => {
         
         try {
             // 1. Fetch initial shipment data
-            await trackShipment(idToTrack); // Usually returns { status, events }
-            
-            // Mock initial state for preview
-            setStatus('Out for Delivery');
-            setEvents([
-                { id: 1, title: 'Out for Delivery', location: 'Local Hub, NY', timestamp: new Date().toISOString() },
-                { id: 2, title: 'In Transit', location: 'Regional Sort Center, NJ', timestamp: new Date(Date.now() - 86400000).toISOString() }
-            ]);
-            setIsTracking(true);
+            const res = await trackShipment(idToTrack);
+            if (res.data?.success) {
+                const data = res.data.data;
+                setStatus(data.status);
+                setEvents(data.events || []);
+                setIsTracking(true);
+            } else {
+                toast.error('Shipment tracking ID not found');
+                setIsTracking(false);
+                setLoading(false);
+                return;
+            }
             
             // 2. Connect WebSocket for live updates
             if (clientRef.current) {
@@ -126,8 +129,8 @@ const TrackShipmentPage = () => {
                             </div>
                             <div className="text-left md:text-right">
                                 <div className="text-xs font-bold uppercase tracking-wider text-base-content/50 mb-1">Status</div>
-                                <h3 className="text-xl font-bold text-success">Out for Delivery</h3>
-                                <p className="text-sm">Expected today by 5:00 PM</p>
+                                <h3 className="text-xl font-bold text-success">{status || 'Unknown'}</h3>
+                                <p className="text-sm">For exact ETA, see tracking history below</p>
                             </div>
                         </div>
 

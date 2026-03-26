@@ -7,6 +7,8 @@ import com.example.cms.entity.User;
 import com.example.cms.repository.ContentAssetRepository;
 import com.example.cms.repository.ProjectRepository;
 import com.example.cms.repository.UserRepository;
+import com.example.cms.repository.ContentDistributionRepository;
+import com.example.cms.entity.ContentDistribution;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +36,7 @@ public class ContentController {
     private final ProjectRepository projectRepository;
     private final ContentAssetRepository contentAssetRepository;
     private final UserRepository userRepository;
+    private final ContentDistributionRepository contentDistributionRepository;
 
     private User getCurrentUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -115,28 +118,32 @@ public class ContentController {
         return ApiResponse.success("Asset created successfully", contentAssetRepository.save(asset));
     }
 
-    // --- Distribution (Generic/Mock data from backend) ---
+    // --- Distribution ---
     @GetMapping("/distribution")
     @Operation(summary = "Get distribution channel status")
-    public ApiResponse<List<Map<String, Object>>> getDistributionStatus() {
-        List<Map<String, Object>> platforms = List.of(
-            Map.of("platform", "YouTube", "status", "CONNECTED", "followers", "1.2M", "activeCampaigns", 3),
-            Map.of("platform", "Instagram", "status", "CONNECTED", "followers", "450K", "activeCampaigns", 5),
-            Map.of("platform", "TikTok", "status", "DISCONNECTED", "followers", "890K", "activeCampaigns", 0),
-            Map.of("platform", "Twitter/X", "status", "CONNECTED", "followers", "120K", "activeCampaigns", 2)
-        );
-        return ApiResponse.success(platforms);
+    public ApiResponse<List<ContentDistribution>> getDistributionStatus() {
+        return ApiResponse.success(contentDistributionRepository.findAll());
     }
 
-    // --- Analytics (Generic/Mock data from backend) ---
+    // --- Analytics ---
     @GetMapping("/analytics/summary")
     @Operation(summary = "Get high-level content analytics")
     public ApiResponse<Map<String, Object>> getAnalyticsSummary() {
         Map<String, Object> stats = new HashMap<>();
+        
+        long activeCampaigns = contentDistributionRepository.findAll().stream()
+                .mapToLong(d -> d.getActiveCampaigns() != null ? d.getActiveCampaigns() : 0)
+                .sum();
+                
+        stats.put("totalProjects", projectRepository.count());
+        stats.put("totalAssets", contentAssetRepository.count());
+        stats.put("activeCampaigns", activeCampaigns);
+        
+        // Retain some mock data for fields that don't have a backend equivalent yet
         stats.put("totalViews", "45.8M");
         stats.put("avgEngagement", "4.2%");
         stats.put("growthRate", "+12.5%");
-        stats.put("topPerformingProject", "Summer Brand Film 2026");
+        
         return ApiResponse.success(stats);
     }
 

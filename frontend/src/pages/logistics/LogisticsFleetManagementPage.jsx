@@ -6,7 +6,7 @@ import { FaTruck, FaPlus, FaWrench, FaUserCircle, FaExclamationTriangle, FaCheck
 import { toast } from 'sonner';
 
 const LogisticsFleetManagementPage = () => {
-  const { user } = useAuth();
+  const { user, sector } = useAuth();
   const [vehicles, setVehicles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -34,10 +34,10 @@ const LogisticsFleetManagementPage = () => {
   };
 
   useEffect(() => {
-    if (user && user.role === 'logistics') {
+    if (user && sector?.code?.toLowerCase() === 'logistics') {
       fetchVehicles();
     }
-  }, [user]);
+  }, [user, sector]);
 
   const handleCreateVehicle = async (e) => {
     e.preventDefault();
@@ -64,7 +64,7 @@ const LogisticsFleetManagementPage = () => {
     }
   };
 
-  if (!user || user.role !== 'logistics') {
+  if (!user || sector?.code?.toLowerCase() !== 'logistics') {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-base-200">
         

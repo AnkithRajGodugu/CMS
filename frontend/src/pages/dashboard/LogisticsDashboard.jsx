@@ -1,14 +1,17 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { FaTruck, FaBoxes, FaRoute, FaWarehouse, FaUsers, FaShippingFast } from 'react-icons/fa';
+import { FaTruck, FaBoxes, FaRoute, FaWarehouse, FaUsers, FaShippingFast, FaExclamationTriangle } from 'react-icons/fa';
 import ReportExportButtons from '../../components/shared/ReportExportButtons';
 import api from '../../services/api';
+import { useAuth } from '../../hooks/useAuth';
 import SystemMetricsWidget from '../../components/shared/SystemMetricsWidget';
 
 const LogisticsDashboard = () => {
+  const { user, sector } = useAuth();
   const [shipments, setShipments] = useState([]);
   const [inventory, setInventory] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchLogisticsData = async () => {
@@ -19,14 +22,33 @@ const LogisticsDashboard = () => {
         ]);
         setShipments(shipmentsRes.data);
         setInventory(inventoryRes.data);
+        setError(null);
       } catch (err) {
         console.error('Failed to load logistics data', err);
+        setError('Server connection failed. Please ensure the backend is running.');
       } finally {
         setLoading(false);
       }
     };
-    fetchLogisticsData();
-  }, []);
+
+    if (user && sector?.code?.toLowerCase() === 'logistics') {
+      fetchLogisticsData();
+    }
+  }, [user, sector]);
+
+  if (!user || sector?.code?.toLowerCase() !== 'logistics') {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-base-200">
+        <div className="card bg-base-100 shadow-xl p-8 text-center max-w-md mx-auto mt-20">
+          <FaExclamationTriangle className="text-6xl text-warning mx-auto mb-4" />
+          <h2 className="text-3xl font-bold mb-4">Logistics Access Only</h2>
+          <p className="mb-6 text-base-content/70">Please log in with your logistics credentials to view the dashboard.</p>
+          <Link to="/login" className="btn btn-primary">Go to Login</Link>
+        </div>
+      </div>
+    );
+  }
+
   const stats = [
     { label: 'Active Shipments', value: shipments.filter(s => s.status === 'IN_TRANSIT' || s.status === 'PENDING').length || 0, change: '+18%', icon: FaShippingFast, color: 'text-info' },
     { label: 'Inventory Items', value: inventory.length || 0, change: '+5%', icon: FaBoxes, color: 'text-success' },

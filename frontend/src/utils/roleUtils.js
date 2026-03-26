@@ -41,7 +41,7 @@ export const getHomeRoute = (user, sector) => {
     const sectorCode = (
         typeof sector === 'string' ? sector :
         sector?.code || sector?.name || ''
-    ).toLowerCase();
+    ).toUpperCase();
 
     const r = normalizeRole(user?.role);
     
@@ -125,7 +125,7 @@ export const getSectorNavItems = (sector, role) => {
         ],
     };
 
-    const s = (sector || 'banking').toLowerCase();
+    const s = (typeof sector === 'string' ? sector : sector?.code || 'banking').toLowerCase();
     const r = normalizeRole(role);
 
     if (r === ROLES.USER) {
@@ -137,4 +137,16 @@ export const getSectorNavItems = (sector, role) => {
         return links.filter(item => !item.adminOnly);
     }
     return links;
+};
+
+/**
+ * Helper to check if a user belongs to a specific sector (case-insensitive)
+ */
+export const hasSector = (userSector, targetCode) => {
+    const sectorCode = (
+        typeof userSector === 'string' ? userSector :
+        userSector?.code || ''
+    ).toUpperCase();
+    
+    return sectorCode === targetCode.toUpperCase();
 };

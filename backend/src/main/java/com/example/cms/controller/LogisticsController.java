@@ -6,11 +6,15 @@ import com.example.cms.entity.Shipment;
 import com.example.cms.entity.Vehicle;
 import com.example.cms.entity.Route;
 import com.example.cms.entity.User;
+import com.example.cms.entity.ShipmentEvent;
+import com.example.cms.entity.Vendor;
 import com.example.cms.repository.InventoryItemRepository;
 import com.example.cms.repository.ShipmentRepository;
 import com.example.cms.repository.VehicleRepository;
 import com.example.cms.repository.RouteRepository;
 import com.example.cms.repository.UserRepository;
+import com.example.cms.repository.ShipmentEventRepository;
+import com.example.cms.repository.VendorRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -40,6 +44,8 @@ public class LogisticsController {
     private final VehicleRepository vehicleRepository;
     private final RouteRepository routeRepository;
     private final UserRepository userRepository;
+    private final ShipmentEventRepository shipmentEventRepository;
+    private final VendorRepository vendorRepository;
 
     private User getCurrentUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -102,6 +108,20 @@ public class LogisticsController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @GetMapping("/shipments/track/{trackingId}")
+    @Operation(summary = "Track shipment by tracking ID")
+    public ApiResponse<Map<String, Object>> trackShipment(@PathVariable String trackingId) {
+        Shipment shipment = shipmentRepository.findByTrackingId(trackingId).orElse(null);
+        if (shipment == null) {
+            return ApiResponse.error("Shipment not found");
+        }
+        List<ShipmentEvent> events = shipmentEventRepository.findByShipmentIdOrderByTimestampDesc(shipment.getId());
+        Map<String, Object> result = new HashMap<>();
+        result.put("status", shipment.getStatus());
+        result.put("events", events);
+        return ApiResponse.success(result);
+    }
+
     // --- Inventory ---
     @GetMapping("/inventory")
     @Operation(summary = "Get all inventory items")
@@ -155,5 +175,18 @@ public class LogisticsController {
         return routeRepository.findById(id)
                 .map(r -> ResponseEntity.ok(ApiResponse.success(r)))
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    // --- Vendors ---
+    @GetMapping("/vendors")
+    @Operation(summary = "Get all vendors")
+    public ApiResponse<List<Vendor>> getAllVendors() {
+        return ApiResponse.success(vendorRepository.findAll());
+    }
+
+    @PostMapping("/vendors")
+    @Operation(summary = "Add a new vendor")
+    public ApiResponse<Vendor> createVendor(@RequestBody Vendor vendor) {
+        return ApiResponse.success("Vendor added successfully", vendorRepository.save(vendor));
     }
 }

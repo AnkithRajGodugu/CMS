@@ -22,9 +22,14 @@ export const AuthProvider = ({ children }) => {
     if (isAuthenticated()) {
       const userData = getUserData();
       const sectorData = getSectorData();
+      
+      const normalizedSector = sectorData ? {
+        ...sectorData,
+        code: sectorData.code?.toLowerCase()
+      } : null;
 
       setUser(userData || null);
-      setSector(sectorData || null);
+      setSector(normalizedSector);
     }
     setLoading(false);
   };
@@ -38,8 +43,12 @@ export const AuthProvider = ({ children }) => {
     }
 
     if (loginData?.sector) {
-      setSector(loginData.sector);
-      setSectorData(loginData.sector);
+      const normalizedSector = {
+        ...loginData.sector,
+        code: loginData.sector.code?.toLowerCase()
+      };
+      setSector(normalizedSector);
+      setSectorData(normalizedSector);
     }
   }, []);
 
@@ -52,8 +61,12 @@ export const AuthProvider = ({ children }) => {
       const sectorData = response.data?.sector || null;
 
       if (sectorData) {
-        setSector(sectorData);
-        setSectorData(sectorData);
+        const normalizedSector = {
+          ...sectorData,
+          code: sectorData.code?.toLowerCase()
+        };
+        setSector(normalizedSector);
+        setSectorData(normalizedSector);
       }
 
       return sectorData;

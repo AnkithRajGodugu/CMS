@@ -6,7 +6,7 @@ import { FaWarehouse, FaExclamationTriangle, FaBoxOpen, FaThLarge, FaSearch, FaH
 import { toast } from 'sonner';
 
 const LogisticsWarehouseManagementPage = () => {
-  const { user } = useAuth();
+  const { user, sector } = useAuth();
   const [inventory, setInventory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -27,10 +27,10 @@ const LogisticsWarehouseManagementPage = () => {
   };
 
   useEffect(() => {
-    if (user && user.role === 'logistics') {
+    if (user && sector?.code?.toLowerCase() === 'logistics') {
       fetchInventory();
     }
-  }, [user]);
+  }, [user, sector]);
 
   const warehouses = [...new Set(inventory.map(item => item.warehouseLocation || 'Unassigned'))];
 
@@ -45,7 +45,7 @@ const LogisticsWarehouseManagementPage = () => {
     };
   };
 
-  if (!user || user.role !== 'logistics') {
+  if (!user || sector?.code?.toLowerCase() !== 'logistics') {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-base-200">
         

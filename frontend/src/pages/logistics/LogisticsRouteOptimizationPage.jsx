@@ -6,7 +6,7 @@ import { FaRoute, FaPlus, FaMapMarkedAlt, FaClock, FaExclamationTriangle, FaChec
 import { toast } from 'sonner';
 
 const LogisticsRouteOptimizationPage = () => {
-  const { user } = useAuth();
+  const { user, sector } = useAuth();
   const [routes, setRoutes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -34,10 +34,10 @@ const LogisticsRouteOptimizationPage = () => {
   };
 
   useEffect(() => {
-    if (user && user.role === 'logistics') {
+    if (user && sector?.code?.toLowerCase() === 'logistics') {
       fetchRoutes();
     }
-  }, [user]);
+  }, [user, sector]);
 
   const handleCreateRoute = async (e) => {
     e.preventDefault();
@@ -54,7 +54,7 @@ const LogisticsRouteOptimizationPage = () => {
     }
   };
 
-  if (!user || user.role !== 'logistics') {
+  if (!user || sector?.code?.toLowerCase() !== 'logistics') {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-base-200">
         

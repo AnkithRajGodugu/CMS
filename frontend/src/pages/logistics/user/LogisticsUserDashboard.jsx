@@ -110,14 +110,14 @@ const LogisticsUserDashboard = () => {
                                 <div key={s.id} className="mt-4 bg-white/10 rounded-xl p-4 backdrop-blur-sm border border-white/20">
                                     <div className="flex justify-between items-start mb-2">
                                         <div>
-                                            <h3 className="font-bold text-lg">{s.trackingNumber}</h3>
+                                            <h3 className="font-bold text-lg">{s.trackingId}</h3>
                                             <p className="text-sm opacity-80 mt-1">To: {s.destination || 'N/A'}</p>
                                         </div>
                                         <div className="badge border-white/40 bg-white/20 text-white gap-2 font-medium">
                                             Today
                                         </div>
                                     </div>
-                                    <Link to={`/user/logistics/track?id=${s.trackingNumber}`} className="btn btn-sm w-full bg-white text-primary hover:bg-gray-100 border-none font-bold mt-4">
+                                    <Link to={`/user/logistics/track?id=${s.trackingId}`} className="btn btn-sm w-full bg-white text-primary hover:bg-gray-100 border-none font-bold mt-4">
                                         View Live Map
                                     </Link>
                                 </div>
@@ -146,7 +146,7 @@ const LogisticsUserDashboard = () => {
                                             <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
                                         </div>
                                         <div>
-                                            <h4 className="font-bold text-sm">{s.trackingNumber}</h4>
+                                            <h4 className="font-bold text-sm">{s.trackingId}</h4>
                                             <p className="text-xs text-base-content/60">Dest: {s.destination}</p>
                                         </div>
                                     </div>

@@ -6,7 +6,7 @@ import { FaBoxes, FaPlus, FaExclamationTriangle, FaWarehouse, FaHistory } from '
 import { toast } from 'sonner';
 
 const LogisticsInventoryManagementPage = () => {
-  const { user } = useAuth();
+  const { user, sector } = useAuth();
   const [inventory, setInventory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -35,10 +35,10 @@ const LogisticsInventoryManagementPage = () => {
   };
 
   useEffect(() => {
-    if (user && user.role === 'logistics') {
+    if (user && sector?.code?.toLowerCase() === 'logistics') {
       fetchInventory();
     }
-  }, [user]);
+  }, [user, sector]);
 
   const handleCreateItem = async (e) => {
     e.preventDefault();
@@ -60,7 +60,7 @@ const LogisticsInventoryManagementPage = () => {
     item.warehouseLocation.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  if (!user || user.role !== 'logistics') {
+  if (!user || sector?.code?.toLowerCase() !== 'logistics') {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-base-200">
         

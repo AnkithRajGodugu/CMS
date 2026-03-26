@@ -78,10 +78,11 @@ export const NotificationProvider = ({ children }) => {
       return;
     }
 
+    const token = getToken();
     const client = new Client({
-      webSocketFactory: () => new SockJS(WS_URL),
+      webSocketFactory: () => new SockJS(`${WS_URL}?token=${token}`),
       connectHeaders: {
-        Authorization: `Bearer ${getToken()}`
+        Authorization: `Bearer ${token}`
       },
       debug: (str) => {
         if (import.meta.env.DEV) console.log('STOMP: ' + str);

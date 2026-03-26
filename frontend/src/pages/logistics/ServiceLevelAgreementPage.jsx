@@ -6,7 +6,7 @@ import { FaShieldAlt, FaExclamationTriangle, FaCheckCircle, FaClock, FaPercent, 
 import { toast } from 'sonner';
 
 const ServiceLevelAgreementPage = () => {
-  const { user } = useAuth();
+  const { user, sector } = useAuth();
   const [shipments, setShipments] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -25,10 +25,10 @@ const ServiceLevelAgreementPage = () => {
   };
 
   useEffect(() => {
-    if (user && user.role === 'logistics') {
+    if (user && sector?.code?.toLowerCase() === 'logistics') {
       fetchShipments();
     }
-  }, [user]);
+  }, [user, sector]);
 
   // Derive SLA metrics from shipments
   const delivered = shipments.filter(s => s.status === 'DELIVERED').length;
@@ -36,7 +36,7 @@ const ServiceLevelAgreementPage = () => {
   const total = shipments.length || 1;
   const onTimeRate = Math.round(((delivered) / (delivered + delayed || 1)) * 100);
 
-  if (!user || user.role !== 'logistics') {
+  if (!user || sector?.code?.toLowerCase() !== 'logistics') {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-base-200">
         

@@ -5,52 +5,34 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
-@Table(name = "projects")
+@Table(name = "content_distributions")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Project {
-
-    public enum ProjectStatus {
-        PLANNING, IN_PROGRESS, REVIEW, COMPLETED, ON_HOLD
-    }
+public class ContentDistribution {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "project_name", nullable = false)
-    private String projectName;
+    @Column(name = "platform", nullable = false)
+    private String platform;
 
-    @Column(name = "client_name")
-    private String clientName;
-
-    @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
-    private ProjectStatus status;
+    private String status;
 
-    @Column(name = "start_date")
-    private LocalDate startDate;
+    @Column(name = "followers")
+    private String followers;
 
-    @Column(name = "deadline")
-    private LocalDate deadline;
-
-    @Column(name = "budget")
-    private Double budget;
+    @Column(name = "active_campaigns")
+    private Integer activeCampaigns;
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
-    
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    @JsonIgnore
-    private User user;
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;

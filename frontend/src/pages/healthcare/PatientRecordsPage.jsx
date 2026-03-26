@@ -1,17 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import { getAllPatients, searchPatients } from '../../services/healthcareService';
+import { useAuth } from '../../context/AuthContext';
 
 const PatientRecordsPage = () => {
+  const { sector } = useAuth();
   const [patients, setPatients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [stats, setStats] = useState({ total: 0, active: 0, critical: 0, stable: 0 });
 
+  useEffect(() => {
+    if (sector?.code?.toLowerCase() === 'healthcare') {
+      loadPatients();
+    }
+  }, [sector]);
+
   const loadPatients = async (query = '') => {
     setLoading(true);
     try {
       let data;
-      if (query.trim().length > 1) {
+      if (query && query.trim().length > 1) {
         const res = await searchPatients(query);
         data = res.data;
         setPatients(Array.isArray(data) ? data : []);
@@ -33,7 +41,18 @@ const PatientRecordsPage = () => {
     }
   };
 
-  useEffect(() => { loadPatients(); }, []);
+  if (sector?.code?.toLowerCase() !== 'healthcare') {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 p-4">
+        <div className="text-6xl mb-4">🏥</div>
+        <h2 className="text-2xl font-bold text-gray-800 mb-2">Access Denied</h2>
+        <p className="text-gray-600 mb-6 text-center max-w-md">
+          This area is restricted to Healthcare sector personnel. Your account does not have the required permissions.
+        </p>
+        <button className="btn btn-primary" onClick={() => window.location.href = '/'}>Return Home</button>
+      </div>
+    );
+  }
 
   const handleSearch = (e) => {
     const q = e.target.value;
@@ -42,6 +61,7 @@ const PatientRecordsPage = () => {
   };
 
   const statusBadge = (status) => {
+    if (!status) return 'badge-ghost';
     const map = { CRITICAL: 'badge-error', MONITORING: 'badge-warning', STABLE: 'badge-success', DISCHARGED: 'badge-ghost' };
     return map[status] ?? 'badge-info';
   };

@@ -30,6 +30,12 @@ export default ({ mode }) => {
           changeOrigin: true,
           secure: false,
         },
+        '/ws': {
+          target: env.VITE_API_URL || 'http://localhost:8081',
+          ws: true,
+          changeOrigin: true,
+          secure: false,
+        },
       },
     },
     test: {

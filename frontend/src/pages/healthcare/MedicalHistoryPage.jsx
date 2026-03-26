@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getAllHealthRecords, getAllPatients } from '../../services/healthcareService';
+import { useAuth } from '../../context/AuthContext';
 
 const TYPE_BADGE = {
   LAB_RESULT: 'badge-info',
@@ -10,6 +11,7 @@ const TYPE_BADGE = {
 };
 
 const MedicalHistoryPage = () => {
+  const { sector } = useAuth();
   const [records, setRecords] = useState([]);
   const [patients, setPatients] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -17,15 +19,30 @@ const MedicalHistoryPage = () => {
   const [searchUser, setSearchUser] = useState('');
 
   useEffect(() => {
-    Promise.all([getAllHealthRecords(), getAllPatients(0, 50)])
-      .then(([recRes, patRes]) => {
-        setRecords(recRes.data ?? []);
-        const list = patRes.data?.content ?? patRes.data ?? [];
-        setPatients(list);
-      })
-      .catch(err => console.error('Could not load health records:', err))
-      .finally(() => setLoading(false));
-  }, []);
+    if (sector?.code?.toLowerCase() === 'healthcare') {
+      Promise.all([getAllHealthRecords(), getAllPatients(0, 50)])
+        .then(([recRes, patRes]) => {
+          setRecords(recRes.data ?? []);
+          const list = patRes.data?.content ?? patRes.data ?? [];
+          setPatients(list);
+        })
+        .catch(err => console.error('Could not load health records:', err))
+        .finally(() => setLoading(false));
+    }
+  }, [sector]);
+
+  if (sector?.code?.toLowerCase() !== 'healthcare') {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 p-4">
+        <div className="text-6xl mb-4">🏥</div>
+        <h2 className="text-2xl font-bold text-gray-800 mb-2">Access Denied</h2>
+        <p className="text-gray-600 mb-6 text-center max-w-md">
+          This area is restricted to Healthcare sector personnel. Your account does not have the required permissions.
+        </p>
+        <button className="btn btn-primary" onClick={() => window.location.href = '/'}>Return Home</button>
+      </div>
+    );
+  }
 
   const filtered = records.filter(r => {
     const typeMatch = filterType === 'ALL' || r.type === filterType;
@@ -137,10 +154,10 @@ const MedicalHistoryPage = () => {
                         p.status === 'CRITICAL' ? 'badge-error' :
                         p.status === 'MONITORING' ? 'badge-warning' :
                         'badge-success'
-                      }`}>{p.status}</span>
+                      }`}>{p.status || 'STABLE'}</span>
                     </div>
-                    <p className="text-sm text-gray-500 mb-1">🩺 {p.condition}</p>
-                    <p className="text-sm text-gray-500 mb-1">📞 {p.contactNumber}</p>
+                    <p className="text-sm text-gray-500 mb-1">🩺 {p.condition || 'No Condition'}</p>
+                    <p className="text-sm text-gray-500 mb-1">📞 {p.contactNumber || 'N/A'}</p>
                     <p className="text-sm text-gray-500">📅 Last visit: {fmtDate(p.lastVisit)}</p>
                   </div>
                 );

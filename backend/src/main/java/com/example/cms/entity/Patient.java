@@ -31,13 +31,17 @@ public class Patient {
 
     private LocalDate dateOfBirth;
     private Integer age;
+    private String gender;
     private String condition;
+    private String bloodType;
+    private String allergies;
     private LocalDate lastVisit;
 
     @Enumerated(EnumType.STRING)
     private PatientStatus status = PatientStatus.STABLE;
 
     private String contactNumber;
+    private String emergencyContact;
     private String email;
     private String address;
 
@@ -96,6 +100,18 @@ public class Patient {
 
     public String getAddress() { return address; }
     public void setAddress(String address) { this.address = address; }
+
+    public String getGender() { return gender; }
+    public void setGender(String gender) { this.gender = gender; }
+
+    public String getBloodType() { return bloodType; }
+    public void setBloodType(String bloodType) { this.bloodType = bloodType; }
+
+    public String getAllergies() { return allergies; }
+    public void setAllergies(String allergies) { this.allergies = allergies; }
+
+    public String getEmergencyContact() { return emergencyContact; }
+    public void setEmergencyContact(String emergencyContact) { this.emergencyContact = emergencyContact; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
 

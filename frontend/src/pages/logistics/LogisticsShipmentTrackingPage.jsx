@@ -2,11 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { Link } from 'react-router-dom';
 import api from '../../services/api';
-import { FaShippingFast, FaMapMarkerAlt, FaClock, FaCheckCircle, FaExclamationTriangle, FaSearch } from 'react-icons/fa';
+import { FaShippingFast, FaMapMarkerAlt, FaClock, FaCheckCircle, FaExclamationTriangle, FaSearch, FaPlus } from 'react-icons/fa';
 import { toast } from 'sonner';
 
 const LogisticsShipmentTrackingPage = () => {
-  const { user } = useAuth();
+  const { user, sector } = useAuth();
   const [shipments, setShipments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -36,10 +36,10 @@ const LogisticsShipmentTrackingPage = () => {
   };
 
   useEffect(() => {
-    if (user && user.role === 'logistics') {
+    if (user && sector?.code?.toLowerCase() === 'logistics') {
       fetchShipments();
     }
-  }, [user]);
+  }, [user, sector]);
 
   const handleCreateShipment = async (e) => {
     e.preventDefault();
@@ -78,7 +78,7 @@ const LogisticsShipmentTrackingPage = () => {
     }
   };
 
-  if (!user || user.role !== 'logistics') {
+  if (!user || sector?.code?.toLowerCase() !== 'logistics') {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-base-200">
         

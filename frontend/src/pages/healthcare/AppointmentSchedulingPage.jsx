@@ -1,23 +1,40 @@
 import React, { useState, useEffect } from 'react';
 import { getAllAppointments } from '../../services/healthcareService';
+import { useAuth } from '../../context/AuthContext';
 
 const TYPE_LABELS = { CONSULTATION: 'Consultation', FOLLOW_UP: 'Follow-up', CHECK_UP: 'Check-up', EMERGENCY: 'Emergency' };
 const STATUS_BADGE = { CONFIRMED: 'badge-success', PENDING: 'badge-warning', URGENT: 'badge-error', COMPLETED: 'badge-ghost', CANCELLED: 'badge-ghost' };
 
 const AppointmentSchedulingPage = () => {
+  const { sector } = useAuth();
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('ALL');
 
   useEffect(() => {
-    getAllAppointments(0, 50)
-      .then(res => {
-        const list = res.data?.content ?? res.data ?? [];
-        setAppointments(list);
-      })
-      .catch(err => console.error('Could not load appointments:', err))
-      .finally(() => setLoading(false));
-  }, []);
+    if (sector?.code?.toLowerCase() === 'healthcare') {
+      getAllAppointments(0, 50)
+        .then(res => {
+          const list = res.data?.content ?? res.data ?? [];
+          setAppointments(list);
+        })
+        .catch(err => console.error('Could not load appointments:', err))
+        .finally(() => setLoading(false));
+    }
+  }, [sector]);
+
+  if (sector?.code?.toLowerCase() !== 'healthcare') {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 p-4">
+        <div className="text-6xl mb-4">🏥</div>
+        <h2 className="text-2xl font-bold text-gray-800 mb-2">Access Denied</h2>
+        <p className="text-gray-600 mb-6 text-center max-w-md">
+          This area is restricted to Healthcare sector personnel. Your account does not have the required permissions.
+        </p>
+        <button className="btn btn-primary" onClick={() => window.location.href = '/'}>Return Home</button>
+      </div>
+    );
+  }
 
   const filtered = filter === 'ALL'
     ? appointments
@@ -25,9 +42,9 @@ const AppointmentSchedulingPage = () => {
 
   const stats = {
     total: appointments.length,
-    confirmed: appointments.filter(a => a.status === 'CONFIRMED').length,
-    pending: appointments.filter(a => a.status === 'PENDING').length,
-    urgent: appointments.filter(a => a.status === 'URGENT').length,
+    confirmed: appointments.filter(a => a?.status === 'CONFIRMED').length,
+    pending: appointments.filter(a => a?.status === 'PENDING').length,
+    urgent: appointments.filter(a => a?.status === 'URGENT').length,
   };
 
   const fmtTime = (iso) => {

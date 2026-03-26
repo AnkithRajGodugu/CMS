@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { FaHospital, FaUserMd, FaCalendarCheck, FaFileMedical, FaShieldAlt } from 'react-icons/fa';
+import { FaHospital, FaUserMd, FaCalendarCheck, FaFileMedical, FaShieldAlt, FaExclamationTriangle } from 'react-icons/fa';
 import ReportExportButtons from '../../components/shared/ReportExportButtons';
 import { useAuth } from '../../hooks/useAuth';
 import SystemMetricsWidget from '../../components/shared/SystemMetricsWidget';
@@ -13,21 +13,39 @@ const HealthcareDashboard = () => {
   const [recentActivity, setRecentActivity] = useState([]);
 
   useEffect(() => {
-      const fetchData = async () => {
-          try {
-              const [statsRes, activityRes] = await Promise.all([
-                  getHealthcareAdminStats(),
-                  getRecentHealthcareActivity()
-              ]);
-              setAdminStats(statsRes.data?.data || statsRes.data);
-              setRecentActivity(activityRes.data?.data || activityRes.data || []);
-          } catch (error) {
-              console.error('Error fetching healthcare admin data', error);
-          }
-      };
-      // Fetch even if not admin, maybe they are HEALTHCARE role
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const [statsRes, activityRes] = await Promise.all([
+          getHealthcareAdminStats(),
+          getRecentHealthcareActivity()
+        ]);
+        setAdminStats(statsRes.data?.data || statsRes.data);
+        setRecentActivity(activityRes.data?.data || activityRes.data || []);
+      } catch (error) {
+        console.error('Error fetching healthcare admin data', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (sector?.code?.toLowerCase() === 'healthcare') {
       fetchData();
-  }, []);
+    }
+  }, [sector]);
+
+  if (!user || sector?.code?.toLowerCase() !== 'healthcare') {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 p-4">
+        <div className="text-6xl mb-4 text-warning"><FaExclamationTriangle /></div>
+        <h2 className="text-2xl font-bold text-gray-800 mb-2">Access Denied</h2>
+        <p className="text-gray-600 mb-6 text-center max-w-md">
+          This area is restricted to Healthcare sector personnel.
+        </p>
+        <button className="btn btn-primary" onClick={() => window.location.href = '/'}>Return Home</button>
+      </div>
+    );
+  }
 
   const stats = [
     { label: 'Total Patients', value: adminStats?.totalPatients || '0', change: '+12%', icon: FaUserMd, color: 'text-success' },
@@ -129,10 +147,10 @@ const HealthcareDashboard = () => {
                 <tbody>
                   {recentActivity.length > 0 ? recentActivity.map((activity, idx) => (
                     <tr key={idx}>
-                      <td>{activity.patientName}</td>
-                      <td>{activity.type} Appointment</td>
-                      <td>{new Date(activity.createdAt).toLocaleString()}</td>
-                      <td><span className={`badge ${getStatusBadge(activity.status)}`}>{activity.status}</span></td>
+                      <td>{activity.patientName || 'Unknown Patient'}</td>
+                      <td>{(activity.type || 'General')} Appointment</td>
+                      <td>{activity.createdAt ? new Date(activity.createdAt).toLocaleString() : 'N/A'}</td>
+                      <td><span className={`badge ${getStatusBadge(activity.status)}`}>{activity.status || 'PENDING'}</span></td>
                     </tr>
                   )) : (
                     <tr>

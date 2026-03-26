@@ -1,33 +1,50 @@
 import React, { useState, useEffect } from 'react';
 import { getAllInsuranceClaims, getInsuranceClaimStats } from '../../services/healthcareService';
+import { useAuth } from '../../context/AuthContext';
 
 const STATUS_BADGE = { APPROVED: 'badge-success', PENDING: 'badge-warning', DENIED: 'badge-error' };
 
 const InsuranceManagementPage = () => {
+  const { sector } = useAuth();
   const [claims, setClaims] = useState([]);
   const [stats, setStats] = useState({ approved: 0, pending: 0, denied: 0, successRate: 0 });
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('ALL');
 
   useEffect(() => {
-    Promise.all([
-      getAllInsuranceClaims(),
-      getInsuranceClaimStats(),
-    ])
-      .then(([claimsRes, statsRes]) => {
-        const list = claimsRes.data ?? [];
-        setClaims(list);
-        const s = statsRes.data ?? {};
-        setStats({
-          approved: s.approvedClaims ?? 0,
-          pending: s.pendingClaims ?? 0,
-          denied: s.deniedClaims ?? 0,
-          successRate: s.successRate ?? 0,
-        });
-      })
-      .catch(err => console.error('Could not load insurance data:', err))
-      .finally(() => setLoading(false));
-  }, []);
+    if (sector?.code?.toLowerCase() === 'healthcare') {
+      Promise.all([
+        getAllInsuranceClaims(),
+        getInsuranceClaimStats(),
+      ])
+        .then(([claimsRes, statsRes]) => {
+          const list = claimsRes.data ?? [];
+          setClaims(list);
+          const s = statsRes.data ?? {};
+          setStats({
+            approved: s.approvedClaims ?? 0,
+            pending: s.pendingClaims ?? 0,
+            denied: s.deniedClaims ?? 0,
+            successRate: s.successRate ?? 0,
+          });
+        })
+        .catch(err => console.error('Could not load insurance data:', err))
+        .finally(() => setLoading(false));
+    }
+  }, [sector]);
+
+  if (sector?.code?.toLowerCase() !== 'healthcare') {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 p-4">
+        <div className="text-6xl mb-4">🏥</div>
+        <h2 className="text-2xl font-bold text-gray-800 mb-2">Access Denied</h2>
+        <p className="text-gray-600 mb-6 text-center max-w-md">
+          This area is restricted to Healthcare sector personnel. Your account does not have the required permissions.
+        </p>
+        <button className="btn btn-primary" onClick={() => window.location.href = '/'}>Return Home</button>
+      </div>
+    );
+  }
 
   const filtered = filter === 'ALL' ? claims : claims.filter(c => c.status === filter);
 
@@ -87,10 +104,10 @@ const InsuranceManagementPage = () => {
                 {filtered.map(c => (
                   <tr key={c.id}>
                     <td className="font-mono text-xs">CLM-{String(c.id).padStart(4, '0')}</td>
-                    <td className="font-semibold">{c.patientName}</td>
-                    <td className="font-bold">${(+c.amount).toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+                    <td className="font-semibold">{c.patientName || 'Unknown Patient'}</td>
+                    <td className="font-bold">${(+(c.amount || 0)).toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
                     <td>{fmtDate(c.submittedAt)}</td>
-                    <td><span className={`badge ${STATUS_BADGE[c.status] ?? 'badge-info'}`}>{c.status}</span></td>
+                    <td><span className={`badge ${STATUS_BADGE[c.status] ?? 'badge-info'}`}>{c.status || 'PENDING'}</span></td>
                     <td>
                       <div className="flex gap-2">
                         <button className="btn btn-xs btn-outline">View</button>

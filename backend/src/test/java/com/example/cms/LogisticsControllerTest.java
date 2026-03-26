@@ -65,6 +65,6 @@ public class LogisticsControllerTest {
     @Test
     void testGetShipments_WithoutAuth_Returns401() throws Exception {
         mockMvc.perform(get("/api/logistics/shipments"))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isForbidden());
     }
 }

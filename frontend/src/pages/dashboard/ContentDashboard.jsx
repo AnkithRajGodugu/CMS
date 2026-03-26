@@ -1,19 +1,20 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { FaEdit, FaProjectDiagram, FaUsers, FaCalendarAlt, FaFileAlt, FaClock } from 'react-icons/fa';
+import { FaEdit, FaProjectDiagram, FaUsers, FaCalendarAlt, FaFileAlt, FaClock, FaExclamationTriangle } from 'react-icons/fa';
 import ReportExportButtons from '../../components/shared/ReportExportButtons';
 import { useAuth } from '../../hooks/useAuth';
 import SystemMetricsWidget from '../../components/shared/SystemMetricsWidget';
 import api from '../../services/api';
 
 const ContentDashboard = () => {
-  const { user } = useAuth();
+  const { user, sector } = useAuth();
   const [projects, setProjects] = useState([]);
   const [assets, setAssets] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchContentData = async () => {
+      setLoading(true);
       try {
         const [projectsRes, assetsRes] = await Promise.all([
           api.get('/content/projects'),
@@ -27,8 +28,24 @@ const ContentDashboard = () => {
         setLoading(false);
       }
     };
-    fetchContentData();
-  }, []);
+
+    if (sector?.code?.toLowerCase() === 'content') {
+      fetchContentData();
+    }
+  }, [sector]);
+
+  if (!user || sector?.code?.toLowerCase() !== 'content') {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 p-4">
+        <div className="text-6xl mb-4 text-warning"><FaExclamationTriangle /></div>
+        <h2 className="text-2xl font-bold text-gray-800 mb-2">Access Denied</h2>
+        <p className="text-gray-600 mb-6 text-center max-w-md">
+          This area is restricted to Content Creation sector personnel.
+        </p>
+        <button className="btn btn-primary" onClick={() => window.location.href = '/'}>Return Home</button>
+      </div>
+    );
+  }
   const stats = [
     { label: 'Active Projects', value: projects.filter(p => p.status === 'IN_PROGRESS').length || 0, change: '+8%', icon: FaProjectDiagram, color: 'text-primary' },
     { label: 'Total Clients', value: new Set(projects.map(p => p.clientName)).size || 0, change: '+12%', icon: FaUsers, color: 'text-success' },
@@ -129,7 +146,7 @@ const ContentDashboard = () => {
                             project.status === 'IN_PROGRESS' ? 'badge-info' : 
                             'badge-warning'
                           }`}>
-                            {project.status.replace('_', ' ')}
+                            {(project.status || 'PLANNING').replace('_', ' ')}
                           </span>
                         </td>
                         <td>{project.deadline ? new Date(project.deadline).toLocaleDateString() : 'No Deadline'}</td>
