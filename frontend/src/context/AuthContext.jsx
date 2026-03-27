@@ -23,10 +23,16 @@ export const AuthProvider = ({ children }) => {
       const userData = getUserData();
       const sectorData = getSectorData();
       
-      const normalizedSector = sectorData ? {
-        ...sectorData,
-        code: sectorData.code?.toLowerCase()
-      } : null;
+      // Robust normalization (handles string or object)
+      let normalizedSector = null;
+      if (typeof sectorData === 'string') {
+        normalizedSector = { code: sectorData.toLowerCase() };
+      } else if (sectorData?.code) {
+        normalizedSector = {
+          ...sectorData,
+          code: sectorData.code.toLowerCase()
+        };
+      }
 
       setUser(userData || null);
       setSector(normalizedSector);
@@ -43,12 +49,21 @@ export const AuthProvider = ({ children }) => {
     }
 
     if (loginData?.sector) {
-      const normalizedSector = {
-        ...loginData.sector,
-        code: loginData.sector.code?.toLowerCase()
-      };
-      setSector(normalizedSector);
-      setSectorData(normalizedSector);
+      // Robust normalization (handles string or object)
+      let normalizedSector = null;
+      if (typeof loginData.sector === 'string') {
+        normalizedSector = { code: loginData.sector.toLowerCase() };
+      } else if (loginData.sector?.code) {
+        normalizedSector = {
+          ...loginData.sector,
+          code: loginData.sector.code.toLowerCase()
+        };
+      }
+      
+      if (normalizedSector) {
+        setSector(normalizedSector);
+        setSectorData(normalizedSector);
+      }
     }
   }, []);
 
@@ -61,12 +76,21 @@ export const AuthProvider = ({ children }) => {
       const sectorData = response.data?.sector || null;
 
       if (sectorData) {
-        const normalizedSector = {
-          ...sectorData,
-          code: sectorData.code?.toLowerCase()
-        };
-        setSector(normalizedSector);
-        setSectorData(normalizedSector);
+        // Robust normalization (handles string or object)
+        let normalizedSector = null;
+        if (typeof sectorData === 'string') {
+          normalizedSector = { code: sectorData.toLowerCase() };
+        } else if (sectorData?.code) {
+          normalizedSector = {
+            ...sectorData,
+            code: sectorData.code.toLowerCase()
+          };
+        }
+
+        if (normalizedSector) {
+          setSector(normalizedSector);
+          setSectorData(normalizedSector);
+        }
       }
 
       return sectorData;

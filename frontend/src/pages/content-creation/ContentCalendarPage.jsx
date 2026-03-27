@@ -18,7 +18,7 @@ const getTypeIcon = (type) => {
 };
 
 const ContentCalendarPage = () => {
-  const { user } = useAuth();
+  const { user, sector } = useAuth();
   const [assets, setAssets] = useState([]);
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -26,18 +26,18 @@ const ContentCalendarPage = () => {
   const [selectedYear] = useState(new Date().getFullYear());
 
   useEffect(() => {
-    if (user?.role === 'content') {
+    if (sector?.code?.toLowerCase() === 'content') {
       Promise.all([api.get('/content/assets'), api.get('/content/projects')])
         .then(([aRes, pRes]) => {
-          setAssets(aRes.data?.data ?? []);
-          setProjects(pRes.data?.data ?? []);
+          setAssets(Array.isArray(aRes.data?.data) ? aRes.data.data : []);
+          setProjects(Array.isArray(pRes.data?.data) ? pRes.data.data : []);
         })
-        .catch(() => toast.error('Failed to load calendar data'))
+        .catch(() => toast.error('Failed to load content data'))
         .finally(() => setLoading(false));
     }
   }, [user]);
 
-  if (!user || user.role !== 'content') {
+  if (!user || sector?.code?.toLowerCase() !== 'content') {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-base-200">
         

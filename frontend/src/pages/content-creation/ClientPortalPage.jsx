@@ -6,7 +6,7 @@ import { FaUsers, FaCheckCircle, FaClock, FaCommentDots, FaEye, FaExclamationTri
 import { toast } from 'sonner';
 
 const ClientPortalPage = () => {
-  const { user } = useAuth();
+  const { user, sector } = useAuth();
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -24,10 +24,12 @@ const ClientPortalPage = () => {
   };
 
   useEffect(() => {
-    if (user?.role === 'content') fetchProjects();
+    if (sector?.code?.toLowerCase() === 'content') {
+      fetchProjects();
+    }
   }, [user]);
 
-  if (!user || user.role !== 'content') {
+  if (!user || sector?.code?.toLowerCase() !== 'content') {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-base-200">
         

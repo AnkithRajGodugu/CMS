@@ -32,6 +32,9 @@ private CustomerRepository customerRepository;
 @Mock
 private SectorRepository sectorRepository;
 
+@Mock
+private com.example.cms.service.NotificationService notificationService;
+
 @InjectMocks
 private CustomerService customerService;
 

@@ -20,8 +20,8 @@ const ContentDashboard = () => {
           api.get('/content/projects'),
           api.get('/content/assets')
         ]);
-        setProjects(projectsRes.data?.data ?? []);
-        setAssets(assetsRes.data?.data ?? []);
+        setProjects(Array.isArray(projectsRes.data?.data) ? projectsRes.data.data : []);
+        setAssets(Array.isArray(assetsRes.data?.data) ? assetsRes.data.data : []);
       } catch (err) {
         console.error('Failed to load content data', err);
       } finally {

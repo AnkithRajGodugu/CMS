@@ -6,7 +6,7 @@ import { FaFileAlt, FaPlus, FaFilter, FaDownload, FaExclamationTriangle, FaImage
 import { toast } from 'sonner';
 
 const AssetManagementPage = () => {
-  const { user } = useAuth();
+  const { user, sector } = useAuth();
   const [assets, setAssets] = useState([]);
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -27,12 +27,8 @@ const AssetManagementPage = () => {
         api.get('/content/projects')
       ]);
       
-      if (assetsRes.data && assetsRes.data.success) {
-        setAssets(assetsRes.data.data);
-      }
-      if (projectsRes.data && projectsRes.data.success) {
-        setProjects(projectsRes.data.data);
-      }
+      setAssets(Array.isArray(assetsRes.data?.data) ? assetsRes.data.data : []);
+      setProjects(Array.isArray(projectsRes.data?.data) ? projectsRes.data.data : []);
     } catch (err) {
       console.error('Failed to fetch asset data', err);
       toast.error('Failed to load asset management data');
@@ -42,10 +38,10 @@ const AssetManagementPage = () => {
   };
 
   useEffect(() => {
-    if (user && user.role === 'content') {
+    if (sector?.code?.toLowerCase() === 'content') {
       fetchData();
     }
-  }, [user]);
+  }, [user, sector]);
 
   const handleCreateAsset = async (e) => {
     e.preventDefault();
@@ -81,7 +77,7 @@ const AssetManagementPage = () => {
 
   const filteredAssets = assets.filter(a => filterType === 'ALL' || a.type === filterType);
 
-  if (!user || user.role !== 'content') {
+  if (!user || sector?.code?.toLowerCase() !== 'content') {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-base-200">
         

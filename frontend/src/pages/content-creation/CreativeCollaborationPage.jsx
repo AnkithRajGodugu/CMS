@@ -6,7 +6,7 @@ import { FaUsers, FaPlus, FaComments, FaCalendarCheck, FaExclamationTriangle, Fa
 import { toast } from 'sonner';
 
 const CreativeCollaborationPage = () => {
-  const { user } = useAuth();
+  const { user, sector } = useAuth();
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -25,12 +25,12 @@ const CreativeCollaborationPage = () => {
   };
 
   useEffect(() => {
-    if (user && user.role === 'content') {
+    if (sector?.code?.toLowerCase() === 'content') {
       fetchData();
     }
   }, [user]);
 
-  if (!user || user.role !== 'content') {
+  if (!user || sector?.code?.toLowerCase() !== 'content') {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-base-200">
         

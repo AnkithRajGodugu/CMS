@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getAllAppointments } from '../../services/healthcareService';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../hooks/useAuth';
 
 const TYPE_LABELS = { CONSULTATION: 'Consultation', FOLLOW_UP: 'Follow-up', CHECK_UP: 'Check-up', EMERGENCY: 'Emergency' };
 const STATUS_BADGE = { CONFIRMED: 'badge-success', PENDING: 'badge-warning', URGENT: 'badge-error', COMPLETED: 'badge-ghost', CANCELLED: 'badge-ghost' };

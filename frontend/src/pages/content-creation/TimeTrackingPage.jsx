@@ -6,7 +6,7 @@ import { FaClock, FaPlay, FaPause, FaStop, FaPlus, FaExclamationTriangle } from 
 import { toast } from 'sonner';
 
 const TimeTrackingPage = () => {
-  const { user } = useAuth();
+  const { user, sector } = useAuth();
   const [projects, setProjects] = useState([]);
   const [running, setRunning] = useState(false);
   const [elapsed, setElapsed] = useState(0);
@@ -15,9 +15,9 @@ const TimeTrackingPage = () => {
   const intervalRef = useRef(null);
 
   useEffect(() => {
-    if (user?.role === 'content') {
+    if (user && sector?.code?.toLowerCase() === 'content') {
       api.get('/content/projects')
-        .then(res => setProjects(res.data?.data ?? []))
+        .then(res => setProjects(Array.isArray(res.data?.data) ? res.data.data : []))
         .catch(() => toast.error('Failed to load projects'));
     }
   }, [user]);
@@ -56,7 +56,7 @@ const TimeTrackingPage = () => {
     return sum + parts[0] + parts[1] / 60;
   }, 0);
 
-  if (!user || user.role !== 'content') {
+  if (!user || sector?.code?.toLowerCase() !== 'content') {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-base-200">
         

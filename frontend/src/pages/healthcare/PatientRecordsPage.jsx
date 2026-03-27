@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getAllPatients, searchPatients } from '../../services/healthcareService';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../hooks/useAuth';
 
 const PatientRecordsPage = () => {
   const { sector } = useAuth();

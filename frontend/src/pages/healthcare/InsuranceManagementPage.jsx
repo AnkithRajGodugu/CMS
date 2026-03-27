@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getAllInsuranceClaims, getInsuranceClaimStats } from '../../services/healthcareService';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../hooks/useAuth';
 
 const STATUS_BADGE = { APPROVED: 'badge-success', PENDING: 'badge-warning', DENIED: 'badge-error' };
 

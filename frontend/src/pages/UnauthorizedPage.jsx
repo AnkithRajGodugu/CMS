@@ -23,7 +23,7 @@ const UnauthorizedPage = () => {
               Go Home
             </Link>
             {user && (
-              <Link to={`/dashboard/${user.sector?.toLowerCase()}`} className="btn btn-outline">
+              <Link to={`/dashboard/${(typeof user.sector === 'string' ? user.sector : user.sector?.code || 'banking').toLowerCase()}`} className="btn btn-outline">
                 Go to Dashboard
               </Link>
             )}

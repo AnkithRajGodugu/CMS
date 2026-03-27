@@ -125,10 +125,13 @@ export const SectorThemeProvider = ({ children }) => {
    * Sync with AuthContext sector
    */
   useEffect(() => {
-    if (sector && sector.code) {
-      const normalizedCode = sector.code.toLowerCase();
-      if (isSectorValid(normalizedCode)) {
-        changeSector(normalizedCode);
+    if (sector) {
+      const sectorCode = typeof sector === 'string' ? sector : sector.code;
+      if (sectorCode) {
+        const normalizedCode = sectorCode.toLowerCase();
+        if (isSectorValid(normalizedCode)) {
+          changeSector(normalizedCode);
+        }
       }
     }
   }, [sector, changeSector]);

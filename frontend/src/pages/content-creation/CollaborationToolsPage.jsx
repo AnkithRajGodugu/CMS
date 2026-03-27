@@ -6,7 +6,7 @@ import { FaComments, FaPlus, FaCheckCircle, FaExclamationTriangle, FaUserCircle,
 import { toast } from 'sonner';
 
 const CollaborationToolsPage = () => {
-  const { user } = useAuth();
+  const { user, sector } = useAuth();
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [comment, setComment] = useState('');
@@ -16,9 +16,9 @@ const CollaborationToolsPage = () => {
   ]);
 
   useEffect(() => {
-    if (user?.role === 'content') {
+    if (sector?.code?.toLowerCase() === 'content') {
       api.get('/content/projects')
-        .then(res => setProjects(res.data?.data ?? []))
+        .then(res => setProjects(Array.isArray(res.data?.data) ? res.data.data : []))
         .catch(() => toast.error('Failed to load project data'))
         .finally(() => setLoading(false));
     }
@@ -34,7 +34,7 @@ const CollaborationToolsPage = () => {
     setComment('');
   };
 
-  if (!user || user.role !== 'content') {
+  if (!user || sector?.code?.toLowerCase() !== 'content') {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-base-200">
         

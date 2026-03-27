@@ -43,8 +43,8 @@ class CustomerReportTest {
 
     @BeforeEach
     void setup() {
-        customerRepository.deleteAll();
-        sectorRepository.deleteAll();
+        customerRepository.deleteAllInBatch();
+        sectorRepository.deleteAllInBatch();
 
         sector = sectorRepository.save(
                 Sector.builder()

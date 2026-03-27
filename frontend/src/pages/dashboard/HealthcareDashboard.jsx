@@ -8,9 +8,10 @@ import AppointmentCalendarView from '../../components/healthcare/AppointmentCale
 import { getHealthcareAdminStats, getRecentHealthcareActivity } from '../../services/healthcareService';
 
 const HealthcareDashboard = () => {
-  const { user } = useAuth();
+  const { user, sector } = useAuth();
   const [adminStats, setAdminStats] = useState(null);
   const [recentActivity, setRecentActivity] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -70,6 +71,14 @@ const HealthcareDashboard = () => {
       default: return 'badge-ghost';
     }
   };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen bg-base-200">
+        <span className="loading loading-spinner loading-lg text-primary"></span>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-base-200">

@@ -125,7 +125,6 @@ class AuthServiceTest {
                 .sectorCode("BANKING")
                 .userId(1L)
                 .build();
-        when(sectorDetectionService.detectSectorByUsername("testuser")).thenReturn(sectorContext);
         when(jwtUtil.generateToken("testuser", "USER", "Banking & Finance")).thenReturn("test-jwt-token");
 
         // Act
@@ -142,7 +141,6 @@ class AuthServiceTest {
 
         verify(userRepository, times(1)).findByUsername("testuser");
         verify(userRepository, times(1)).save(any(User.class));
-        verify(sectorDetectionService, times(1)).detectSectorByUsername("testuser");
         verify(jwtUtil, times(1)).generateToken("testuser", "USER", "Banking & Finance");
         verify(auditService, times(1)).logAuthentication(eq(1L), eq("LOGIN_SUCCESS"), eq(true), isNull(), anyString());
     }

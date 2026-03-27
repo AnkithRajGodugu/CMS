@@ -6,7 +6,7 @@ import { FaChartLine, FaEye, FaUsers, FaArrowUp, FaArrowDown, FaExclamationTrian
 import { toast } from 'sonner';
 
 const CreatorAnalyticPage = () => {
-  const { user } = useAuth();
+  const { user, sector } = useAuth();
   const [analytics, setAnalytics] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -25,12 +25,12 @@ const CreatorAnalyticPage = () => {
   };
 
   useEffect(() => {
-    if (user && user.role === 'content') {
+    if (user && sector?.code?.toLowerCase() === 'content') {
       fetchAnalytics();
     }
-  }, [user]);
+  }, [user, sector]);
 
-  if (!user || user.role !== 'content') {
+  if (!user || sector?.code?.toLowerCase() !== 'content') {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-base-200">
         

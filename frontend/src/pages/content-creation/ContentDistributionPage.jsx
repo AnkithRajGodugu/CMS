@@ -6,7 +6,7 @@ import { FaGlobe, FaShareAlt, FaPlus, FaCheckCircle, FaExclamationTriangle, FaYo
 import { toast } from 'sonner';
 
 const ContentDistributionPage = () => {
-  const { user } = useAuth();
+  const { user, sector } = useAuth();
   const [platforms, setPlatforms] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -25,10 +25,10 @@ const ContentDistributionPage = () => {
   };
 
   useEffect(() => {
-    if (user && user.role === 'content') {
+    if (sector?.code?.toLowerCase() === 'content') {
       fetchDistribution();
     }
-  }, [user]);
+  }, [user, sector]); // Added sector to dependency array
 
   const getPlatformIcon = (name) => {
     switch (name.toLowerCase()) {
@@ -40,7 +40,7 @@ const ContentDistributionPage = () => {
     }
   };
 
-  if (!user || user.role !== 'content') {
+  if (!user || sector?.code?.toLowerCase() !== 'content') {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-base-200">
         

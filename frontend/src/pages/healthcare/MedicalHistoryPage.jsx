@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getAllHealthRecords, getAllPatients } from '../../services/healthcareService';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../hooks/useAuth';
 
 const TYPE_BADGE = {
   LAB_RESULT: 'badge-info',

@@ -181,59 +181,59 @@ const LoginPage = () => {
                                         </span>
                                     </label>
 
-                                <input
-                                    type="text"
-                                    name="username"
-                                    value={formData.username}
-                                    onChange={handleChange}
-                                    className="input input-bordered"
-                                    placeholder="Enter your username"
-                                    required
-                                    disabled={isLoading}
-                                />
-                            </div>
+                                    <input
+                                        type="text"
+                                        name="username"
+                                        value={formData.username}
+                                        onChange={handleChange}
+                                        className="input input-bordered"
+                                        placeholder="Enter your username"
+                                        required
+                                        disabled={isLoading}
+                                    />
+                                </div>
 
-                            <div className="form-control">
+                                <div className="form-control">
 
-                                <label className="label">
-                  <span className="label-text">
-                    Password
-                  </span>
-                                </label>
+                                    <label className="label">
+                                        <span className="label-text">
+                                            Password
+                                        </span>
+                                    </label>
 
-                                <input
-                                    type="password"
-                                    name="password"
-                                    value={formData.password}
-                                    onChange={handleChange}
-                                    className="input input-bordered"
-                                    placeholder="Enter your password"
-                                    required
-                                    disabled={isLoading}
-                                />
+                                    <input
+                                        type="password"
+                                        name="password"
+                                        value={formData.password}
+                                        onChange={handleChange}
+                                        className="input input-bordered"
+                                        placeholder="Enter your password"
+                                        required
+                                        disabled={isLoading}
+                                    />
 
-                                <label className="label">
-                                    <Link
-                                        to="/forgot-password"
-                                        className="label-text-alt link link-hover"
+                                    <label className="label">
+                                        <Link
+                                            to="/forgot-password"
+                                            className="label-text-alt link link-hover"
+                                        >
+                                            Forgot password?
+                                        </Link>
+                                    </label>
+
+                                </div>
+
+                                <div className="form-control">
+                                    <button
+                                        type="submit"
+                                        className={`btn btn-primary ${isLoading ? 'loading' : ''}`}
+                                        disabled={isLoading}
                                     >
-                                        Forgot password?
-                                    </Link>
-                                </label>
+                                        {isLoading ? 'Signing In...' : 'Sign In'}
+                                    </button>
+                                </div>
 
-                            </div>
-
-                            <div className="form-control">
-                                <button
-                                    type="submit"
-                                    className={`btn btn-primary ${isLoading ? 'loading' : ''}`}
-                                    disabled={isLoading}
-                                >
-                                    {isLoading ? 'Signing In...' : 'Sign In'}
-                                </button>
-                            </div>
-
-                        </form>
+                            </form>
                         )}
 
                         <div className="divider">OR</div>
@@ -245,20 +245,20 @@ const LoginPage = () => {
                             >
                                 View All Test Credentials
                             </Link>
-                            
+
                             <div className="bg-base-200 rounded-lg p-3">
                                 <p className="text-xs font-bold uppercase tracking-wider opacity-60 mb-2">Quick Login (Auto-fill)</p>
-                                
+
                                 <div className="grid grid-cols-2 gap-2 mb-2">
                                     <button onClick={() => fillCredentials('bank_user1', 'bank123')} type="button" className="btn btn-xs btn-outline btn-info">Bank User</button>
                                     <button onClick={() => fillCredentials('bank_admin', 'admin123')} type="button" className="btn btn-xs btn-info">Bank Admin</button>
-                                    
+
                                     <button onClick={() => fillCredentials('health_user', 'health123')} type="button" className="btn btn-xs btn-outline btn-success">Health User</button>
                                     <button onClick={() => fillCredentials('health_admin', 'admin123')} type="button" className="btn btn-xs btn-success">Health Admin</button>
-                                    
+
                                     <button onClick={() => fillCredentials('logistics_user', 'logistics123')} type="button" className="btn btn-xs btn-outline btn-warning">Logistics User</button>
                                     <button onClick={() => fillCredentials('logistics_admin', 'admin123')} type="button" className="btn btn-xs btn-warning">Logistics Admin</button>
-                                    
+
                                     <button onClick={() => fillCredentials('content_user', 'content123')} type="button" className="btn btn-xs btn-outline btn-secondary">Content User</button>
                                     <button onClick={() => fillCredentials('content_admin', 'admin123')} type="button" className="btn btn-xs btn-secondary">Content Admin</button>
                                 </div>

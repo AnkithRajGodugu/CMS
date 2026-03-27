@@ -6,7 +6,7 @@ import { FaProjectDiagram, FaPlus, FaCalendarAlt, FaDollarSign, FaUserTie, FaExc
 import { toast } from 'sonner';
 
 const ProjectManagementPage = () => {
-  const { user } = useAuth();
+  const { user, sector } = useAuth();
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -24,7 +24,7 @@ const ProjectManagementPage = () => {
       setLoading(true);
       const response = await api.get('/content/projects');
       if (response.data && response.data.success) {
-        setProjects(response.data.data);
+        setProjects(Array.isArray(response.data.data) ? response.data.data : []);
       }
     } catch (err) {
       console.error('Failed to fetch projects', err);
@@ -35,10 +35,10 @@ const ProjectManagementPage = () => {
   };
 
   useEffect(() => {
-    if (user && user.role === 'content') {
+    if (user && sector?.code?.toLowerCase() === 'content') {
       fetchProjects();
     }
-  }, [user]);
+  }, [user, sector]);
 
   const handleCreateProject = async (e) => {
     e.preventDefault();
@@ -81,7 +81,7 @@ const ProjectManagementPage = () => {
      }
   };
 
-  if (!user || user.role !== 'content') {
+  if (!user || sector?.code?.toLowerCase() !== 'content') {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-base-200">
         

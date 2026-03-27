@@ -6,17 +6,15 @@ import { FaRobot, FaPlus, FaPlay, FaExclamationTriangle, FaCheckCircle, FaProjec
 import { toast } from 'sonner';
 
 const WorkflowAutomationPage = () => {
-  const { user } = useAuth();
+  const { user, sector } = useAuth();
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const fetchData = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
       const response = await api.get('/content/projects');
-      if (response.data && response.data.success) {
-        setProjects(response.data.data);
-      }
+      setProjects(Array.isArray(response.data?.data) ? response.data.data : []);
     } catch (err) {
       console.error('Failed to fetch projects for workflow', err);
     } finally {
@@ -25,12 +23,12 @@ const WorkflowAutomationPage = () => {
   };
 
   useEffect(() => {
-    if (user && user.role === 'content') {
+    if (sector?.code?.toLowerCase() === 'content') {
       fetchData();
     }
-  }, [user]);
+  }, [user, sector]);
 
-  if (!user || user.role !== 'content') {
+  if (!user || sector?.code?.toLowerCase() !== 'content') {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-base-200">
         
