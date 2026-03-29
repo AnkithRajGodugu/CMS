@@ -59,69 +59,71 @@ export const getHomeRoute = (user, sector) => {
 
 /**
  * Returns the sidebar navigation config for a given sector + role.
+ * Each item has { label, path, icon, adminOnly? }
+ * icon is a react-icons/fa icon name string — Sidebar.jsx resolves it.
  */
 export const getSectorNavItems = (sector, role) => {
     const adminNavs = {
         banking: [
-            { label: 'Overview', path: '/dashboard/banking' },
-            { label: 'Accounts', path: '/dashboard/banking/accounts' },
-            { label: 'Transactions', path: '/dashboard/banking/transactions' },
-            { label: 'Compliance', path: '/dashboard/banking/compliance', adminOnly: true },
-            { label: 'Risk', path: '/dashboard/banking/risk', adminOnly: true },
-            { label: 'Customers', path: '/dashboard/banking/customers' },
+            { label: 'Overview',      path: '/dashboard/banking',              icon: 'FaChartPie' },
+            { label: 'Accounts',      path: '/dashboard/banking/accounts',     icon: 'FaCreditCard' },
+            { label: 'Transactions',  path: '/dashboard/banking/transactions', icon: 'FaExchangeAlt' },
+            { label: 'Customers',     path: '/dashboard/banking/customers',    icon: 'FaUsers' },
+            { label: 'Compliance',    path: '/dashboard/banking/compliance',   icon: 'FaShieldAlt', adminOnly: true },
+            { label: 'Risk',          path: '/dashboard/banking/risk',         icon: 'FaExclamationTriangle', adminOnly: true },
         ],
         healthcare: [
-            { label: 'Overview', path: '/dashboard/healthcare' },
-            { label: 'Patients', path: '/dashboard/healthcare/patients' },
-            { label: 'Appointments', path: '/dashboard/healthcare/appointments' },
-            { label: 'Medical History', path: '/dashboard/healthcare/medical-history' },
-            { label: 'Insurance', path: '/dashboard/healthcare/insurance', adminOnly: true },
+            { label: 'Overview',        path: '/dashboard/healthcare',                  icon: 'FaHospital' },
+            { label: 'Patients',        path: '/dashboard/healthcare/patients',         icon: 'FaUserMd' },
+            { label: 'Appointments',    path: '/dashboard/healthcare/appointments',     icon: 'FaCalendarCheck' },
+            { label: 'Medical History', path: '/dashboard/healthcare/medical-history', icon: 'FaFileMedical' },
+            { label: 'Insurance',       path: '/dashboard/healthcare/insurance',        icon: 'FaShieldAlt', adminOnly: true },
         ],
         logistics: [
-            { label: 'Overview', path: '/dashboard/logistics' },
-            { label: 'Shipment Tracking', path: '/dashboard/logistics/tracking' },
-            { label: 'Inventory', path: '/dashboard/logistics/inventory' },
-            { label: 'Fleet', path: '/dashboard/logistics/fleet', adminOnly: true },
-            { label: 'Routes', path: '/dashboard/logistics/routes' },
-            { label: 'Warehouse', path: '/dashboard/logistics/warehouse' },
-            { label: 'Vendors', path: '/dashboard/logistics/vendors', adminOnly: true },
-            { label: 'SLA', path: '/dashboard/logistics/sla' },
+            { label: 'Overview',          path: '/dashboard/logistics',           icon: 'FaTruck' },
+            { label: 'Shipment Tracking', path: '/dashboard/logistics/tracking',  icon: 'FaShippingFast' },
+            { label: 'Inventory',         path: '/dashboard/logistics/inventory', icon: 'FaBoxes' },
+            { label: 'Routes',            path: '/dashboard/logistics/routes',    icon: 'FaRoute' },
+            { label: 'Warehouse',         path: '/dashboard/logistics/warehouse', icon: 'FaWarehouse' },
+            { label: 'Fleet',             path: '/dashboard/logistics/fleet',     icon: 'FaCarSide', adminOnly: true },
+            { label: 'Vendors',           path: '/dashboard/logistics/vendors',   icon: 'FaHandshake', adminOnly: true },
+            { label: 'SLA',              path: '/dashboard/logistics/sla',        icon: 'FaFileContract' },
         ],
         content: [
-            { label: 'Overview', path: '/dashboard/content' },
-            { label: 'Projects', path: '/dashboard/content/projects' },
-            { label: 'Calendar', path: '/dashboard/content/calendar' },
-            { label: 'Collaboration', path: '/dashboard/content/collaboration' },
-            { label: 'Assets', path: '/dashboard/content/assets' },
-            { label: 'Time Tracking', path: '/dashboard/content/time' },
-            { label: 'Analytics', path: '/dashboard/content/analytics', adminOnly: true },
-            { label: 'Workflow', path: '/dashboard/content/workflow', adminOnly: true },
+            { label: 'Overview',      path: '/dashboard/content',               icon: 'FaEdit' },
+            { label: 'Projects',      path: '/dashboard/content/projects',      icon: 'FaProjectDiagram' },
+            { label: 'Calendar',      path: '/dashboard/content/calendar',      icon: 'FaCalendarAlt' },
+            { label: 'Assets',        path: '/dashboard/content/assets',        icon: 'FaPhotoVideo' },
+            { label: 'Collaboration', path: '/dashboard/content/collaboration', icon: 'FaUsers' },
+            { label: 'Time Tracking', path: '/dashboard/content/time',          icon: 'FaClock' },
+            { label: 'Analytics',     path: '/dashboard/content/analytics',     icon: 'FaChartLine', adminOnly: true },
+            { label: 'Workflow',      path: '/dashboard/content/workflow',      icon: 'FaSitemap', adminOnly: true },
         ],
     };
 
     const userNavs = {
         banking: [
-            { label: 'My Dashboard', path: '/user/banking/dashboard' },
-            { label: 'My Transactions', path: '/user/banking/transactions' },
-            { label: 'Transfer Money', path: '/user/banking/transfer' },
-            { label: 'Statements', path: '/user/banking/statements' },
+            { label: 'My Dashboard',    path: '/user/banking/dashboard',     icon: 'FaChartPie' },
+            { label: 'My Transactions', path: '/user/banking/transactions',  icon: 'FaExchangeAlt' },
+            { label: 'Transfer Money',  path: '/user/banking/transfer',      icon: 'FaPaperPlane' },
+            { label: 'Statements',      path: '/user/banking/statements',    icon: 'FaFileAlt' },
         ],
         healthcare: [
-            { label: 'My Dashboard', path: '/user/healthcare/dashboard' },
-            { label: 'My Appointments', path: '/user/healthcare/appointments' },
-            { label: 'Health Records', path: '/user/healthcare/records' },
-            { label: 'My Insurance', path: '/user/healthcare/insurance' },
+            { label: 'My Dashboard',   path: '/user/healthcare/dashboard',    icon: 'FaHospital' },
+            { label: 'My Appointments',path: '/user/healthcare/appointments', icon: 'FaCalendarCheck' },
+            { label: 'Health Records', path: '/user/healthcare/records',      icon: 'FaFileMedical' },
+            { label: 'My Insurance',   path: '/user/healthcare/insurance',    icon: 'FaShieldAlt' },
         ],
         logistics: [
-            { label: 'My Dashboard', path: '/user/logistics/dashboard' },
-            { label: 'Track Shipment', path: '/user/logistics/track' },
-            { label: 'My Orders', path: '/user/logistics/orders' },
+            { label: 'My Dashboard',   path: '/user/logistics/dashboard', icon: 'FaTruck' },
+            { label: 'Track Shipment', path: '/user/logistics/track',     icon: 'FaShippingFast' },
+            { label: 'My Orders',      path: '/user/logistics/orders',    icon: 'FaBoxes' },
         ],
         content: [
-            { label: 'My Dashboard', path: '/user/content/dashboard' },
-            { label: 'My Tasks', path: '/user/content/tasks' },
-            { label: 'My Calendar', path: '/user/content/calendar' },
-            { label: 'My Projects', path: '/user/content/projects' },
+            { label: 'My Dashboard', path: '/user/content/dashboard', icon: 'FaEdit' },
+            { label: 'My Tasks',     path: '/user/content/tasks',     icon: 'FaTasks' },
+            { label: 'My Calendar',  path: '/user/content/calendar',  icon: 'FaCalendarAlt' },
+            { label: 'My Projects',  path: '/user/content/projects',  icon: 'FaProjectDiagram' },
         ],
     };
 

@@ -75,7 +75,7 @@ const SignupPage = () => {
             }
 
         } catch (err) {
-            setError(err.response?.data?.message || err.userMessage || 'Registration failed');
+            setError(err.userMessage || 'Registration failed. Please check your inputs.');
         } finally {
             setLoading(false);
         }

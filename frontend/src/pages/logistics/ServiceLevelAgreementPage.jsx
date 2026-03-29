@@ -15,7 +15,7 @@ const ServiceLevelAgreementPage = () => {
       setLoading(true);
       const response = await api.get('/logistics/shipments');
       if (response.data && response.data.success) {
-        setShipments(response.data.data);
+        setShipments(response.data.data?.content || response.data.data);
       }
     } catch (err) {
       console.error('Failed to fetch shipments for SLA', err);

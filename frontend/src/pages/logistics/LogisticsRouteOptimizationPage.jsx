@@ -23,7 +23,7 @@ const LogisticsRouteOptimizationPage = () => {
       setLoading(true);
       const response = await api.get('/logistics/routes');
       if (response.data && response.data.success) {
-        setRoutes(response.data.data);
+        setRoutes(response.data.data?.content || response.data.data);
       }
     } catch (err) {
       console.error('Failed to fetch routes', err);

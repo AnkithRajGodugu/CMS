@@ -1,4 +1,5 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { useTheme } from '../../context/SectorThemeProvider';
 import { getHomeRoute, isAdmin, isManager } from '../../utils/roleUtils';
@@ -8,6 +9,59 @@ import NotificationsDropdown from '../NotificationsDropdown';
 const SafeNavbar = ({ hideSectorSwitcher = false }) => {
   const { user, logout, isAuthenticated } = useAuth();
   const { currentTheme, changeSector, getAllSectors } = useTheme();
+  const navigate = useNavigate();
+
+  // Global Search State
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const searchRef = useRef(null);
+
+  // Close search when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (searchRef.current && !searchRef.current.contains(event.target)) {
+        setIsSearchOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Hotkey Ctrl+K to manually focus search
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        document.getElementById('global-search-input')?.focus();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  // Universal Searchable Navigation Index
+  const searchablePages = [
+    { name: 'Banking Dashboard', path: '/dashboard/banking', keywords: 'home overview analytics' },
+    { name: 'Banking - Accounts', path: '/dashboard/banking/accounts', keywords: 'bank accounts money create' },
+    { name: 'Banking - Transactions', path: '/dashboard/banking/transactions', keywords: 'transfer history transactions records' },
+    { name: 'Banking - Customers', path: '/dashboard/banking/customers', keywords: 'clients users people' },
+    { name: 'Healthcare Dashboard', path: '/dashboard/healthcare', keywords: 'home overview analytics doc' },
+    { name: 'Healthcare - Patients', path: '/dashboard/healthcare/patients', keywords: 'patients medical health users' },
+    { name: 'Healthcare - Appointments', path: '/dashboard/healthcare/appointments', keywords: 'doctor schedule calendar time' },
+    { name: 'Logistics Dashboard', path: '/dashboard/logistics', keywords: 'home overview analytics' },
+    { name: 'Logistics - Shipments', path: '/dashboard/logistics/shipments', keywords: 'truck delivery packages freight' },
+    { name: 'Logistics - Fleet', path: '/dashboard/logistics/fleet', keywords: 'vehicles fleet trucks cars' },
+    { name: 'Content Dashboard', path: '/dashboard/content', keywords: 'home overview analytics' },
+    { name: 'Content - Projects', path: '/dashboard/content/projects', keywords: 'media tasks campaigns' },
+    { name: 'System Users', path: '/users', keywords: 'admin system role users accounts' },
+    { name: 'Audit Trails', path: '/admin/audit-logs', keywords: 'security logs tracking audit changes' },
+    { name: 'Profile Settings', path: '/settings', keywords: 'profile password settings config account' },
+  ];
+
+  const searchResults = searchablePages.filter(page => 
+    page.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    page.keywords.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <div 
@@ -88,18 +142,61 @@ const SafeNavbar = ({ hideSectorSwitcher = false }) => {
       <div className="navbar-end">
         <div className="flex items-center gap-2">
 
-          {/* Global Search Bar (Phase C Stretch) */}
+          {/* Global Search Bar */}
           {isAuthenticated && (
-            <div className="hidden md:flex relative mr-1 group">
+            <div className="hidden md:flex relative mr-1 group z-[100]" ref={searchRef}>
               <input 
+                id="global-search-input"
                 type="text" 
+                autoComplete="off"
                 placeholder="Search everywhere..." 
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setIsSearchOpen(e.target.value.length > 0);
+                }}
+                onFocus={() => { if(searchQuery.length > 0) setIsSearchOpen(true); }}
                 className="input input-sm input-bordered w-48 focus:w-64 transition-all duration-300 rounded-full bg-base-200/50 pr-8 border-transparent focus:border-primary/50"
               />
-              <div className="absolute right-2 top-1.5 opacity-50 group-hover:opacity-100 transition-opacity flex items-center gap-1 cursor-pointer">
-                <kbd className="kbd kbd-xs bg-base-300">Ctrl</kbd>
-                <kbd className="kbd kbd-xs bg-base-300">K</kbd>
-              </div>
+              
+              {!searchQuery && (
+                <div className="absolute right-2 top-1.5 opacity-50 group-hover:opacity-100 transition-opacity flex items-center gap-1 cursor-pointer pointer-events-none">
+                  <kbd className="kbd kbd-xs bg-base-300 shadow-none border-none">Ctrl</kbd>
+                  <kbd className="kbd kbd-xs bg-base-300 shadow-none border-none">K</kbd>
+                </div>
+              )}
+
+              {/* Search Results Dropdown Palette */}
+              {isSearchOpen && (
+                <ul className="absolute top-10 right-0 w-72 bg-base-100 shadow-2xl rounded-xl z-[150] p-2 max-h-80 overflow-y-auto border border-base-300 animate-in fade-in slide-in-from-top-2 duration-200">
+                  <li className="px-3 py-2 text-xs font-bold uppercase tracking-wider text-base-content/50 border-b border-base-200 mb-1">
+                    Quick Navigation
+                  </li>
+                  
+                  {searchResults.length > 0 ? (
+                    searchResults.map((result, idx) => (
+                      <li key={idx}>
+                        <button 
+                          className="w-full text-left px-3 py-2.5 hover:bg-base-200 rounded-lg text-sm font-medium transition-colors flex flex-col gap-0.5"
+                          onClick={() => {
+                            navigate(result.path);
+                            setIsSearchOpen(false);
+                            setSearchQuery('');
+                          }}
+                        >
+                          {result.name}
+                          <span className="text-xs font-normal opacity-50 block">{result.path}</span>
+                        </button>
+                      </li>
+                    ))
+                  ) : (
+                    <li className="px-3 py-6 text-center">
+                      <p className="text-sm font-semibold">No matches found</p>
+                      <p className="text-xs opacity-60">Try searching for "patients" or "shipments"</p>
+                    </li>
+                  )}
+                </ul>
+              )}
             </div>
           )}
 
@@ -111,10 +208,14 @@ const SafeNavbar = ({ hideSectorSwitcher = false }) => {
           {/* Sector switcher for desktop (hidden for regular users) */}
           {isAuthenticated && !hideSectorSwitcher && (
             <div className="dropdown dropdown-end hidden lg:block">
-              <div tabIndex={0} role="button" className="btn btn-ghost btn-sm flex items-center gap-2">
-                <DynamicLogo size={20} animated={false} />
-                <span className="text-sm capitalize">{currentTheme?.name || 'Banking'}</span>
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div 
+                tabIndex={0} 
+                role="button" 
+                className="flex items-center gap-2 px-4 py-1.5 rounded-full border border-base-300 bg-base-100 hover:bg-base-200 transition-colors shadow-sm"
+              >
+                <DynamicLogo size={18} animated={false} />
+                <span className="text-sm font-semibold tracking-wide capitalize">{currentTheme?.name || 'Banking'}</span>
+                <svg className="w-4 h-4 opacity-50 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
                 </svg>
               </div>

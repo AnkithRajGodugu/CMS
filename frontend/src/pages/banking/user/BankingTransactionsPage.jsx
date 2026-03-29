@@ -17,9 +17,9 @@ const BankingTransactionsPage = () => {
     setError(null);
     try {
       const res = await api.get('/sectors/banking/my-transactions', { params: { page, size: 20 } });
-      const data = res.data;
-      setTransactions(data.content ?? []);
-      setTotalPages(data.totalPages ?? 1);
+      const payload = res.data?.data;
+      setTransactions(payload?.content ?? []);
+      setTotalPages(payload?.totalPages ?? 1);
     } catch (e) {
       setError('Failed to load your transactions.');
     } finally {

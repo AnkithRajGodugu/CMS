@@ -18,7 +18,7 @@ export default ({ mode }) => {
           }
         }
       },
-      chunkSizeWarningLimit: 600,
+      chunkSizeWarningLimit: 1500,
       sourcemap: false
     },
     server: {

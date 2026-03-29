@@ -4,12 +4,12 @@ import Sidebar from './Sidebar';
 
 const SectorLayout = () => {
     return (
-        <div className="drawer lg:drawer-open min-h-screen bg-base-200">
+        <div className="drawer lg:drawer-open h-screen bg-base-200 overflow-hidden">
             <input id="mobile-sidebar-drawer" type="checkbox" className="drawer-toggle" />
             
-            <div className="drawer-content flex flex-col min-h-screen">
+            <div className="drawer-content flex flex-col h-screen overflow-hidden">
                 {/* Navbar */}
-                <div className="sticky top-0 z-40 w-full">
+                <div className="z-40 w-full flex-shrink-0">
                     <Navbar />
                 </div>
                 

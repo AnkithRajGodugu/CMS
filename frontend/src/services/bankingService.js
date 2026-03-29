@@ -35,9 +35,25 @@ export const getRecentTransactions = (page = 0, size = 5) => {
 };
 
 /**
- * Create a new bank transfer
- * @param {Object} data - Transfer details
+ * Create a new bank transfer (internal between own accounts)
+ * @param {Object} data - Transfer details { fromAccount, toAccount, amount, description }
+ */
+export const createBankAccount = (accountData) => {
+  return api.post('/sectors/banking/accounts', accountData);
+};
+
+/**
+ * Create a new bank transfer (internal between own accounts)
+ * @param {Object} data - Transfer details { fromAccount, toAccount, amount, description }
  */
 export const createTransfer = (data) => {
-  return api.post('/banking/transfers', data);
+  return api.post('/sectors/banking/my-transfer', data);
+};
+
+/**
+ * Create an external bank transfer (to a different bank)
+ * @param {Object} data - Transfer details { fromAccount, routingNumber, externalAccount, amount, description }
+ */
+export const createExternalTransfer = (data) => {
+  return api.post('/sectors/banking/my-external-transfer', data);
 };

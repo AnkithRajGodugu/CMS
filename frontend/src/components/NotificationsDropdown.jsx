@@ -18,9 +18,11 @@ const NotificationsDropdown = () => {
       // Use installed SockJS and @stomp/stompjs
       const { default: SockJS } = await import('sockjs-client');
       const { Client } = await import('@stomp/stompjs');
+      const token = localStorage.getItem('token');
+      const wsUrl = token ? `${API_BASE}/ws?token=${token}` : `${API_BASE}/ws`;
 
       const client = new Client({
-        webSocketFactory: () => new SockJS(`${API_BASE}/ws`),
+        webSocketFactory: () => new SockJS(wsUrl),
         onConnect: () => {
           setConnected(true);
           client.subscribe('/topic/notifications', (msg) => {

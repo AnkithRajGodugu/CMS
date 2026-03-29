@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   getBankingDashboardStats,
-  getRecentTransactions
+  getRecentTransactions,
+  createBankAccount
 } from '../../services/bankingService';
 import ReportExportButtons from '../../components/shared/ReportExportButtons';
 import SystemMetricsWidget from '../../components/shared/SystemMetricsWidget';
@@ -13,6 +14,8 @@ const BankingDashboard = () => {
   const [transactions, setTransactions] = useState([]);
   const [loadingStats, setLoadingStats] = useState(true);
   const [loadingTransactions, setLoadingTransactions] = useState(true);
+  const [isCreating, setIsCreating] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
 
   useEffect(() => {
     fetchDashboard();
@@ -83,8 +86,42 @@ const BankingDashboard = () => {
     }
   };
 
+  const handleCreateAccount = async (e) => {
+    e.preventDefault();
+    setIsCreating(true);
+    const formData = new FormData(e.target);
+    const payload = Object.fromEntries(formData.entries());
+    payload.balance = parseFloat(payload.balance);
+    try {
+      await createBankAccount(payload);
+      document.getElementById('new_account_modal').close();
+      e.target.reset();
+      fetchDashboard(); // refresh stats right after creation!
+      
+      // Show success feedback correctly
+      setToastMessage(`Account ${payload.accountNumber} created successfully!`);
+      setTimeout(() => setToastMessage(''), 4000);
+
+    } catch (err) {
+      console.error(err);
+      alert('Failed to create account: ' + (err.response?.data?.error || err.response?.data?.message || err.message));
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
+      
+      {/* Success Toast */}
+      {toastMessage && (
+        <div className="toast toast-top toast-center z-[100]">
+          <div className="alert alert-success text-white font-semibold shadow-xl border-none">
+            <span>🎉 {toastMessage}</span>
+          </div>
+        </div>
+      )}
+
       <div className="space-y-6">
 
         
@@ -98,7 +135,7 @@ const BankingDashboard = () => {
 
           <div className="flex space-x-2">
             <ReportExportButtons sectorCode="BANKING" />
-            <button className="btn btn-primary">New Account</button>
+            <button className="btn btn-primary" onClick={() => document.getElementById('new_account_modal').showModal()}>New Account</button>
           </div>
         </div>
 
@@ -264,6 +301,47 @@ const BankingDashboard = () => {
 
           </div>
         </div>
+
+        {/* New Account Modal */}
+        <dialog id="new_account_modal" className="modal">
+          <div className="modal-box">
+            <h3 className="font-bold text-lg mb-4">Create New Account</h3>
+            <form onSubmit={handleCreateAccount} className="space-y-4">
+              <div className="form-control">
+                <label className="label">Customer Name</label>
+                <input type="text" name="customerName" required className="input input-bordered w-full" placeholder="Full Name" />
+              </div>
+              <div className="form-control">
+                <label className="label">Account Number</label>
+                <input type="text" name="accountNumber" required className="input input-bordered w-full" placeholder="e.g. ACC-12345" />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="form-control">
+                  <label className="label">Account Type</label>
+                  <select name="accountType" className="select select-bordered" required defaultValue="SAVINGS">
+                    <option value="SAVINGS">Savings</option>
+                    <option value="CHECKING">Checking</option>
+                    <option value="BUSINESS">Business</option>
+                    <option value="CREDIT">Credit</option>
+                  </select>
+                </div>
+                <div className="form-control">
+                  <label className="label">Initial Balance ($)</label>
+                  <input type="number" name="balance" step="0.01" required defaultValue="0.00" className="input input-bordered w-full" />
+                </div>
+              </div>
+              <div className="modal-action">
+                <button type="button" className="btn" onClick={() => document.getElementById('new_account_modal').close()}>Cancel</button>
+                <button type="submit" className="btn btn-primary" disabled={isCreating}>
+                  {isCreating ? <span className="loading loading-spinner"></span> : 'Create Account'}
+                </button>
+              </div>
+            </form>
+          </div>
+          <form method="dialog" className="modal-backdrop">
+            <button>close</button>
+          </form>
+        </dialog>
 
       </div>
     </div>

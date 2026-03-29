@@ -85,7 +85,7 @@ const LoginPage = () => {
             navigate(redirectPath);
         } catch (err) {
             console.error('2FA error:', err);
-            setError(err.response?.data?.message || 'Invalid 2FA code.');
+            setError(err.userMessage || 'Invalid 2FA code.');
         } finally {
             setIsLoading(false);
         }
@@ -250,16 +250,16 @@ const LoginPage = () => {
                                 <p className="text-xs font-bold uppercase tracking-wider opacity-60 mb-2">Quick Login (Auto-fill)</p>
 
                                 <div className="grid grid-cols-2 gap-2 mb-2">
-                                    <button onClick={() => fillCredentials('bank_user1', 'bank123')} type="button" className="btn btn-xs btn-outline btn-info">Bank User</button>
+                                    <button onClick={() => fillCredentials('bank_user1', 'admin123')} type="button" className="btn btn-xs btn-outline btn-info">Bank User</button>
                                     <button onClick={() => fillCredentials('bank_admin', 'admin123')} type="button" className="btn btn-xs btn-info">Bank Admin</button>
 
-                                    <button onClick={() => fillCredentials('health_user', 'health123')} type="button" className="btn btn-xs btn-outline btn-success">Health User</button>
+                                    <button onClick={() => fillCredentials('dr_priya', 'admin123')} type="button" className="btn btn-xs btn-outline btn-success">Health User</button>
                                     <button onClick={() => fillCredentials('health_admin', 'admin123')} type="button" className="btn btn-xs btn-success">Health Admin</button>
 
-                                    <button onClick={() => fillCredentials('logistics_user', 'logistics123')} type="button" className="btn btn-xs btn-outline btn-warning">Logistics User</button>
+                                    <button onClick={() => fillCredentials('driver_raj', 'admin123')} type="button" className="btn btn-xs btn-outline btn-warning">Logistics User</button>
                                     <button onClick={() => fillCredentials('logistics_admin', 'admin123')} type="button" className="btn btn-xs btn-warning">Logistics Admin</button>
 
-                                    <button onClick={() => fillCredentials('content_user', 'content123')} type="button" className="btn btn-xs btn-outline btn-secondary">Content User</button>
+                                    <button onClick={() => fillCredentials('creator_priya', 'admin123')} type="button" className="btn btn-xs btn-outline btn-secondary">Content User</button>
                                     <button onClick={() => fillCredentials('content_admin', 'admin123')} type="button" className="btn btn-xs btn-secondary">Content Admin</button>
                                 </div>
                                 <button onClick={() => fillCredentials('admin', 'admin123')} type="button" className="btn btn-xs btn-error w-full">Super Admin</button>

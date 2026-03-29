@@ -24,7 +24,7 @@ const LogisticsInventoryManagementPage = () => {
       const response = await api.get('/logistics/inventory');
       // response.data is the ApiResponse object from backend
       if (response.data && response.data.success) {
-        setInventory(response.data.data);
+        setInventory(response.data.data?.content || response.data.data);
       }
     } catch (err) {
       console.error('Failed to fetch inventory', err);

@@ -24,7 +24,7 @@ const ProjectManagementPage = () => {
       setLoading(true);
       const response = await api.get('/content/projects');
       if (response.data && response.data.success) {
-        setProjects(Array.isArray(response.data.data) ? response.data.data : []);
+        setProjects(response.data.data?.content || response.data.data || []);
       }
     } catch (err) {
       console.error('Failed to fetch projects', err);

@@ -15,7 +15,7 @@ const ContentDistributionPage = () => {
       setLoading(true);
       const response = await api.get('/content/distribution');
       if (response.data && response.data.success) {
-        setPlatforms(response.data.data);
+        setPlatforms(response.data.data?.content || response.data.data);
       }
     } catch (err) {
       console.error('Failed to fetch distribution data', err);

@@ -23,7 +23,7 @@ const LogisticsFleetManagementPage = () => {
       setLoading(true);
       const response = await api.get('/logistics/vehicles');
       if (response.data && response.data.success) {
-        setVehicles(response.data.data);
+        setVehicles(response.data.data?.content || response.data.data);
       }
     } catch (err) {
       console.error('Failed to fetch vehicles', err);

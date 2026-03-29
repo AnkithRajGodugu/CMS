@@ -15,7 +15,7 @@ const CreatorAnalyticPage = () => {
       setLoading(true);
       const response = await api.get('/content/analytics/summary');
       if (response.data && response.data.success) {
-        setAnalytics(response.data.data);
+        setAnalytics(response.data.data?.content || response.data.data);
       }
     } catch (err) {
       console.error('Failed to fetch analytics', err);

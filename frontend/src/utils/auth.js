@@ -72,7 +72,14 @@ export const login = async (username, password) => {
 
     if (!response.ok) {
       const errorData = await response.text();
-      throw new Error(errorData || 'Login failed');
+      let errorMessage = 'Login failed';
+      try {
+        const parsed = JSON.parse(errorData);
+        errorMessage = parsed.message || errorData;
+      } catch (e) {
+        errorMessage = errorData || 'Login failed';
+      }
+      throw new Error(errorMessage);
     }
 
     const data = await response.json();
@@ -99,6 +106,9 @@ export const login = async (username, password) => {
     }
   } catch (loginError) {
     console.error('Login error:', loginError);
+    if (loginError.name === 'TypeError' && loginError.message === 'Failed to fetch') {
+      throw new Error('Unable to connect to the backend server. Please verify it is running on port 8081.');
+    }
     throw loginError;
   }
 };

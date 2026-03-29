@@ -5,23 +5,28 @@ import ReportExportButtons from '../../components/shared/ReportExportButtons';
 import { useAuth } from '../../hooks/useAuth';
 import SystemMetricsWidget from '../../components/shared/SystemMetricsWidget';
 import api from '../../services/api';
+import { getContentAdminStats } from '../../services/contentService';
 
 const ContentDashboard = () => {
   const { user, sector } = useAuth();
   const [projects, setProjects] = useState([]);
   const [assets, setAssets] = useState([]);
+  const [adminStats, setAdminStats] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchContentData = async () => {
       setLoading(true);
       try {
-        const [projectsRes, assetsRes] = await Promise.all([
+        const [projectsRes, assetsRes, statsRes] = await Promise.all([
           api.get('/content/projects'),
-          api.get('/content/assets')
+          api.get('/content/assets'),
+          getContentAdminStats().catch(() => ({ data: null }))
         ]);
-        setProjects(Array.isArray(projectsRes.data?.data) ? projectsRes.data.data : []);
-        setAssets(Array.isArray(assetsRes.data?.data) ? assetsRes.data.data : []);
+        setProjects(projectsRes.data?.data?.content || projectsRes.data?.content || projectsRes.data?.data || projectsRes.data || []);
+        setAssets(assetsRes.data?.data?.content || assetsRes.data?.content || assetsRes.data?.data || assetsRes.data || []);
+        if (statsRes.data?.data) setAdminStats(statsRes.data.data);
+        else if (statsRes.data) setAdminStats(statsRes.data);
       } catch (err) {
         console.error('Failed to load content data', err);
       } finally {
@@ -29,10 +34,17 @@ const ContentDashboard = () => {
       }
     };
 
-    if (sector?.code?.toLowerCase() === 'content') {
-      fetchContentData();
-    }
-  }, [sector]);
+    // Fetch unconditionally — sector gate applied after loading
+    fetchContentData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-[60vh] bg-base-200">
+        <span className="loading loading-spinner loading-lg text-primary"></span>
+      </div>
+    );
+  }
 
   if (!user || sector?.code?.toLowerCase() !== 'content') {
     return (
@@ -47,10 +59,10 @@ const ContentDashboard = () => {
     );
   }
   const stats = [
-    { label: 'Active Projects', value: projects.filter(p => p.status === 'IN_PROGRESS').length || 0, change: '+8%', icon: FaProjectDiagram, color: 'text-primary' },
-    { label: 'Total Clients', value: new Set(projects.map(p => p.clientName)).size || 0, change: '+12%', icon: FaUsers, color: 'text-success' },
-    { label: 'Content Pieces', value: assets.length || 0, change: '+25%', icon: FaFileAlt, color: 'text-info' },
-    { label: 'Hours Tracked', value: '1,234', change: '+15%', icon: FaClock, color: 'text-warning' },
+    { label: 'Active Projects', value: adminStats?.activeProjects ?? projects.filter(p => p.status === 'IN_PROGRESS').length, change: '+8%', icon: FaProjectDiagram, color: 'text-primary' },
+    { label: 'Total Clients',   value: adminStats?.totalClients   ?? new Set(projects.map(p => p.clientName)).size, change: '+12%', icon: FaUsers, color: 'text-success' },
+    { label: 'Content Assets',  value: adminStats?.totalAssets    ?? assets.length, change: '+25%', icon: FaFileAlt, color: 'text-info' },
+    { label: 'Active Campaigns',value: adminStats?.activeCampaigns ?? 0, change: '+15%', icon: FaClock, color: 'text-warning' },
   ];
 
   const quickActions = [

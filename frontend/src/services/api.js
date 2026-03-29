@@ -37,25 +37,30 @@ api.interceptors.request.use(
 // Extract User-Friendly Errors
 // ===============================
 const extractErrorMessage = (error) => {
+  let data = error.response?.data;
+  if (typeof data === 'string') {
+    try {
+      data = JSON.parse(data);
+    } catch (e) {}
+  }
 
-  if (error.response?.data?.errors && Array.isArray(error.response.data.errors)) {
-    const fieldErrors = error.response.data.errors
+  if (data?.errors && Array.isArray(data.errors)) {
+    const fieldErrors = data.errors
       .map(err => `${err.field}: ${err.message}`)
       .join(', ');
-
     return `Validation failed: ${fieldErrors}`;
   }
 
-  if (error.response?.data?.message) {
-    return error.response.data.message;
+  if (data?.message) {
+    return data.message;
   }
 
-  if (typeof error.response?.data === 'string') {
-    return error.response.data;
+  if (typeof data === 'string') {
+    return data;
   }
 
-  if (error.message === 'Network Error') {
-    return 'Unable to connect to the server. Please check your internet connection.';
+  if (error.message === 'Network Error' || error?.message?.includes('Failed to fetch')) {
+    return 'Unable to connect to the server. Please check if the backend is actively running.';
   }
 
   if (error.code === 'ECONNABORTED') {

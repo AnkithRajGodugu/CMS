@@ -15,7 +15,7 @@ const CreativeCollaborationPage = () => {
       setLoading(true);
       const response = await api.get('/content/projects');
       if (response.data && response.data.success) {
-        setProjects(response.data.data);
+        setProjects(response.data.data?.content || response.data.data);
       }
     } catch (err) {
       console.error('Failed to fetch projects for collaboration', err);

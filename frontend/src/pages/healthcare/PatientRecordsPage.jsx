@@ -25,7 +25,7 @@ const PatientRecordsPage = () => {
         setPatients(Array.isArray(data) ? data : []);
       } else {
         const res = await getAllPatients(0, 50);
-        const list = res.data?.content ?? res.data ?? [];
+        const list = res.data?.data?.content ?? res.data?.data ?? [];
         setPatients(list);
         setStats({
           total: list.length,

@@ -6,9 +6,9 @@ import UserOnboardingModal from '../UserOnboardingModal';
 const UserLayout = () => {
     return (
         <>
-            <div className="min-h-screen flex flex-col bg-base-200">
+            <div className="h-screen flex flex-col bg-base-200 overflow-hidden">
                 {/* Top Navbar spans full width */}
-                <div className="sticky top-0 z-50">
+                <div className="z-50 flex-shrink-0 w-full">
                     <Navbar hideSectorSwitcher={true} />
                 </div>
                 

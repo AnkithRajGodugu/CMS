@@ -27,8 +27,8 @@ const AssetManagementPage = () => {
         api.get('/content/projects')
       ]);
       
-      setAssets(Array.isArray(assetsRes.data?.data) ? assetsRes.data.data : []);
-      setProjects(Array.isArray(projectsRes.data?.data) ? projectsRes.data.data : []);
+      setAssets(assetsRes.data?.data?.content || assetsRes.data?.data || []);
+      setProjects(projectsRes.data?.data?.content || projectsRes.data?.data || []);
     } catch (err) {
       console.error('Failed to fetch asset data', err);
       toast.error('Failed to load asset management data');

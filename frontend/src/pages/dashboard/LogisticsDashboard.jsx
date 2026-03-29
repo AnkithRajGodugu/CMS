@@ -20,8 +20,8 @@ const LogisticsDashboard = () => {
           api.get('/logistics/shipments'),
           api.get('/logistics/inventory')
         ]);
-        setShipments(shipmentsRes.data);
-        setInventory(inventoryRes.data);
+        setShipments(Array.isArray(shipmentsRes.data) ? shipmentsRes.data : (shipmentsRes.data?.content || []));
+        setInventory(Array.isArray(inventoryRes.data) ? inventoryRes.data : (inventoryRes.data?.content || []));
         setError(null);
       } catch (err) {
         console.error('Failed to load logistics data', err);
@@ -31,10 +31,17 @@ const LogisticsDashboard = () => {
       }
     };
 
-    if (user && sector?.code?.toLowerCase() === 'logistics') {
-      fetchLogisticsData();
-    }
-  }, [user, sector]);
+    // Fetch unconditionally — sector gate is applied after loading
+    fetchLogisticsData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-[60vh] bg-base-200">
+        <span className="loading loading-spinner loading-lg text-primary"></span>
+      </div>
+    );
+  }
 
   if (!user || sector?.code?.toLowerCase() !== 'logistics') {
     return (

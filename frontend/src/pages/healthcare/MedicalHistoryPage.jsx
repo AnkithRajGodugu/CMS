@@ -22,8 +22,8 @@ const MedicalHistoryPage = () => {
     if (sector?.code?.toLowerCase() === 'healthcare') {
       Promise.all([getAllHealthRecords(), getAllPatients(0, 50)])
         .then(([recRes, patRes]) => {
-          setRecords(recRes.data ?? []);
-          const list = patRes.data?.content ?? patRes.data ?? [];
+          setRecords(recRes.data?.data ?? []);
+          const list = patRes.data?.data?.content ?? patRes.data?.data ?? [];
           setPatients(list);
         })
         .catch(err => console.error('Could not load health records:', err))

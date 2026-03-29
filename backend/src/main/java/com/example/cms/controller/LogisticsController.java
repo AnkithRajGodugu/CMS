@@ -34,7 +34,7 @@ import org.springframework.data.web.PageableDefault;
 
 @RestController
 @RequestMapping("/api/logistics")
-@PreAuthorize("hasRole('ADMIN') or hasRole('USER') or hasRole('LOGISTICS') or hasRole('logistics')")
+@PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or hasRole('USER') or hasRole('LOGISTICS') or hasRole('logistics')")
 @RequiredArgsConstructor
 @Tag(name = "Logistics Management", description = "Endpoints for managing shipments, inventory, fleet and routes")
 public class LogisticsController {

@@ -19,7 +19,7 @@ const HealthcareUserDashboard = () => {
 
                 // Backend returns data directly (no .success wrapper)
                 setStats(statsRes.data?.data ?? statsRes.data ?? {});
-                const apptList = apptsRes.data?.content ?? apptsRes.data ?? [];
+                const apptList = apptsRes.data?.data?.content ?? apptsRes.data?.data ?? [];
                 setAppointments(Array.isArray(apptList) ? apptList : []);
             } catch (err) {
                 console.error('Error fetching healthcare dashboard data:', err);

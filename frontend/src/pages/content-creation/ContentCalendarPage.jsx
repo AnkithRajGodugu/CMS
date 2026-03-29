@@ -29,8 +29,8 @@ const ContentCalendarPage = () => {
     if (sector?.code?.toLowerCase() === 'content') {
       Promise.all([api.get('/content/assets'), api.get('/content/projects')])
         .then(([aRes, pRes]) => {
-          setAssets(Array.isArray(aRes.data?.data) ? aRes.data.data : []);
-          setProjects(Array.isArray(pRes.data?.data) ? pRes.data.data : []);
+          setAssets(aRes.data?.data?.content || aRes.data?.data || []);
+          setProjects(pRes.data?.data?.content || pRes.data?.data || []);
         })
         .catch(() => toast.error('Failed to load content data'))
         .finally(() => setLoading(false));

@@ -28,7 +28,7 @@ import org.springframework.data.web.PageableDefault;
 
 @RestController
 @RequestMapping("/api/content")
-@PreAuthorize("hasRole('ADMIN') or hasRole('USER') or hasRole('CONTENT') or hasRole('content')")
+@PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or hasRole('USER') or hasRole('CONTENT') or hasRole('content')")
 @RequiredArgsConstructor
 @Tag(name = "Content Management", description = "Endpoints for managing projects and content assets")
 public class ContentController {
@@ -125,7 +125,6 @@ public class ContentController {
         return ApiResponse.success(contentDistributionRepository.findAll());
     }
 
-    // --- Analytics ---
     @GetMapping("/analytics/summary")
     @Operation(summary = "Get high-level content analytics")
     public ApiResponse<Map<String, Object>> getAnalyticsSummary() {
@@ -144,6 +143,39 @@ public class ContentController {
         stats.put("avgEngagement", "4.2%");
         stats.put("growthRate", "+12.5%");
         
+        return ApiResponse.success(stats);
+    }
+
+    // --- Admin Dashboard Stats ---
+    @GetMapping("/dashboard/stats")
+    @Operation(summary = "Get admin content dashboard summary stats")
+    public ApiResponse<Map<String, Object>> getAdminDashboardStats() {
+        Map<String, Object> stats = new HashMap<>();
+
+        List<Project> allProjects = projectRepository.findAll();
+        long activeProjects  = allProjects.stream().filter(p -> p.getStatus() == Project.ProjectStatus.IN_PROGRESS).count();
+        long completedProjects = allProjects.stream().filter(p -> p.getStatus() == Project.ProjectStatus.COMPLETED).count();
+        long onHoldProjects  = allProjects.stream().filter(p -> p.getStatus() == Project.ProjectStatus.ON_HOLD).count();
+        long reviewProjects  = allProjects.stream().filter(p -> p.getStatus() == Project.ProjectStatus.REVIEW).count();
+        long totalClients    = allProjects.stream().map(Project::getClientName).filter(c -> c != null).distinct().count();
+
+        stats.put("totalProjects",     allProjects.size());
+        stats.put("activeProjects",    activeProjects);
+        stats.put("completedProjects", completedProjects);
+        stats.put("onHoldProjects",    onHoldProjects);
+        stats.put("reviewProjects",    reviewProjects);
+        stats.put("totalClients",      totalClients);
+
+        List<ContentAsset> allAssets = contentAssetRepository.findAll();
+        stats.put("totalAssets", allAssets.size());
+        stats.put("imageAssets",    allAssets.stream().filter(a -> a.getType() == ContentAsset.AssetType.IMAGE).count());
+        stats.put("videoAssets",    allAssets.stream().filter(a -> a.getType() == ContentAsset.AssetType.VIDEO).count());
+        stats.put("documentAssets", allAssets.stream().filter(a -> a.getType() == ContentAsset.AssetType.DOCUMENT).count());
+
+        long activeCampaigns = contentDistributionRepository.findAll().stream()
+                .mapToLong(d -> d.getActiveCampaigns() != null ? d.getActiveCampaigns() : 0).sum();
+        stats.put("activeCampaigns", activeCampaigns);
+
         return ApiResponse.success(stats);
     }
 

@@ -15,7 +15,8 @@ A modern, enterprise-grade Customer Management System with **sector-based archit
 ### Access the Application
 
 ```
-URL: http://localhost:8080
+Frontend URL: http://localhost:3000
+Backend API: http://localhost:8081
 ```
 
 ### Test Credentials (Sector-Specific)
@@ -23,22 +24,22 @@ URL: http://localhost:8080
 **Banking Sector:**
 
 - Username: `banking_admin`
-- Password: `password123`
+- Password: `admin123`
 
 **Healthcare Sector:**
 
 - Username: `healthcare_admin`
-- Password: `password123`
+- Password: `admin123`
 
 **Logistics Sector:**
 
 - Username: `logistics_admin`
-- Password: `password123`
+- Password: `admin123`
 
 **Content Creation Sector:**
 
 - Username: `content_admin`
-- Password: `password123`
+- Password: `admin123`
 
 ### Run with Docker (Recommended)
 
@@ -62,10 +63,12 @@ cd frontend && npm run dev
 
 ### � Sector-Ba sed Architecture
 
+- **Global Navigation (Command Palette)**: Quick jump anywhere via `Ctrl+K`.
 - **Automatic Sector Detection**: Users are automatically redirected to their sector dashboard upon login
 - **Sector-Specific Theming**: Each sector has its own color scheme and branding
 - **Multi-Tenant Support**: Organization-level data isolation with Row-Level Security (RLS)
 - **Sector Authorization**: API-level access control based on user's assigned sector
+- **Security & Compliance**: Standardized configurations via `SECURITY.md` and `CODE_OF_CONDUCT.md`
 
 ### 🏦 Banking & Finance
 
@@ -214,33 +217,33 @@ cms/
 
 | Username        | Password    | Role    | Access              |
 | --------------- | ----------- | ------- | ------------------- |
-| banking_admin   | password123 | ADMIN   | Full banking access |
-| banking_manager | password123 | MANAGER | Banking management  |
-| banking_user    | password123 | USER    | Banking user access |
+| banking_admin   | admin123    | ADMIN   | Full banking access |
+| banking_manager | admin123    | MANAGER | Banking management  |
+| banking_user    | admin123    | USER    | Banking user access |
 
 ### Healthcare Sector
 
 | Username           | Password    | Role    | Access                 |
 | ------------------ | ----------- | ------- | ---------------------- |
-| healthcare_admin   | password123 | ADMIN   | Full healthcare access |
-| healthcare_manager | password123 | MANAGER | Healthcare management  |
-| healthcare_user    | password123 | USER    | Healthcare user access |
+| healthcare_admin   | admin123    | ADMIN   | Full healthcare access |
+| healthcare_manager | admin123    | MANAGER | Healthcare management  |
+| healthcare_user    | admin123    | USER    | Healthcare user access |
 
 ### Logistics Sector
 
 | Username          | Password    | Role    | Access                |
 | ----------------- | ----------- | ------- | --------------------- |
-| logistics_admin   | password123 | ADMIN   | Full logistics access |
-| logistics_manager | password123 | MANAGER | Logistics management  |
-| logistics_user    | password123 | USER    | Logistics user access |
+| logistics_admin   | admin123    | ADMIN   | Full logistics access |
+| logistics_manager | admin123    | MANAGER | Logistics management  |
+| logistics_user    | admin123    | USER    | Logistics user access |
 
 ### Content Creation Sector
 
 | Username        | Password    | Role    | Access              |
 | --------------- | ----------- | ------- | ------------------- |
-| content_admin   | password123 | ADMIN   | Full content access |
-| content_manager | password123 | MANAGER | Content management  |
-| content_user    | password123 | USER    | Content user access |
+| content_admin   | admin123    | ADMIN   | Full content access |
+| content_manager | admin123    | MANAGER | Content management  |
+| content_user    | admin123    | USER    | Content user access |
 
 ---
 
@@ -299,9 +302,9 @@ Comprehensive documentation is available in the `.docs/` folder:
 
 | Service      | URL                              | Description          | Credentials           |
 | ------------ | -------------------------------- | -------------------- | --------------------- |
-| Frontend     | http://localhost:8080            | Main application     | See test credentials  |
-| Backend API  | http://localhost:8080/api        | REST API             | JWT token required    |
-| Health Check | http://localhost:8080/api/health | System health status | Public                |
+| Frontend     | http://localhost:5173            | Main application     | See test credentials  |
+| Backend API  | http://localhost:8081/api        | REST API             | JWT token required    |
+| Health Check | http://localhost:8081/api/health | System health status | Public                |
 | Kafka UI     | http://localhost:8081            | Kafka monitoring     | No auth               |
 | pgAdmin      | http://localhost:5050            | Database admin       | admin@cms.com / admin |
 | Prometheus   | http://localhost:9090            | Metrics collection   | No auth               |
@@ -565,6 +568,6 @@ For detailed documentation, see:
 
 ---
 
-**Last Updated**: October 23, 2025  
-**Version**: 2.0.0  
-**Status**: ✅ Operational with Sector Architecture
+**Last Updated**: March 29, 2026  
+**Version**: 2.5.0 (Production-Ready Edition)  
+**Status**: ✅ Operational with Unified Global Command Palette & Full Sector Architecture

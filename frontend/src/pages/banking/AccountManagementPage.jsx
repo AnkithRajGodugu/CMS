@@ -20,9 +20,9 @@ const AccountManagementPage = () => {
     setError(null);
     try {
       const res = await api.get('/sectors/banking/accounts', { params: { page, size: 15 } });
-      const data = res.data;
-      setAccounts(data.content ?? data);
-      setTotalPages(data.totalPages ?? 1);
+      const payload = res.data?.data;
+      setAccounts(payload?.content ?? []);
+      setTotalPages(payload?.totalPages ?? 1);
     } catch (e) {
       setError('Failed to load accounts. Please try again.');
     } finally {

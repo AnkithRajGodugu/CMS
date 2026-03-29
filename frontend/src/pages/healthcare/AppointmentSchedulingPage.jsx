@@ -15,7 +15,7 @@ const AppointmentSchedulingPage = () => {
     if (sector?.code?.toLowerCase() === 'healthcare') {
       getAllAppointments(0, 50)
         .then(res => {
-          const list = res.data?.content ?? res.data ?? [];
+          const list = res.data?.data?.content ?? res.data?.data ?? [];
           setAppointments(list);
         })
         .catch(err => console.error('Could not load appointments:', err))

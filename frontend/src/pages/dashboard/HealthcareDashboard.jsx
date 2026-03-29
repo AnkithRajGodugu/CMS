@@ -30,10 +30,17 @@ const HealthcareDashboard = () => {
       }
     };
 
-    if (sector?.code?.toLowerCase() === 'healthcare') {
-      fetchData();
-    }
-  }, [sector]);
+    // Always fetch — sector check below handles rendering
+    fetchData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-[60vh] bg-base-200">
+        <span className="loading loading-spinner loading-lg text-primary"></span>
+      </div>
+    );
+  }
 
   if (!user || sector?.code?.toLowerCase() !== 'healthcare') {
     return (

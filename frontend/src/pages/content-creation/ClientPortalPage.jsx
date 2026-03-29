@@ -14,7 +14,7 @@ const ClientPortalPage = () => {
     try {
       setLoading(true);
       const res = await api.get('/content/projects');
-      if (res.data?.success) setProjects(res.data.data);
+      if (res.data?.success) setProjects(res.data.data?.content || res.data.data);
     } catch (err) {
       console.error(err);
       toast.error('Failed to load client data');

@@ -21,10 +21,9 @@ const CustomersPage = () => {
           size: 15 
         } 
       });
-      // The backend returns a PagedResponse with 'content' for the list
-      const data = res.data;
-      setCustomers(data.content ?? []);
-      setTotalPages(data.totalPages ?? 1);
+      const payload = res.data?.data;
+      setCustomers(payload?.content ?? []);
+      setTotalPages(payload?.totalPages ?? 1);
     } catch (e) {
       console.error('Error fetching customers:', e);
     } finally {
