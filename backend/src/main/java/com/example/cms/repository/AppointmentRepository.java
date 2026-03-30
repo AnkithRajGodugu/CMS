@@ -42,19 +42,22 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     @Query("SELECT a FROM Appointment a WHERE a.appointmentTime BETWEEN :startDate AND :endDate")
     List<Appointment> findByDateRange(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
     
-    @Query("SELECT COUNT(a) FROM Appointment a WHERE CAST(a.appointmentTime AS date) = CURRENT_DATE")
-    Long countTodaysAppointments();
+    @Query("SELECT COUNT(a) FROM Appointment a WHERE a.appointmentTime >= :start AND a.appointmentTime < :end")
+    Long countTodaysAppointments(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
     
-    @Query("SELECT COUNT(a) FROM Appointment a WHERE a.status = 'CONFIRMED' AND CAST(a.appointmentTime AS date) = CURRENT_DATE")
-    Long countTodaysConfirmedAppointments();
+    @Query("SELECT COUNT(a) FROM Appointment a WHERE a.status = com.example.cms.entity.Appointment.AppointmentStatus.CONFIRMED AND a.appointmentTime >= :start AND a.appointmentTime < :end")
+    Long countTodaysConfirmedAppointments(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
     
-    @Query("SELECT COUNT(a) FROM Appointment a WHERE a.status = 'PENDING' AND CAST(a.appointmentTime AS date) = CURRENT_DATE")
-    Long countTodaysPendingAppointments();
+    @Query("SELECT COUNT(a) FROM Appointment a WHERE a.status = com.example.cms.entity.Appointment.AppointmentStatus.PENDING AND a.appointmentTime >= :start AND a.appointmentTime < :end")
+    Long countTodaysPendingAppointments(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
     
-    @Query("SELECT COUNT(a) FROM Appointment a WHERE a.status = 'URGENT' AND CAST(a.appointmentTime AS date) = CURRENT_DATE")
-    Long countTodaysUrgentAppointments();
+    @Query("SELECT COUNT(a) FROM Appointment a WHERE a.status = com.example.cms.entity.Appointment.AppointmentStatus.URGENT AND a.appointmentTime >= :start AND a.appointmentTime < :end")
+    Long countTodaysUrgentAppointments(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
     
     List<Appointment> findTop5ByOrderByCreatedAtDesc();
+
+    @Query("SELECT COUNT(a) FROM Appointment a WHERE a.status = com.example.cms.entity.Appointment.AppointmentStatus.PENDING")
+    Long countAllPendingAppointments();
     // Calculate total visits for a specific patient
     long countByPatientName(String patientName);
 

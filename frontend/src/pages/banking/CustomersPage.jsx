@@ -21,7 +21,7 @@ const CustomersPage = () => {
           size: 15 
         } 
       });
-      const payload = res.data?.data;
+      const payload = res.data?.data ?? res.data;
       setCustomers(payload?.content ?? []);
       setTotalPages(payload?.totalPages ?? 1);
     } catch (e) {

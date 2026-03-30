@@ -22,8 +22,10 @@ const MedicalHistoryPage = () => {
     if (sector?.code?.toLowerCase() === 'healthcare') {
       Promise.all([getAllHealthRecords(), getAllPatients(0, 50)])
         .then(([recRes, patRes]) => {
-          setRecords(recRes.data?.data ?? []);
-          const list = patRes.data?.data?.content ?? patRes.data?.data ?? [];
+          const recs = Array.isArray(recRes.data) ? recRes.data
+            : (recRes.data?.content ?? recRes.data ?? []);
+          setRecords(recs);
+          const list = patRes.data?.content ?? patRes.data ?? [];
           setPatients(list);
         })
         .catch(err => console.error('Could not load health records:', err))
@@ -47,7 +49,7 @@ const MedicalHistoryPage = () => {
   const filtered = records.filter(r => {
     const typeMatch = filterType === 'ALL' || r.type === filterType;
     const userMatch = searchUser === '' ||
-      (r.user?.username ?? '').toLowerCase().includes(searchUser.toLowerCase());
+      (r.username ?? '').toLowerCase().includes(searchUser.toLowerCase());
     return typeMatch && userMatch;
   });
 
@@ -120,7 +122,7 @@ const MedicalHistoryPage = () => {
                 {filtered.map(r => (
                   <tr key={r.id}>
                     <td>{fmtDate(r.recordDate)}</td>
-                    <td className="font-mono">{r.user?.username ?? '—'}</td>
+                    <td className="font-mono">{r.username ?? '—'}</td>
                     <td>
                       <span className={`badge badge-sm ${TYPE_BADGE[r.type] ?? 'badge-ghost'}`}>
                         {(r.type ?? '').replace('_', ' ')}

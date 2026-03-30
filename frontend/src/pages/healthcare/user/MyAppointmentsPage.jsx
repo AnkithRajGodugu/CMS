@@ -36,7 +36,7 @@ const MyAppointmentsPage = () => {
     setLoading(true);
     try {
       const res = await getMyAppointments(0, 50);
-      const list = res.data?.data?.content ?? res.data?.data ?? [];
+      const list = res.data?.content ?? res.data ?? [];
       setAppointments(Array.isArray(list) ? list : []);
     } catch (err) {
       console.error('Failed to load appointments:', err);

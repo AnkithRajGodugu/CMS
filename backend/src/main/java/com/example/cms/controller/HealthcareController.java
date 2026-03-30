@@ -35,7 +35,7 @@ import org.springframework.http.HttpStatus;
 
 @RestController
 @RequestMapping("/api/sectors/healthcare")
-@PreAuthorize("hasRole('ADMIN') or hasRole('USER') or hasRole('healthcare')")
+@PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or hasRole('USER') or hasRole('healthcare')")
 public class HealthcareController {
 
     @Autowired
@@ -291,6 +291,10 @@ public class HealthcareController {
     public ResponseEntity<Map<String, Object>> getDashboardStats() {
         Map<String, Object> stats = new HashMap<>();
         
+        // Today's date range
+        LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
+        LocalDateTime endOfDay = startOfDay.plusDays(1);
+        
         // Patient statistics
         Long totalPatients = patientRepository.countTotalPatients();
         Long activeCases = patientRepository.countActiveCases();
@@ -298,10 +302,10 @@ public class HealthcareController {
         Long todaysVisits = patientRepository.countTodaysVisits();
         
         // Appointment statistics
-        Long todaysAppointments = appointmentRepository.countTodaysAppointments();
-        Long confirmedAppointments = appointmentRepository.countTodaysConfirmedAppointments();
-        Long pendingAppointments = appointmentRepository.countTodaysPendingAppointments();
-        Long urgentAppointments = appointmentRepository.countTodaysUrgentAppointments();
+        Long todaysAppointments = appointmentRepository.countTodaysAppointments(startOfDay, endOfDay);
+        Long confirmedAppointments = appointmentRepository.countTodaysConfirmedAppointments(startOfDay, endOfDay);
+        Long urgentAppointments = appointmentRepository.countTodaysUrgentAppointments(startOfDay, endOfDay);
+        Long allPendingAppointments = appointmentRepository.countAllPendingAppointments();
         
         stats.put("totalPatients", totalPatients != null ? totalPatients : 0);
         stats.put("activeCases", activeCases != null ? activeCases : 0);
@@ -309,7 +313,7 @@ public class HealthcareController {
         stats.put("todaysVisits", todaysVisits != null ? todaysVisits : 0);
         stats.put("todaysAppointments", todaysAppointments != null ? todaysAppointments : 0);
         stats.put("confirmedAppointments", confirmedAppointments != null ? confirmedAppointments : 0);
-        stats.put("pendingAppointments", pendingAppointments != null ? pendingAppointments : 0);
+        stats.put("pendingAppointments", allPendingAppointments != null ? allPendingAppointments : 0);
         stats.put("urgentAppointments", urgentAppointments != null ? urgentAppointments : 0);
         
         return ResponseEntity.ok(stats);
@@ -353,7 +357,7 @@ public class HealthcareController {
     // Admin - all health records across all users
     @GetMapping("/records/all")
     public ResponseEntity<List<HealthRecord>> getAllHealthRecords() {
-        return ResponseEntity.ok(healthRecordRepository.findAll());
+        return ResponseEntity.ok(healthRecordRepository.findAllWithUser());
     }
 
     // Medical History Endpoints

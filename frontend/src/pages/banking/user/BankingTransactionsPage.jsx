@@ -17,7 +17,7 @@ const BankingTransactionsPage = () => {
     setError(null);
     try {
       const res = await api.get('/sectors/banking/my-transactions', { params: { page, size: 20 } });
-      const payload = res.data?.data;
+      const payload = res.data?.data ?? res.data;
       setTransactions(payload?.content ?? []);
       setTotalPages(payload?.totalPages ?? 1);
     } catch (e) {

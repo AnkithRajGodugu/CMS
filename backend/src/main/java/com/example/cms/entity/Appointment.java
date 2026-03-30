@@ -2,6 +2,7 @@ package com.example.cms.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.time.LocalDateTime;
 
@@ -55,12 +56,15 @@ public class Appointment {
     }
 
     // Constructors
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
 
     public User getUser() { return user; }
     public void setUser(User user) { this.user = user; }
+
+    public Appointment() {}
 
     public Appointment(String appointmentId, String patientName, String doctorName, LocalDateTime appointmentTime, AppointmentType type, User user) {
         this.appointmentId = appointmentId;

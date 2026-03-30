@@ -20,7 +20,7 @@ const AccountManagementPage = () => {
     setError(null);
     try {
       const res = await api.get('/sectors/banking/accounts', { params: { page, size: 15 } });
-      const payload = res.data?.data;
+      const payload = res.data?.data ?? res.data;
       setAccounts(payload?.content ?? []);
       setTotalPages(payload?.totalPages ?? 1);
     } catch (e) {
