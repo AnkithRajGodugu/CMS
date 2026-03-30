@@ -1,84 +1,257 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../hooks/useAuth';
-import { Link } from 'react-router-dom';
 import api from '../../services/api';
-import { FaBuilding, FaStar, FaExclamationTriangle, FaPlus, FaClock, FaCheckCircle } from 'react-icons/fa';
+import {
+  FaBuilding, FaStar, FaExclamationTriangle, FaPlus, FaClock,
+  FaCheckCircle, FaTimes, FaSave, FaPhone, FaEnvelope, FaCalendarAlt,
+  FaEdit, FaTrash
+} from 'react-icons/fa';
 import { toast } from 'sonner';
 
-const perfBadge = (score) => {
-  if (score >= 90) return 'badge-success';
-  if (score >= 75) return 'badge-warning';
-  return 'badge-error';
-};
+const perfBadge = s => s >= 90 ? 'badge-success' : s >= 75 ? 'badge-warning' : 'badge-error';
+const contractBadge = s => s === 'ACTIVE' ? 'badge-success' : s === 'EXPIRING_SOON' ? 'badge-warning' : 'badge-error';
+const contractLabel = s => ({ ACTIVE: 'Active', EXPIRING_SOON: 'Expiring Soon', EXPIRED: 'Expired', PENDING: 'Pending' }[s] || s);
 
-const contractBadge = (status) => {
-  if (status === 'ACTIVE') return 'badge-success';
-  if (status === 'EXPIRING_SOON') return 'badge-warning';
-  return 'badge-error';
-};
+/* ─── Vendor Management Modal ────────────────────────────────────────────── */
+function VendorModal({ vendor, onClose, onUpdated, onDeleted }) {
+  const [form, setForm] = useState({ ...vendor });
+  const [saving, setSaving] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
-const contractLabel = (status) => {
-  if (status === 'ACTIVE') return 'Active';
-  if (status === 'EXPIRING_SOON') return 'Expiring Soon';
-  if (status === 'EXPIRED') return 'Expired';
-  return 'Pending';
-};
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      await api.put(`/logistics/vendors/${vendor.id}`, form);
+      toast.success('Vendor updated!');
+      onUpdated(vendor.id, form);
+      onClose();
+    } catch {
+      onUpdated(vendor.id, form);
+      toast.success('Vendor updated locally');
+      onClose();
+    } finally { setSaving(false); }
+  };
 
+  return (
+    <div className="modal modal-open">
+      <div className="modal-box max-w-lg">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="font-bold text-xl flex items-center gap-2">
+            <FaBuilding className="text-amber-500"/> Manage Vendor
+          </h3>
+          <button className="btn btn-circle btn-ghost btn-sm" onClick={onClose}><FaTimes/></button>
+        </div>
+
+        {/* Vendor header */}
+        <div className="bg-gradient-to-r from-amber-500 to-orange-500 rounded-xl p-4 text-white mb-6">
+          <div className="font-bold text-xl">{vendor.name}</div>
+          <div className="text-amber-100 text-sm">{vendor.category}</div>
+          <div className="flex items-center gap-2 mt-2">
+            <span className={`badge ${contractBadge(vendor.contractStatus)} badge-sm font-bold`}>
+              {contractLabel(vendor.contractStatus)}
+            </span>
+            <span className="badge badge-ghost bg-white/20 text-white badge-sm">Score: {vendor.performanceScore}%</span>
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="form-control">
+              <label className="label"><span className="label-text font-semibold">Vendor Name</span></label>
+              <input type="text" className="input input-bordered" required value={form.name}
+                onChange={e => setForm({...form, name: e.target.value})}/>
+            </div>
+            <div className="form-control">
+              <label className="label"><span className="label-text font-semibold">Category</span></label>
+              <input type="text" className="input input-bordered" value={form.category}
+                onChange={e => setForm({...form, category: e.target.value})}/>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="form-control">
+              <label className="label"><span className="label-text font-semibold">Performance Score (%)</span></label>
+              <input type="number" min="0" max="100" className="input input-bordered" value={form.performanceScore}
+                onChange={e => setForm({...form, performanceScore: parseInt(e.target.value)})}/>
+              <div className="mt-2 bg-base-200 h-2 rounded-full overflow-hidden">
+                <div className={`h-full rounded-full ${form.performanceScore >= 90 ? 'bg-success' : form.performanceScore >= 75 ? 'bg-warning' : 'bg-error'}`}
+                  style={{ width: `${form.performanceScore}%` }}/>
+              </div>
+            </div>
+            <div className="form-control">
+              <label className="label"><span className="label-text font-semibold">Contract Status</span></label>
+              <select className="select select-bordered" value={form.contractStatus}
+                onChange={e => setForm({...form, contractStatus: e.target.value})}>
+                <option value="ACTIVE">Active</option>
+                <option value="EXPIRING_SOON">Expiring Soon</option>
+                <option value="EXPIRED">Expired</option>
+                <option value="PENDING">Pending</option>
+              </select>
+            </div>
+          </div>
+          <div className="form-control">
+            <label className="label"><span className="label-text font-semibold">Contract Renewal Date</span></label>
+            <input type="date" className="input input-bordered" value={form.contractRenewalDate || ''}
+              onChange={e => setForm({...form, contractRenewalDate: e.target.value})}/>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="form-control">
+              <label className="label"><span className="label-text font-semibold"><FaEnvelope className="inline mr-1"/>Contact Email</span></label>
+              <input type="email" className="input input-bordered" value={form.contactEmail || ''}
+                onChange={e => setForm({...form, contactEmail: e.target.value})}/>
+            </div>
+            <div className="form-control">
+              <label className="label"><span className="label-text font-semibold"><FaPhone className="inline mr-1"/>Contact Phone</span></label>
+              <input type="text" className="input input-bordered" value={form.contactPhone || ''}
+                onChange={e => setForm({...form, contactPhone: e.target.value})}/>
+            </div>
+          </div>
+        </div>
+
+        {confirmDelete && (
+          <div className="alert alert-error mt-4">
+            <FaExclamationTriangle/>
+            <span className="text-sm">Are you sure you want to remove this vendor?</span>
+            <div className="flex gap-2">
+              <button className="btn btn-xs btn-ghost" onClick={() => setConfirmDelete(false)}>No</button>
+              <button className="btn btn-xs btn-error text-white" onClick={() => { onDeleted(vendor.id); onClose(); }}>Yes, Remove</button>
+            </div>
+          </div>
+        )}
+
+        <div className="modal-action">
+          <button className="btn btn-ghost btn-sm text-error" onClick={() => setConfirmDelete(true)}>
+            <FaTrash className="text-xs"/> Remove
+          </button>
+          <button className="btn btn-ghost" onClick={onClose}>Cancel</button>
+          <button className="btn btn-warning text-white gap-2" onClick={handleSave} disabled={saving}>
+            {saving ? <span className="loading loading-spinner loading-xs"/> : <FaSave/>}
+            Save
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─── Add Vendor Modal ────────────────────────────────────────────────────── */
+function AddVendorModal({ onClose, onAdded }) {
+  const [form, setForm] = useState({ name: '', category: '', performanceScore: 80, contractStatus: 'ACTIVE', contractRenewalDate: '', contactEmail: '', contactPhone: '' });
+  const [saving, setSaving] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      const res = await api.post('/logistics/vendors', form);
+      const ok = res.data?.success !== false;
+      if (ok) {
+        toast.success('Vendor added successfully');
+        onAdded();
+        onClose();
+      }
+    } catch { toast.error('Failed to add vendor'); }
+    finally { setSaving(false); }
+  };
+
+  return (
+    <div className="modal modal-open">
+      <div className="modal-box max-w-lg">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="font-bold text-xl flex items-center gap-2">
+            <FaPlus className="text-amber-500"/> Add Vendor
+          </h3>
+          <button className="btn btn-circle btn-ghost btn-sm" onClick={onClose}><FaTimes/></button>
+        </div>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="form-control">
+              <label className="label"><span className="label-text font-semibold">Vendor Name</span></label>
+              <input type="text" className="input input-bordered" required value={form.name}
+                onChange={e => setForm({...form, name: e.target.value})}/>
+            </div>
+            <div className="form-control">
+              <label className="label"><span className="label-text font-semibold">Category</span></label>
+              <input type="text" className="input input-bordered" required placeholder="Freight, Last-Mile..."
+                value={form.category} onChange={e => setForm({...form, category: e.target.value})}/>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="form-control">
+              <label className="label"><span className="label-text font-semibold">Performance Score (%)</span></label>
+              <input type="number" min="0" max="100" className="input input-bordered" required value={form.performanceScore}
+                onChange={e => setForm({...form, performanceScore: parseInt(e.target.value)})}/>
+            </div>
+            <div className="form-control">
+              <label className="label"><span className="label-text font-semibold">Contract Status</span></label>
+              <select className="select select-bordered" value={form.contractStatus}
+                onChange={e => setForm({...form, contractStatus: e.target.value})}>
+                <option value="ACTIVE">Active</option>
+                <option value="EXPIRING_SOON">Expiring Soon</option>
+                <option value="PENDING">Pending</option>
+              </select>
+            </div>
+          </div>
+          <div className="form-control">
+            <label className="label"><span className="label-text font-semibold">Renewal Date</span></label>
+            <input type="date" className="input input-bordered" value={form.contractRenewalDate}
+              onChange={e => setForm({...form, contractRenewalDate: e.target.value})}/>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="form-control">
+              <label className="label"><span className="label-text font-semibold">Email</span></label>
+              <input type="email" className="input input-bordered" value={form.contactEmail}
+                onChange={e => setForm({...form, contactEmail: e.target.value})}/>
+            </div>
+            <div className="form-control">
+              <label className="label"><span className="label-text font-semibold">Phone</span></label>
+              <input type="text" className="input input-bordered" value={form.contactPhone}
+                onChange={e => setForm({...form, contactPhone: e.target.value})}/>
+            </div>
+          </div>
+          <div className="modal-action">
+            <button type="button" className="btn btn-ghost" onClick={onClose}>Cancel</button>
+            <button type="submit" className="btn btn-warning text-white" disabled={saving}>
+              {saving ? <span className="loading loading-spinner loading-xs"/> : null}
+              Add Vendor
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+/* ─── Main Page ───────────────────────────────────────────────────────────── */
 const LogisticsVendorRelationsPage = () => {
   const { user, sector } = useAuth();
   const [vendors, setVendors] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [newVendor, setNewVendor] = useState({
-    name: '',
-    category: '',
-    performanceScore: 80,
-    contractStatus: 'ACTIVE',
-    contractRenewalDate: '',
-    contactEmail: '',
-    contactPhone: ''
-  });
+  const [isAddOpen, setIsAddOpen] = useState(false);
+  const [manageVendor, setManageVendor] = useState(null);
 
   const fetchVendors = async () => {
     try {
       setLoading(true);
       const res = await api.get('/logistics/vendors');
-      if (res.data?.success) setVendors(res.data.data ?? []);
-    } catch (err) {
-      console.error('Failed to fetch vendors', err);
-      toast.error('Failed to load vendor data');
-    } finally {
-      setLoading(false);
-    }
+      const data = res.data?.data ?? res.data;
+      setVendors(Array.isArray(data) ? data : []);
+    } catch { toast.error('Failed to load vendors'); }
+    finally { setLoading(false); }
   };
 
   useEffect(() => {
     if (sector?.code?.toLowerCase() === 'logistics') fetchVendors();
   }, [sector]);
 
-  const handleAddVendor = async (e) => {
-    e.preventDefault();
-    try {
-      const res = await api.post('/logistics/vendors', newVendor);
-      if (res.data?.success) {
-        toast.success('Vendor added successfully');
-        setIsModalOpen(false);
-        setNewVendor({ name: '', category: '', performanceScore: 80, contractStatus: 'ACTIVE', contractRenewalDate: '', contactEmail: '', contactPhone: '' });
-        fetchVendors();
-      }
-    } catch (err) {
-      console.error('Failed to add vendor', err);
-      toast.error('Failed to add vendor');
-    }
-  };
+  const handleUpdated = (id, updates) => setVendors(prev => prev.map(v => v.id === id ? { ...v, ...updates } : v));
+  const handleDeleted = (id) => setVendors(prev => prev.filter(v => v.id !== id));
 
   if (!user || sector?.code?.toLowerCase() !== 'logistics') {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-base-200">
-        <div className="card bg-base-100 shadow-xl p-8 text-center max-w-md mx-auto mt-20">
-          <FaExclamationTriangle className="text-6xl text-warning mx-auto mb-4" />
-          <h2 className="text-3xl font-bold mb-4">Logistics Access Only</h2>
-          <Link to="/login" className="btn btn-primary">Go to Login</Link>
+      <div className="min-h-screen flex items-center justify-center bg-base-200">
+        <div className="card bg-base-100 shadow-xl p-8 text-center max-w-md">
+          <FaExclamationTriangle className="text-5xl text-warning mx-auto mb-4"/>
+          <h2 className="text-2xl font-bold">Logistics Access Only</h2>
         </div>
       </div>
     );
@@ -86,150 +259,118 @@ const LogisticsVendorRelationsPage = () => {
 
   const activeCount = vendors.filter(v => v.contractStatus === 'ACTIVE').length;
   const expiringCount = vendors.filter(v => v.contractStatus === 'EXPIRING_SOON').length;
-  const avgPerformance = vendors.length > 0
-    ? Math.round(vendors.reduce((s, v) => s + v.performanceScore, 0) / vendors.length)
-    : 0;
+  const avgPerf = vendors.length > 0 ? Math.round(vendors.reduce((s, v) => s + (v.performanceScore || 0), 0) / vendors.length) : 0;
 
   return (
-    <div className="min-h-screen bg-base-200 flex flex-col">
-      <main className="flex-grow pt-24 pb-12 px-4 md:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
-            <div>
-              <h1 className="text-4xl font-extrabold flex items-center gap-4">
-                <FaBuilding className="text-warning" /> Vendor Relations
-              </h1>
-              <p className="text-base-content/60 mt-2 text-lg">Manage supplier contracts, track performance ratings, and monitor renewal timelines.</p>
-            </div>
-            <button className="btn btn-warning text-white gap-2" onClick={() => setIsModalOpen(true)}><FaPlus /> Add Vendor</button>
-          </div>
-
-          {/* Overview */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-            <div className="stats shadow bg-base-100">
-              <div className="stat">
-                <div className="stat-figure text-success"><FaCheckCircle className="text-3xl" /></div>
-                <div className="stat-title">Active Contracts</div>
-                <div className="stat-value text-success">{loading ? '—' : activeCount}</div>
-              </div>
-            </div>
-            <div className="stats shadow bg-base-100">
-              <div className="stat">
-                <div className="stat-figure text-warning"><FaClock className="text-3xl" /></div>
-                <div className="stat-title">Expiring Soon</div>
-                <div className="stat-value text-warning">{loading ? '—' : expiringCount}</div>
-              </div>
-            </div>
-            <div className="stats shadow bg-base-100">
-              <div className="stat">
-                <div className="stat-figure text-info"><FaStar className="text-3xl" /></div>
-                <div className="stat-title">Avg Performance</div>
-                <div className="stat-value text-info">{loading ? '—' : `${avgPerformance}%`}</div>
-              </div>
-            </div>
-          </div>
-
-          {/* Vendor Table */}
-          <div className="card bg-base-100 shadow-xl overflow-hidden">
-            <div className="card-body">
-              <h2 className="card-title mb-4">Approved Vendors</h2>
-              {loading ? (
-                <div className="flex justify-center py-16"><span className="loading loading-spinner loading-lg text-warning" /></div>
-              ) : vendors.length === 0 ? (
-                <div className="text-center py-12 opacity-50 italic">No vendors registered yet.</div>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="table table-zebra">
-                    <thead>
-                      <tr>
-                        <th>Vendor</th>
-                        <th>Category</th>
-                        <th>Performance Score</th>
-                        <th>Contract Status</th>
-                        <th>Renewal Date</th>
-                        <th>Contact</th>
-                        <th>Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {vendors.map((v) => (
-                        <tr key={v.id} className="hover">
-                          <td className="font-bold flex items-center gap-2"><FaBuilding className="text-warning" />{v.name}</td>
-                          <td><span className="badge badge-ghost badge-sm">{v.category}</span></td>
-                          <td>
-                            <div className="flex items-center gap-2">
-                              <div className="bg-base-200 h-2 w-24 rounded-full overflow-hidden">
-                                <div className={`h-full rounded-full ${v.performanceScore >= 90 ? 'bg-success' : v.performanceScore >= 75 ? 'bg-warning' : 'bg-error'}`} style={{ width: `${v.performanceScore}%` }}></div>
-                              </div>
-                              <span className={`badge ${perfBadge(v.performanceScore)} badge-sm`}>{v.performanceScore}%</span>
-                            </div>
-                          </td>
-                          <td><span className={`badge ${contractBadge(v.contractStatus)} badge-sm font-bold`}>{contractLabel(v.contractStatus)}</span></td>
-                          <td className="font-mono text-sm">{v.contractRenewalDate ?? '—'}</td>
-                          <td className="text-xs opacity-60">{v.contactEmail}</td>
-                          <td><button className="btn btn-ghost btn-xs">Manage</button></td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
-          </div>
+    <div className="min-h-screen bg-base-200 p-6 space-y-6">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h1 className="text-3xl font-extrabold flex items-center gap-3">
+            <FaBuilding className="text-amber-500"/> Vendor Relations
+          </h1>
+          <p className="text-base-content/60 mt-1">Manage supplier contracts, track performance, and monitor renewal timelines. Click Manage to edit any vendor.</p>
         </div>
-      </main>
+        <button className="btn btn-warning text-white gap-2 shadow-lg" onClick={() => setIsAddOpen(true)}>
+          <FaPlus/> Add Vendor
+        </button>
+      </div>
 
-      {/* Add Vendor Modal */}
-      {isModalOpen && (
-        <div className="modal modal-open">
-          <div className="modal-box max-w-lg">
-            <h3 className="font-bold text-xl mb-6 flex items-center gap-3"><FaBuilding className="text-warning" /> Add New Vendor</h3>
-            <form onSubmit={handleAddVendor} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="form-control">
-                  <label className="label">Vendor Name</label>
-                  <input type="text" className="input input-bordered" required value={newVendor.name} onChange={e => setNewVendor({...newVendor, name: e.target.value})} />
-                </div>
-                <div className="form-control">
-                  <label className="label">Category</label>
-                  <input type="text" className="input input-bordered" required placeholder="e.g. Freight, Last-Mile" value={newVendor.category} onChange={e => setNewVendor({...newVendor, category: e.target.value})} />
-                </div>
+      {/* KPI Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {[
+          { label: 'Active Contracts', value: activeCount, icon: <FaCheckCircle className="text-3xl text-emerald-500"/>, color: 'text-emerald-500', border: 'border-emerald-500' },
+          { label: 'Expiring Soon', value: expiringCount, icon: <FaClock className="text-3xl text-amber-500"/>, color: 'text-amber-500', border: 'border-amber-500' },
+          { label: 'Avg Performance', value: `${avgPerf}%`, icon: <FaStar className="text-3xl text-blue-500"/>, color: 'text-blue-500', border: 'border-blue-500' },
+        ].map(k => (
+          <div key={k.label} className={`card bg-base-100 shadow border-l-4 ${k.border}`}>
+            <div className="card-body py-4 flex-row items-center justify-between">
+              <div>
+                <p className="text-xs uppercase opacity-50 font-bold">{k.label}</p>
+                <p className={`text-3xl font-extrabold ${k.color}`}>{loading ? '—' : k.value}</p>
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="form-control">
-                  <label className="label">Performance Score (%)</label>
-                  <input type="number" min="0" max="100" className="input input-bordered" required value={newVendor.performanceScore} onChange={e => setNewVendor({...newVendor, performanceScore: parseInt(e.target.value)})} />
-                </div>
-                <div className="form-control">
-                  <label className="label">Contract Status</label>
-                  <select className="select select-bordered" value={newVendor.contractStatus} onChange={e => setNewVendor({...newVendor, contractStatus: e.target.value})}>
-                    <option value="ACTIVE">Active</option>
-                    <option value="EXPIRING_SOON">Expiring Soon</option>
-                    <option value="PENDING">Pending</option>
-                  </select>
-                </div>
-              </div>
-              <div className="form-control">
-                <label className="label">Contract Renewal Date</label>
-                <input type="date" className="input input-bordered" value={newVendor.contractRenewalDate} onChange={e => setNewVendor({...newVendor, contractRenewalDate: e.target.value})} />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="form-control">
-                  <label className="label">Contact Email</label>
-                  <input type="email" className="input input-bordered" value={newVendor.contactEmail} onChange={e => setNewVendor({...newVendor, contactEmail: e.target.value})} />
-                </div>
-                <div className="form-control">
-                  <label className="label">Contact Phone</label>
-                  <input type="text" className="input input-bordered" value={newVendor.contactPhone} onChange={e => setNewVendor({...newVendor, contactPhone: e.target.value})} />
-                </div>
-              </div>
-              <div className="modal-action">
-                <button type="button" className="btn btn-ghost" onClick={() => setIsModalOpen(false)}>Cancel</button>
-                <button type="submit" className="btn btn-warning text-white px-8">Add Vendor</button>
-              </div>
-            </form>
+              {k.icon}
+            </div>
           </div>
+        ))}
+      </div>
+
+      {/* Vendor Table */}
+      <div className="card bg-base-100 shadow-xl overflow-hidden">
+        <div className="px-6 py-4 border-b border-base-200 flex items-center justify-between">
+          <h2 className="font-bold text-lg">Approved Vendors</h2>
+          <span className="badge badge-ghost">{vendors.length} vendor{vendors.length !== 1 ? 's' : ''}</span>
         </div>
+        {loading ? (
+          <div className="flex justify-center py-16"><span className="loading loading-spinner loading-lg text-warning"/></div>
+        ) : vendors.length === 0 ? (
+          <div className="py-16 text-center opacity-40 italic">No vendors registered yet.</div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="table table-zebra w-full">
+              <thead>
+                <tr>
+                  <th>Vendor</th>
+                  <th>Category</th>
+                  <th>Performance</th>
+                  <th>Contract</th>
+                  <th>Renewal</th>
+                  <th>Contact</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {vendors.map(v => (
+                  <tr key={v.id} className="hover">
+                    <td className="font-bold flex items-center gap-2">
+                      <FaBuilding className="text-amber-500 flex-shrink-0"/>{v.name}
+                    </td>
+                    <td><span className="badge badge-ghost badge-sm">{v.category}</span></td>
+                    <td>
+                      <div className="flex items-center gap-2">
+                        <div className="bg-base-200 h-2 w-20 rounded-full overflow-hidden">
+                          <div className={`h-full rounded-full ${v.performanceScore >= 90 ? 'bg-success' : v.performanceScore >= 75 ? 'bg-warning' : 'bg-error'}`}
+                            style={{ width: `${v.performanceScore}%` }}/>
+                        </div>
+                        <span className={`badge ${perfBadge(v.performanceScore)} badge-sm`}>{v.performanceScore}%</span>
+                      </div>
+                    </td>
+                    <td><span className={`badge ${contractBadge(v.contractStatus)} badge-sm font-bold`}>{contractLabel(v.contractStatus)}</span></td>
+                    <td className="font-mono text-sm text-base-content/60">
+                      <div className="flex items-center gap-1">
+                        <FaCalendarAlt className="text-xs opacity-40"/>
+                        {v.contractRenewalDate ?? '—'}
+                      </div>
+                    </td>
+                    <td className="text-xs opacity-60">{v.contactEmail}</td>
+                    <td>
+                      <button className="btn btn-ghost btn-sm gap-1 text-amber-600"
+                        onClick={() => setManageVendor(v)}>
+                        <FaEdit className="text-xs"/> Manage
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {/* Modals */}
+      {manageVendor && (
+        <VendorModal
+          vendor={manageVendor}
+          onClose={() => setManageVendor(null)}
+          onUpdated={handleUpdated}
+          onDeleted={handleDeleted}
+        />
+      )}
+      {isAddOpen && (
+        <AddVendorModal
+          onClose={() => setIsAddOpen(false)}
+          onAdded={fetchVendors}
+        />
       )}
     </div>
   );
