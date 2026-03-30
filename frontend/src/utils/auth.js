@@ -101,6 +101,13 @@ export const login = async (username, password) => {
         user: data.user,
         sector: data.sector
       };
+    } else if (data.requires2FA) {
+      // Return 2FA requirement to the UI
+      return {
+        requires2FA: true,
+        username: data.username,
+        message: data.message
+      };
     } else {
       throw new Error('No token received');
     }

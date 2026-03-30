@@ -8,6 +8,7 @@ import com.example.cms.repository.UserRepository;
 import com.example.cms.dto.LoginRequest;
 import com.example.cms.dto.RegisterRequest;
 import com.example.cms.dto.RegisterOrgRequest;
+import com.example.cms.dto.LoginResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -385,7 +386,7 @@ public class AuthController {
             return ResponseEntity.ok(Map.of(
                 "success", true,
                 "secret", secret,
-                "qrImageUrl", qrImageUrl
+                "qrCodeUrl", qrImageUrl
             ));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -455,12 +456,34 @@ public class AuthController {
             refreshCookie.setMaxAge(7 * 24 * 60 * 60);
             httpResponse.addCookie(refreshCookie);
 
-            Map<String, Object> response = new HashMap<>();
-            response.put("success", true);
-            response.put("token", token);
-            response.put("username", user.getUsername());
-            response.put("role", user.getRole().toString());
-            return ResponseEntity.ok(response);
+            LoginResponse.SectorInfo sectorInfo = null;
+            if (user.getSector() != null) {
+                sectorInfo = LoginResponse.SectorInfo.builder()
+                        .id(user.getSector().getId())
+                        .code(user.getSector().getCode())
+                        .name(user.getSector().getName())
+                        .routePath(user.getSector().getRoutePath())
+                        .build();
+            }
+
+            LoginResponse loginResponse = LoginResponse.builder()
+                    .success(true)
+                    .token(token)
+                    .refreshToken(refreshToken)
+                    .user(LoginResponse.UserInfo.builder()
+                            .id(user.getId())
+                            .username(user.getUsername())
+                            .email(user.getEmail())
+                            .role(user.getRole().toString())
+                            .userType(user.getUserType() != null ? user.getUserType().toString() : "INDIVIDUAL")
+                            .organizationId(user.getOrganization() != null ? user.getOrganization().getId() : null)
+                            .totpEnabled(user.isTotpEnabled())
+                            .hasTotpSecret(user.getTotpSecret() != null)
+                            .build())
+                    .sector(sectorInfo)
+                    .build();
+
+            return ResponseEntity.ok(loginResponse);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("success", false, "message", e.getMessage()));
@@ -486,7 +509,7 @@ public class AuthController {
             }
 
             user.setTotpEnabled(false);
-            user.setTotpSecret(null);
+            // user.setTotpSecret(null); // Keep the secret for persistent toggle
             userRepository.save(user);
             return ResponseEntity.ok(Map.of("success", true, "message", "2FA disabled."));
         } catch (Exception e) {

@@ -25,7 +25,7 @@ const contractLabel = (status) => {
 };
 
 const LogisticsVendorRelationsPage = () => {
-  const { user } = useAuth();
+  const { user, sector } = useAuth();
   const [vendors, setVendors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);

@@ -189,6 +189,8 @@ public class AuthService {
                         .role(user.getRole().toString())
                         .userType(user.getUserType() != null ? user.getUserType().toString() : "INDIVIDUAL")
                         .organizationId(user.getOrganization() != null ? user.getOrganization().getId() : null)
+                        .totpEnabled(user.isTotpEnabled())
+                        .hasTotpSecret(user.getTotpSecret() != null)
                         .build())
                 .sector(sectorInfo)
                 .build();

@@ -73,6 +73,14 @@ const LoginPage = () => {
             });
             const loginData = res.data;
 
+            // 🔥 Store credentials in localStorage (Crucial for page refreshes)
+            if (loginData.token) {
+                const { setAuthToken, setUserData, setSectorData } = await import('../../utils/auth');
+                setAuthToken(loginData.token);
+                if (loginData.user) setUserData(loginData.user);
+                if (loginData.sector) setSectorData(loginData.sector);
+            }
+
             login(loginData);
 
             let sectorCode = null;

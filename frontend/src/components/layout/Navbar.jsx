@@ -55,7 +55,8 @@ const SafeNavbar = ({ hideSectorSwitcher = false }) => {
     { name: 'Content - Projects', path: '/dashboard/content/projects', keywords: 'media tasks campaigns' },
     { name: 'System Users', path: '/users', keywords: 'admin system role users accounts' },
     { name: 'Audit Trails', path: '/admin/audit-logs', keywords: 'security logs tracking audit changes' },
-    { name: 'Profile Settings', path: '/settings', keywords: 'profile password settings config account' },
+    { name: 'Profile', path: '/user/profile', keywords: 'profile avatar 2fa security setup' },
+    { name: 'Settings', path: '/settings', keywords: 'password settings config account editing' },
   ];
 
   const searchResults = searchablePages.filter(page => 
@@ -257,7 +258,8 @@ const SafeNavbar = ({ hideSectorSwitcher = false }) => {
                   <span>{user?.username}</span>
                   <span className="text-xs opacity-60">{user?.role} • {user?.sector}</span>
                 </li>
-                <li><Link to="/settings">Profile & Settings</Link></li>
+                <li><Link to="/user/profile">Profile</Link></li>
+                <li><Link to="/settings">Settings</Link></li>
                 {(isAdmin(user) || isManager(user)) && user?.organizationId && (
                   <li><Link to="/organization-settings">Organization Settings</Link></li>
                 )}

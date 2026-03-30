@@ -6,13 +6,6 @@ const UserProfilePage = () => {
     const { user, login } = useAuth();
     const [isEditing, setIsEditing] = useState(false);
     
-    // 2FA State
-    const [is2FAModalOpen, setIs2FAModalOpen] = useState(false);
-    const [qrCodeUrl, setQrCodeUrl] = useState('');
-    const [setupCode, setSetupCode] = useState('');
-    const [is2FALoading, setIs2FALoading] = useState(false);
-    const [twoFAError, setTwoFAError] = useState('');
-
     // Enhanced Profile State
     const [formData, setFormData] = useState({
         username: user?.username || '',
@@ -86,53 +79,6 @@ const UserProfilePage = () => {
             console.error("Failed to upload avatar", err);
         } finally {
             setIsUploading(false);
-        }
-    };
-
-    // ─── 2FA Handlers ────────────────────────────────────────────────────────
-
-    const handleSetup2FA = async () => {
-        setIs2FALoading(true);
-        setTwoFAError('');
-        try {
-            const res = await api.post('/auth/2fa/setup');
-            setQrCodeUrl(res.data.qrImageUrl);
-            setIs2FAModalOpen(true);
-        } catch (err) {
-            console.error('Failed to setup 2FA', err);
-        } finally {
-            setIs2FALoading(false);
-        }
-    };
-
-    const handleEnable2FA = async () => {
-        setIs2FALoading(true);
-        setTwoFAError('');
-        try {
-            await api.post('/auth/2fa/enable', { code: setupCode });
-            setIs2FAModalOpen(false);
-            setSetupCode('');
-            // Optional: refresh user context to reflect 2FA is enabled
-            login({ ...user, isTotpEnabled: true }, true);
-        } catch (err) {
-            setTwoFAError(err.response?.data?.message || 'Invalid code');
-        } finally {
-            setIs2FALoading(false);
-        }
-    };
-
-    const handleDisable2FA = async () => {
-        const code = window.prompt("Enter your 6-digit Authenticator code to disable 2FA:");
-        if (!code) return;
-        setIs2FALoading(true);
-        try {
-            await api.post('/auth/2fa/disable', { code });
-            alert("2FA disabled successfully.");
-            login({ ...user, isTotpEnabled: false }, true);
-        } catch (err) {
-            alert(err.response?.data?.message || 'Invalid code. Could not disable 2FA.');
-        } finally {
-            setIs2FALoading(false);
         }
     };
 
@@ -257,32 +203,7 @@ const UserProfilePage = () => {
                                 <button type="button" className="btn btn-outline btn-sm">Update Password</button>
                             </div>
 
-                            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mt-4 border-t pt-4 border-base-200 gap-4">
-                                <div>
-                                    <h4 className="font-medium">Two-Factor Authentication (TOTP)</h4>
-                                    <p className="text-sm text-base-content/60">Protect your account with an authenticator app.</p>
-                                </div>
-                                <div>
-                                    {/* Assuming user context object doesn't strictly track totpEnabled yet, we rely on the backend call. 
-                                        For this UI, we show the setup button if they want to configure it. */}
-                                    <button 
-                                        type="button" 
-                                        className="btn btn-outline btn-primary btn-sm"
-                                        onClick={handleSetup2FA}
-                                        disabled={is2FALoading}
-                                    >
-                                        Setup 2FA
-                                    </button>
-                                    <button 
-                                        type="button" 
-                                        className="btn btn-ghost text-error btn-sm ml-2"
-                                        onClick={handleDisable2FA}
-                                        disabled={is2FALoading}
-                                    >
-                                        Disable
-                                    </button>
-                                </div>
-                            </div>
+
 
                             {isEditing && (
                                 <div className="form-control mt-6">
@@ -294,51 +215,6 @@ const UserProfilePage = () => {
                 </div>
             </div>
 
-            {/* 2FA Setup Modal */}
-            {is2FAModalOpen && (
-                <div className="modal modal-open">
-                    <div className="modal-box">
-                        <h3 className="font-bold text-lg mb-4">Setup Two-Factor Authentication</h3>
-                        <p className="text-sm text-base-content/70 mb-4">
-                            1. Install Google Authenticator or Authy on your phone.<br/>
-                            2. Scan the QR code below.
-                        </p>
-                        
-                        {qrCodeUrl && (
-                            <div className="flex justify-center my-6">
-                                <img src={qrCodeUrl} alt="2FA QR Code" className="border-4 border-white rounded-lg shadow-sm" />
-                            </div>
-                        )}
-
-                        <div className="form-control">
-                            <label className="label">
-                                <span className="label-text font-medium">3. Enter the 6-digit code to verify:</span>
-                            </label>
-                            <input 
-                                type="text" 
-                                className="input input-bordered text-center tracking-[0.5em] font-mono text-xl"
-                                placeholder="000000"
-                                maxLength="6"
-                                value={setupCode}
-                                onChange={(e) => setSetupCode(e.target.value)}
-                            />
-                            {twoFAError && <p className="text-error text-sm mt-2">{twoFAError}</p>}
-                        </div>
-
-                        <div className="modal-action">
-                            <button className="btn" onClick={() => { setIs2FAModalOpen(false); setSetupCode(''); setTwoFAError(''); }}>Cancel</button>
-                            <button 
-                                className={`btn btn-primary ${is2FALoading ? 'loading' : ''}`}
-                                onClick={handleEnable2FA}
-                                disabled={setupCode.length !== 6 || is2FALoading}
-                            >
-                                Verify & Enable
-                            </button>
-                        </div>
-                    </div>
-                    <div className="modal-backdrop" onClick={() => setIs2FAModalOpen(false)}></div>
-                </div>
-            )}
         </div>
     );
 };
