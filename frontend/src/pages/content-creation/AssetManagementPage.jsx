@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { Link } from 'react-router-dom';
 import api from '../../services/api';
-import { FaFileAlt, FaPlus, FaFilter, FaDownload, FaExclamationTriangle, FaImage, FaVideo, FaFilePdf, FaProjectDiagram } from 'react-icons/fa';
+import { FaFileAlt, FaPlus, FaDownload, FaExclamationTriangle, FaImage, FaVideo, FaFilePdf, FaProjectDiagram, FaTimes, FaExternalLinkAlt, FaCopy } from 'react-icons/fa';
 import { toast } from 'sonner';
 
 const AssetManagementPage = () => {
@@ -12,6 +12,7 @@ const AssetManagementPage = () => {
   const [loading, setLoading] = useState(true);
   const [filterType, setFilterType] = useState('ALL');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedAsset, setSelectedAsset] = useState(null);
   const [newAsset, setNewAsset] = useState({
     title: '',
     type: 'IMAGE',
@@ -26,7 +27,6 @@ const AssetManagementPage = () => {
         api.get('/content/assets'),
         api.get('/content/projects')
       ]);
-      
       setAssets(assetsRes.data?.data?.content || assetsRes.data?.data || []);
       setProjects(projectsRes.data?.data?.content || projectsRes.data?.data || []);
     } catch (err) {
@@ -46,14 +46,12 @@ const AssetManagementPage = () => {
   const handleCreateAsset = async (e) => {
     e.preventDefault();
     try {
-      // Backend createAsset expects Project object or similar structure if we want to link
       const payload = {
-          title: newAsset.title,
-          type: newAsset.type,
-          url: newAsset.url,
-          project: newAsset.projectId ? { id: parseInt(newAsset.projectId) } : null
+        title: newAsset.title,
+        type: newAsset.type,
+        url: newAsset.url,
+        project: newAsset.projectId ? { id: parseInt(newAsset.projectId) } : null
       };
-
       const response = await api.post('/content/assets', payload);
       if (response.data && response.data.success) {
         toast.success(response.data.message || 'Asset added successfully');
@@ -63,7 +61,25 @@ const AssetManagementPage = () => {
       }
     } catch (err) {
       console.error('Failed to create asset', err);
+      toast.error('Failed to create asset');
     }
+  };
+
+  const handleDownload = (asset) => {
+    if (!asset.url) {
+      toast.error('No download URL available for this asset');
+      return;
+    }
+    window.open(asset.url, '_blank');
+    toast.success(`Downloading "${asset.title}"...`);
+  };
+
+  const handleCopyUrl = (url) => {
+    navigator.clipboard.writeText(url).then(() => {
+      toast.success('URL copied to clipboard!');
+    }).catch(() => {
+      toast.error('Failed to copy URL');
+    });
   };
 
   const getAssetIcon = (type) => {
@@ -80,7 +96,6 @@ const AssetManagementPage = () => {
   if (!user || sector?.code?.toLowerCase() !== 'content') {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-base-200">
-        
         <div className="card bg-base-100 shadow-xl p-8 text-center max-w-md mx-auto mt-20">
           <FaExclamationTriangle className="text-6xl text-warning mx-auto mb-4" />
           <h2 className="text-3xl font-bold mb-4">Content Sector Access Only</h2>
@@ -93,39 +108,27 @@ const AssetManagementPage = () => {
 
   return (
     <div className="min-h-screen bg-base-200 flex flex-col">
-      
-      
       <main className="flex-grow pt-24 pb-12 px-4 md:px-8">
         <div className="max-w-7xl mx-auto">
-          
-          {/* Header Section */}
+          {/* Header */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
             <div>
               <h1 className="text-4xl font-extrabold flex items-center gap-4">
-                <FaFileAlt className="text-primary" />
-                Asset Library
+                <FaFileAlt className="text-primary" /> Asset Library
               </h1>
               <p className="text-base-content/60 mt-2 text-lg">Central hub for high-fidelity media, documents, and project deliverables.</p>
             </div>
             <div className="flex items-center gap-3">
               <div className="join">
-                <button 
-                  className={`btn btn-sm join-item ${filterType === 'ALL' ? 'btn-primary' : 'btn-ghost bg-base-100'}`}
-                  onClick={() => setFilterType('ALL')}
-                >All</button>
-                <button 
-                  className={`btn btn-sm join-item ${filterType === 'IMAGE' ? 'btn-primary' : 'btn-ghost bg-base-100'}`}
-                  onClick={() => setFilterType('IMAGE')}
-                >Images</button>
-                <button 
-                  className={`btn btn-sm join-item ${filterType === 'VIDEO' ? 'btn-primary' : 'btn-ghost bg-base-100'}`}
-                  onClick={() => setFilterType('VIDEO')}
-                >Videos</button>
+                {['ALL', 'IMAGE', 'VIDEO', 'PDF', 'DOCUMENT'].map(t => (
+                  <button
+                    key={t}
+                    className={`btn btn-sm join-item ${filterType === t ? 'btn-primary' : 'btn-ghost bg-base-100'}`}
+                    onClick={() => setFilterType(t)}
+                  >{t === 'ALL' ? 'All' : t.charAt(0) + t.slice(1).toLowerCase()}</button>
+                ))}
               </div>
-              <button 
-                className="btn btn-primary btn-md shadow-lg gap-2 text-white"
-                onClick={() => setIsModalOpen(true)}
-              >
+              <button className="btn btn-primary btn-md shadow-lg gap-2 text-white" onClick={() => setIsModalOpen(true)}>
                 <FaPlus /> Upload Asset
               </button>
             </div>
@@ -133,53 +136,62 @@ const AssetManagementPage = () => {
 
           {/* Asset Grid */}
           {loading ? (
-             <div className="flex justify-center py-40">
-                <span className="loading loading-spinner loading-xl text-primary"></span>
-             </div>
+            <div className="flex justify-center py-40">
+              <span className="loading loading-spinner loading-xl text-primary"></span>
+            </div>
           ) : filteredAssets.length === 0 ? (
-             <div className="card bg-base-100 shadow-xl p-20 text-center flex flex-col items-center">
-                <FaFileAlt className="text-6xl opacity-10 mb-4" />
-                <p className="text-xl opacity-40 italic">No assets found in the library.</p>
-             </div>
+            <div className="card bg-base-100 shadow-xl p-20 text-center flex flex-col items-center">
+              <FaFileAlt className="text-6xl opacity-10 mb-4" />
+              <p className="text-xl opacity-40 italic">No assets found in the library.</p>
+            </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {filteredAssets.map(asset => (
                 <div key={asset.id} className="card bg-base-100 shadow-md hover:shadow-2xl transition-all group overflow-hidden border border-base-200">
-                  <figure className="h-48 bg-base-300 relative group-hover:scale-105 transition-transform duration-500">
+                  <figure className="h-48 bg-base-300 relative overflow-hidden">
                     {asset.type === 'IMAGE' ? (
-                      <img src={asset.url || 'https://via.placeholder.com/300x200?text=Preview'} alt={asset.title} className="w-full h-full object-cover" />
+                      <img src={asset.url || 'https://via.placeholder.com/300x200?text=Preview'} alt={asset.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                     ) : (
-                      <div className="flex items-center justify-center w-full h-full bg-base-200">
-                        {getAssetIcon(asset.type)}
-                        <span className="ml-2 font-bold opacity-30">{asset.type}</span>
+                      <div className="flex items-center justify-center w-full h-full bg-base-200 group-hover:scale-105 transition-transform duration-500">
+                        <span className="text-4xl">{getAssetIcon(asset.type)}</span>
+                        <span className="ml-3 font-bold opacity-30 text-lg">{asset.type}</span>
                       </div>
                     )}
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
-                       <button className="btn btn-circle btn-primary btn-sm mx-1"><FaDownload /></button>
-                       <button className="btn btn-circle btn-ghost bg-white/20 btn-sm mx-1">Details</button>
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-colors flex items-center justify-center gap-3 opacity-0 group-hover:opacity-100">
+                      <button
+                        className="btn btn-circle btn-primary btn-sm tooltip"
+                        data-tip="Download"
+                        onClick={() => handleDownload(asset)}
+                      >
+                        <FaDownload />
+                      </button>
+                      <button
+                        className="btn btn-circle btn-ghost bg-white/20 text-white btn-sm tooltip"
+                        data-tip="View Details"
+                        onClick={() => setSelectedAsset(asset)}
+                      >
+                        <FaExternalLinkAlt />
+                      </button>
                     </div>
                   </figure>
                   <div className="card-body p-4">
                     <div className="flex items-start justify-between">
-                       <h2 className="card-title text-sm font-bold truncate pr-2">{asset.title}</h2>
-                       <div className="text-xs opacity-50 font-mono">#{asset.id}</div>
+                      <h2 className="card-title text-sm font-bold truncate pr-2">{asset.title}</h2>
+                      <div className="text-xs opacity-50 font-mono">#{asset.id}</div>
                     </div>
-                    
                     <div className="flex items-center gap-2 mt-2">
-                       <div className="badge badge-outline badge-xs opacity-60">{asset.type}</div>
-                       {asset.project && (
-                         <div className="flex items-center gap-1 text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full">
-                           <FaProjectDiagram className="scale-75" />
-                           {asset.project.projectName}
-                         </div>
-                       )}
+                      <div className="badge badge-outline badge-xs opacity-60">{asset.type}</div>
+                      {asset.project && (
+                        <div className="flex items-center gap-1 text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full">
+                          <FaProjectDiagram className="scale-75" />
+                          {asset.project.projectName}
+                        </div>
+                      )}
                     </div>
-
                     <div className="divider my-2 opacity-10"></div>
-                    
                     <div className="flex justify-between items-center text-[10px] opacity-40 uppercase font-bold tracking-widest">
-                       <span>Uploaded</span>
-                       <span>{new Date().toLocaleDateString()}</span>
+                      <span>Uploaded</span>
+                      <span>{new Date().toLocaleDateString()}</span>
                     </div>
                   </div>
                 </div>
@@ -205,7 +217,7 @@ const AssetManagementPage = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div className="form-control">
                   <label className="label">Type</label>
-                  <select className="select select-bordered" 
+                  <select className="select select-bordered"
                     value={newAsset.type} onChange={e => setNewAsset({...newAsset, type: e.target.value})}>
                     <option value="IMAGE">Image</option>
                     <option value="VIDEO">Video</option>
@@ -233,6 +245,64 @@ const AssetManagementPage = () => {
                 <button type="submit" className="btn btn-primary text-white px-8">Confirm Upload</button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Asset Details Modal */}
+      {selectedAsset && (
+        <div className="modal modal-open">
+          <div className="modal-box max-w-lg">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="font-bold text-xl flex items-center gap-2">
+                {getAssetIcon(selectedAsset.type)} Asset Details
+              </h3>
+              <button className="btn btn-ghost btn-sm btn-circle" onClick={() => setSelectedAsset(null)}>
+                <FaTimes />
+              </button>
+            </div>
+            <div className="space-y-4">
+              {selectedAsset.type === 'IMAGE' && selectedAsset.url && (
+                <img src={selectedAsset.url} alt={selectedAsset.title} className="w-full h-48 object-cover rounded-xl" />
+              )}
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div className="bg-base-200 rounded-xl p-4">
+                  <p className="text-xs opacity-50 uppercase tracking-widest font-bold mb-1">Asset ID</p>
+                  <p className="font-mono font-bold">#{selectedAsset.id}</p>
+                </div>
+                <div className="bg-base-200 rounded-xl p-4">
+                  <p className="text-xs opacity-50 uppercase tracking-widest font-bold mb-1">Type</p>
+                  <p className="font-bold">{selectedAsset.type}</p>
+                </div>
+              </div>
+              <div className="bg-base-200 rounded-xl p-4">
+                <p className="text-xs opacity-50 uppercase tracking-widest font-bold mb-1">Title</p>
+                <p className="font-bold">{selectedAsset.title}</p>
+              </div>
+              {selectedAsset.project && (
+                <div className="bg-primary/10 rounded-xl p-4">
+                  <p className="text-xs opacity-50 uppercase tracking-widest font-bold mb-1">Linked Project</p>
+                  <p className="font-bold text-primary">{selectedAsset.project.projectName}</p>
+                </div>
+              )}
+              {selectedAsset.url && (
+                <div className="bg-base-200 rounded-xl p-4">
+                  <p className="text-xs opacity-50 uppercase tracking-widest font-bold mb-2">URL</p>
+                  <div className="flex items-center gap-2">
+                    <p className="font-mono text-xs truncate flex-grow">{selectedAsset.url}</p>
+                    <button className="btn btn-ghost btn-xs" onClick={() => handleCopyUrl(selectedAsset.url)}>
+                      <FaCopy />
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+            <div className="modal-action mt-6">
+              <button className="btn btn-ghost" onClick={() => setSelectedAsset(null)}>Close</button>
+              <button className="btn btn-primary text-white gap-2" onClick={() => handleDownload(selectedAsset)}>
+                <FaDownload /> Download Asset
+              </button>
+            </div>
           </div>
         </div>
       )}
