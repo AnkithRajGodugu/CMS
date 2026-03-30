@@ -27,7 +27,7 @@ public class OrganizationController {
      * Requires ADMIN role
      */
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     public ResponseEntity<org.springframework.data.domain.Page<OrganizationResponse>> getAllOrganizations(
             @org.springframework.data.web.PageableDefault(size = 20) org.springframework.data.domain.Pageable pageable) {
         log.info("GET /api/organizations - Fetching all organizations");
