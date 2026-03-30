@@ -11,6 +11,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.time.Instant;
 import java.util.Base64;
+import org.apache.commons.codec.binary.Base32;
 
 /**
  * TotpService — RFC 6238 compliant TOTP (Time-based One-Time Password).
@@ -25,13 +26,13 @@ public class TotpService {
 
     private static final int CODE_DIGITS = 6;
     private static final long TIME_STEP_SECONDS = 30;
-    private static final int WINDOW_TOLERANCE = 1; // allow ±1 window
+    private static final int WINDOW_TOLERANCE = 3; // allow ±3 windows (90s skew)
     private static final String HMAC_SHA1 = "HmacSHA1";
 
     public String generateSecret() {
         byte[] bytes = new byte[20]; // 160-bit secret
         new SecureRandom().nextBytes(bytes);
-        return Base64.getEncoder().withoutPadding().encodeToString(bytes);
+        return new Base32().encodeAsString(bytes).replace("=", "");
     }
 
     /**
@@ -60,11 +61,15 @@ public class TotpService {
      */
     public boolean verify(String secret, int code) {
         long currentWindow = Instant.now().getEpochSecond() / TIME_STEP_SECONDS;
+        log.debug("Verifying TOTP for window {} (±{})", currentWindow, WINDOW_TOLERANCE);
         for (int i = -WINDOW_TOLERANCE; i <= WINDOW_TOLERANCE; i++) {
-            if (generate(secret, currentWindow + i) == code) {
+            int expectedCode = generate(secret, currentWindow + i);
+            if (expectedCode == code) {
+                log.info("TOTP verification successful for window offset {}", i);
                 return true;
             }
         }
+        log.warn("TOTP verification failed for code {}", code);
         return false;
     }
 
@@ -72,7 +77,7 @@ public class TotpService {
 
     private int generate(String secret, long counter) {
         try {
-            byte[] keyBytes = Base64.getDecoder().decode(secret);
+            byte[] keyBytes = new Base32().decode(secret.toUpperCase().replace(" ", ""));
             byte[] counterBytes = ByteBuffer.allocate(8).putLong(counter).array();
 
             Mac mac = Mac.getInstance(HMAC_SHA1);

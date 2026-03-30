@@ -34,6 +34,8 @@ public class LoginResponse {
         private String role;
         private String userType;
         private Long organizationId;
+        private boolean totpEnabled;
+        private boolean hasTotpSecret;
     }
     
     @Data

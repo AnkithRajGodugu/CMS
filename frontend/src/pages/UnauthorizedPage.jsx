@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 
 const UnauthorizedPage = () => {
-  const { user } = useAuth();
+  const { user, sector } = useAuth();
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-base-200">
@@ -23,7 +23,7 @@ const UnauthorizedPage = () => {
               Go Home
             </Link>
             {user && (
-              <Link to={`/dashboard/${(typeof user.sector === 'string' ? user.sector : user.sector?.code || 'banking').toLowerCase()}`} className="btn btn-outline">
+              <Link to={`/dashboard/${(sector?.code || 'banking').toLowerCase()}`} className="btn btn-outline">
                 Go to Dashboard
               </Link>
             )}
