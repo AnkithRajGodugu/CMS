@@ -1,31 +1,48 @@
 import React, { useState, useEffect } from 'react';
+import {
+  DollarSign, CheckCircle2, Clock, XCircle, BarChart2, Filter, Eye
+} from 'lucide-react';
 import { getAllInsuranceClaims, getInsuranceClaimStats } from '../../services/healthcareService';
 import { useAuth } from '../../hooks/useAuth';
+import HealthcareKPICard from '../../components/healthcare/HealthcareKPICard';
+import { RadialBarChart, RadialBar, ResponsiveContainer, PolarAngleAxis } from 'recharts';
 
-const STATUS_BADGE = { APPROVED: 'badge-success', PENDING: 'badge-warning', DENIED: 'badge-error' };
+const STATUS_BADGE = {
+  APPROVED: 'bg-emerald-50 text-emerald-700 border border-emerald-200',
+  PENDING:  'bg-amber-50 text-amber-700 border border-amber-200',
+  DENIED:   'bg-red-50 text-red-700 border border-red-200',
+};
+
+function SkeletonRow({ cols }) {
+  return (
+    <tr className="border-b border-slate-50">
+      {Array.from({ length: cols }).map((_, i) => (
+        <td key={i} className="px-4 py-3">
+          <div className="h-4 bg-slate-100 rounded animate-pulse" style={{ width: `${50 + (i * 11) % 40}%` }} />
+        </td>
+      ))}
+    </tr>
+  );
+}
 
 const InsuranceManagementPage = () => {
   const { sector } = useAuth();
-  const [claims, setClaims] = useState([]);
-  const [stats, setStats] = useState({ approved: 0, pending: 0, denied: 0, successRate: 0 });
+  const [claims, setClaims]   = useState([]);
+  const [stats, setStats]     = useState({ approved: 0, pending: 0, denied: 0, successRate: 0 });
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState('ALL');
+  const [filter, setFilter]   = useState('ALL');
 
   useEffect(() => {
     if (sector?.code?.toLowerCase() === 'healthcare') {
-      Promise.all([
-        getAllInsuranceClaims(),
-        getInsuranceClaimStats(),
-      ])
+      Promise.all([getAllInsuranceClaims(), getInsuranceClaimStats()])
         .then(([claimsRes, statsRes]) => {
-          const list = claimsRes.data ?? [];
-          setClaims(list);
+          setClaims(claimsRes.data ?? []);
           const s = statsRes.data ?? {};
           setStats({
-            approved: s.approvedClaims ?? 0,
-            pending: s.pendingClaims ?? 0,
-            denied: s.deniedClaims ?? 0,
-            successRate: s.successRate ?? 0,
+            approved:    s.approvedClaims ?? 0,
+            pending:     s.pendingClaims  ?? 0,
+            denied:      s.deniedClaims   ?? 0,
+            successRate: s.successRate    ?? 0,
           });
         })
         .catch(err => console.error('Could not load insurance data:', err))
@@ -35,90 +52,151 @@ const InsuranceManagementPage = () => {
 
   if (sector?.code?.toLowerCase() !== 'healthcare') {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 p-4">
+      <div className="flex flex-col items-center justify-center min-h-screen bg-slate-50 p-4">
         <div className="text-6xl mb-4">🏥</div>
-        <h2 className="text-2xl font-bold text-gray-800 mb-2">Access Denied</h2>
-        <p className="text-gray-600 mb-6 text-center max-w-md">
-          This area is restricted to Healthcare sector personnel. Your account does not have the required permissions.
-        </p>
-        <button className="btn btn-primary" onClick={() => window.location.href = '/'}>Return Home</button>
+        <h2 className="text-2xl font-bold text-slate-800 mb-2">Access Denied</h2>
+        <p className="text-slate-500 mb-6 text-center max-w-md">This area is restricted to Healthcare sector personnel.</p>
+        <button className="px-5 py-2 bg-teal-600 text-white rounded-xl font-semibold hover:bg-teal-700 transition" onClick={() => window.location.href = '/'}>Return Home</button>
       </div>
     );
   }
 
   const filtered = filter === 'ALL' ? claims : claims.filter(c => c.status === filter);
+  const fmtDate  = iso => iso ? new Date(iso).toLocaleDateString('en-US', { dateStyle: 'medium' }) : '—';
+  const fmtUSD   = n   => `$${(+n || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
 
-  const fmtDate = (iso) => {
-    if (!iso) return '—';
-    return new Date(iso).toLocaleDateString('en-US', { dateStyle: 'medium' });
-  };
+  const radialData = [{ value: stats.successRate, fill: stats.successRate >= 75 ? '#0d9488' : '#f59e0b' }];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 p-6">
-      <div className="max-w-7xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-green-800">Insurance Management</h1>
-          <p className="text-green-700/70 mt-1">Track and process all insurance claims</p>
-        </div>
+    <div className="min-h-screen bg-slate-50 p-6 space-y-6 animate-fade-in-up">
 
-        {/* Stats */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          {[
-            { label: 'Approved Claims', value: `$${(+stats.approved).toLocaleString('en-US', {minimumFractionDigits: 2})}`, icon: '✅', color: 'text-green-600' },
-            { label: 'Pending Claims', value: `$${(+stats.pending).toLocaleString('en-US', {minimumFractionDigits: 2})}`, icon: '⏳', color: 'text-orange-600' },
-            { label: 'Denied Claims', value: `$${(+stats.denied).toLocaleString('en-US', {minimumFractionDigits: 2})}`, icon: '❌', color: 'text-red-600' },
-            { label: 'Success Rate', value: `${stats.successRate}%`, icon: '📊', color: 'text-blue-600' },
-          ].map(({ label, value, icon, color }) => (
-            <div key={label} className="bg-white rounded-xl shadow p-5">
-              <div className="text-2xl mb-2">{icon}</div>
-              <p className="text-sm text-gray-500 font-medium">{label}</p>
-              <p className={`text-2xl font-bold ${color}`}>{loading ? '—' : value}</p>
+      {/* ── Header ── */}
+      <div className="bg-gradient-to-r from-teal-900 via-teal-800 to-emerald-900 rounded-2xl p-6 text-white shadow-lg">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center">
+            <DollarSign className="w-5 h-5 text-teal-200" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-extrabold tracking-tight">Insurance Management</h1>
+            <p className="text-teal-200 text-sm mt-0.5">Track and process all insurance claims</p>
+          </div>
+        </div>
+      </div>
+
+      {/* ── KPI Cards ── */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <HealthcareKPICard title="Approved Claims" value={loading ? '—' : fmtUSD(stats.approved)} icon={CheckCircle2} accentColor="border-emerald-500" bgAccent="bg-emerald-50" iconColor="text-emerald-600" loading={loading} />
+        <HealthcareKPICard title="Pending Claims"  value={loading ? '—' : fmtUSD(stats.pending)}  icon={Clock}        accentColor="border-amber-500"   bgAccent="bg-amber-50"   iconColor="text-amber-600" loading={loading} />
+        <HealthcareKPICard title="Denied Claims"   value={loading ? '—' : fmtUSD(stats.denied)}   icon={XCircle}      accentColor="border-red-500"     bgAccent="bg-red-50"     iconColor="text-red-600" loading={loading} />
+        <HealthcareKPICard title="Success Rate"    value={loading ? '—' : `${stats.successRate}%`} icon={BarChart2}   accentColor="border-teal-500"    bgAccent="bg-teal-50"    iconColor="text-teal-600" loading={loading} />
+      </div>
+
+      {/* ── Approval Rate Ring + Breakdown ── */}
+      {!loading && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 flex flex-col items-center justify-center gap-3">
+            <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">Claim Success Rate</p>
+            <div className="relative w-40 h-40">
+              <ResponsiveContainer width="100%" height="100%">
+                <RadialBarChart cx="50%" cy="50%" innerRadius="70%" outerRadius="100%" barSize={14} data={radialData} startAngle={90} endAngle={-270}>
+                  <PolarAngleAxis type="number" domain={[0, 100]} angleAxisId={0} tick={false} />
+                  <RadialBar background={{ fill: '#f1f5f9' }} dataKey="value" angleAxisId={0} cornerRadius={8} />
+                </RadialBarChart>
+              </ResponsiveContainer>
+              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <span className="text-4xl font-extrabold text-slate-800">{stats.successRate}%</span>
+              </div>
             </div>
-          ))}
+            <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold ${stats.successRate >= 75 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-amber-50 text-amber-700 border border-amber-200'}`}>
+              {stats.successRate >= 75 ? '✓ Good Rate' : '⚠ Needs Improvement'}
+            </span>
+          </div>
+
+          <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-slate-100 p-6 space-y-4">
+            <h2 className="text-base font-bold text-slate-800">Claims Breakdown</h2>
+            {[
+              { label: 'Approved', value: claims.filter(c => c.status === 'APPROVED').length, total: claims.length, color: '#10b981' },
+              { label: 'Pending',  value: claims.filter(c => c.status === 'PENDING').length,  total: claims.length, color: '#f59e0b' },
+              { label: 'Denied',   value: claims.filter(c => c.status === 'DENIED').length,   total: claims.length, color: '#ef4444' },
+            ].map(row => {
+              const pct = row.total > 0 ? Math.round((row.value / row.total) * 100) : 0;
+              return (
+                <div key={row.label} className="space-y-1.5">
+                  <div className="flex justify-between text-sm">
+                    <span className="font-medium text-slate-700">{row.label}</span>
+                    <span className="font-bold text-slate-800">{row.value} claims <span className="text-slate-400 font-normal">({pct}%)</span></span>
+                  </div>
+                  <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
+                    <div className="h-2.5 rounded-full transition-all duration-700" style={{ width: `${pct}%`, backgroundColor: row.color }} />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
+      )}
 
-        {/* Filter */}
-        <div className="bg-white rounded-xl shadow p-4 mb-6 flex gap-2">
-          {['ALL', 'APPROVED', 'PENDING', 'DENIED'].map(s => (
-            <button key={s} onClick={() => setFilter(s)}
-              className={`btn btn-sm ${filter === s ? 'btn-primary' : 'btn-ghost'}`}>
-              {s}
-            </button>
-          ))}
+      {/* ── Filter Pills ── */}
+      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-3 flex gap-2 flex-wrap items-center">
+        <Filter className="w-4 h-4 text-slate-400 ml-1" />
+        {['ALL', 'APPROVED', 'PENDING', 'DENIED'].map(s => (
+          <button key={s} onClick={() => setFilter(s)}
+            className={`px-4 py-1.5 rounded-full text-xs font-semibold border transition-all duration-200 ${
+              filter === s ? 'bg-teal-600 text-white border-teal-600 shadow-sm' : 'bg-white text-slate-600 border-slate-200 hover:border-teal-300 hover:text-teal-600'
+            }`}
+          >{s === 'ALL' ? 'All Claims' : s}</button>
+        ))}
+        <span className="ml-auto text-xs text-slate-400">{filtered.length} claims</span>
+      </div>
+
+      {/* ── Claims Table ── */}
+      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+        <div className="px-5 py-4 border-b border-slate-100">
+          <h2 className="text-base font-bold text-slate-800">Insurance Claims</h2>
         </div>
-
-        {/* Claims Table */}
-        <div className="bg-white rounded-xl shadow p-6 overflow-x-auto">
-          <h2 className="text-xl font-bold text-green-800 mb-4">Insurance Claims ({filtered.length})</h2>
-
-          {loading ? (
-            <div className="flex justify-center py-16"><span className="loading loading-spinner loading-lg text-green-600" /></div>
-          ) : filtered.length === 0 ? (
-            <div className="text-center py-16 text-gray-400">No claims found</div>
-          ) : (
-            <table className="table table-zebra w-full">
-              <thead>
-                <tr><th>#</th><th>Patient</th><th>Amount</th><th>Submitted</th><th>Status</th><th>Actions</th></tr>
-              </thead>
-              <tbody>
-                {filtered.map(c => (
-                  <tr key={c.id}>
-                    <td className="font-mono text-xs">CLM-{String(c.id).padStart(4, '0')}</td>
-                    <td className="font-semibold">{c.patientName || 'Unknown Patient'}</td>
-                    <td className="font-bold">${(+(c.amount || 0)).toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
-                    <td>{fmtDate(c.submittedAt)}</td>
-                    <td><span className={`badge ${STATUS_BADGE[c.status] ?? 'badge-info'}`}>{c.status || 'PENDING'}</span></td>
-                    <td>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="bg-slate-50 border-b border-slate-100">
+                {['Claim #', 'Patient', 'Amount', 'Submitted', 'Status', 'Actions'].map(h => (
+                  <th key={h} className={`px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500 ${h === 'Amount' ? 'text-right' : 'text-left'}`}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-50">
+              {loading ? (
+                Array.from({ length: 6 }).map((_, i) => <SkeletonRow key={i} cols={6} />)
+              ) : filtered.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="px-4 py-16 text-center text-slate-400">No claims found</td>
+                </tr>
+              ) : (
+                filtered.map(c => (
+                  <tr key={c.id} className="hover:bg-teal-50/40 transition-colors duration-150">
+                    <td className="px-4 py-3 font-mono text-xs text-slate-500">CLM-{String(c.id).padStart(4, '0')}</td>
+                    <td className="px-4 py-3 font-semibold text-slate-800">{c.patientName || 'Unknown Patient'}</td>
+                    <td className="px-4 py-3 text-right font-bold text-slate-800 tabular-nums">{fmtUSD(c.amount)}</td>
+                    <td className="px-4 py-3 text-xs text-slate-400">{fmtDate(c.submittedAt)}</td>
+                    <td className="px-4 py-3">
+                      <span className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-semibold ${STATUS_BADGE[c.status] ?? 'bg-slate-100 text-slate-600'}`}>
+                        {c.status || 'PENDING'}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3">
                       <div className="flex gap-2">
-                        <button className="btn btn-xs btn-outline">View</button>
-                        <button className="btn btn-xs btn-primary">Process</button>
+                        <button className="inline-flex items-center gap-1 px-3 py-1 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 rounded-lg hover:bg-slate-100 transition">
+                          <Eye className="w-3 h-3" />View
+                        </button>
+                        <button className="inline-flex items-center gap-1 px-3 py-1 text-xs font-medium text-teal-700 bg-teal-50 border border-teal-200 rounded-lg hover:bg-teal-100 transition">
+                          Process
+                        </button>
                       </div>
                     </td>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>

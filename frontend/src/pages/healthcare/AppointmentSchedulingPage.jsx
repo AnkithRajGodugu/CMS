@@ -1,15 +1,45 @@
 import React, { useState, useEffect } from 'react';
+import {
+  CalendarDays, CheckCircle2, Clock, Siren, Filter, XCircle
+} from 'lucide-react';
 import { getAllAppointments } from '../../services/healthcareService';
 import { useAuth } from '../../hooks/useAuth';
+import HealthcareKPICard from '../../components/healthcare/HealthcareKPICard';
 
-const TYPE_LABELS = { CONSULTATION: 'Consultation', FOLLOW_UP: 'Follow-up', CHECK_UP: 'Check-up', EMERGENCY: 'Emergency' };
-const STATUS_BADGE = { CONFIRMED: 'badge-success', PENDING: 'badge-warning', URGENT: 'badge-error', COMPLETED: 'badge-ghost', CANCELLED: 'badge-ghost' };
+const TYPE_LABELS = {
+  CONSULTATION: 'Consultation',
+  FOLLOW_UP:    'Follow-up',
+  CHECK_UP:     'Check-up',
+  EMERGENCY:    'Emergency',
+};
+
+const STATUS_CONFIG = {
+  CONFIRMED:  { classes: 'bg-emerald-50 text-emerald-700 border border-emerald-200', dot: 'bg-emerald-500' },
+  PENDING:    { classes: 'bg-amber-50 text-amber-700 border border-amber-200',       dot: 'bg-amber-500' },
+  URGENT:     { classes: 'bg-red-50 text-red-700 border border-red-200',             dot: 'bg-red-500' },
+  COMPLETED:  { classes: 'bg-slate-100 text-slate-600 border border-slate-200',      dot: 'bg-slate-400' },
+  CANCELLED:  { classes: 'bg-slate-100 text-slate-500 border border-slate-200',      dot: 'bg-slate-300' },
+};
+
+const FILTERS = ['ALL', 'CONFIRMED', 'PENDING', 'URGENT', 'COMPLETED', 'CANCELLED'];
+
+function SkeletonRow({ cols }) {
+  return (
+    <tr className="border-b border-slate-50">
+      {Array.from({ length: cols }).map((_, i) => (
+        <td key={i} className="px-4 py-3">
+          <div className="h-4 bg-slate-100 rounded animate-pulse" style={{ width: `${50 + (i * 13) % 40}%` }} />
+        </td>
+      ))}
+    </tr>
+  );
+}
 
 const AppointmentSchedulingPage = () => {
   const { sector } = useAuth();
   const [appointments, setAppointments] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState('ALL');
+  const [loading, setLoading]           = useState(true);
+  const [filter, setFilter]             = useState('ALL');
 
   useEffect(() => {
     if (sector?.code?.toLowerCase() === 'healthcare') {
@@ -25,98 +55,131 @@ const AppointmentSchedulingPage = () => {
 
   if (sector?.code?.toLowerCase() !== 'healthcare') {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 p-4">
+      <div className="flex flex-col items-center justify-center min-h-screen bg-slate-50 p-4">
         <div className="text-6xl mb-4">🏥</div>
-        <h2 className="text-2xl font-bold text-gray-800 mb-2">Access Denied</h2>
-        <p className="text-gray-600 mb-6 text-center max-w-md">
-          This area is restricted to Healthcare sector personnel. Your account does not have the required permissions.
-        </p>
-        <button className="btn btn-primary" onClick={() => window.location.href = '/'}>Return Home</button>
+        <h2 className="text-2xl font-bold text-slate-800 mb-2">Access Denied</h2>
+        <p className="text-slate-500 mb-6 text-center max-w-md">This area is restricted to Healthcare sector personnel.</p>
+        <button className="px-5 py-2 bg-teal-600 text-white rounded-xl font-semibold hover:bg-teal-700 transition" onClick={() => window.location.href = '/'}>Return Home</button>
       </div>
     );
   }
 
-  const filtered = filter === 'ALL'
-    ? appointments
-    : appointments.filter(a => a.status === filter);
-
+  const filtered = filter === 'ALL' ? appointments : appointments.filter(a => a.status === filter);
   const stats = {
-    total: appointments.length,
-    confirmed: appointments.filter(a => a?.status === 'CONFIRMED').length,
-    pending: appointments.filter(a => a?.status === 'PENDING').length,
-    urgent: appointments.filter(a => a?.status === 'URGENT').length,
+    total:     appointments.length,
+    confirmed: appointments.filter(a => a.status === 'CONFIRMED').length,
+    pending:   appointments.filter(a => a.status === 'PENDING').length,
+    urgent:    appointments.filter(a => a.status === 'URGENT').length,
   };
 
-  const fmtTime = (iso) => {
+  const fmtTime = iso => {
     if (!iso) return '—';
-    const d = new Date(iso);
-    return d.toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
+    return new Date(iso).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 p-6">
-      <div className="max-w-7xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-green-800">Appointment Scheduling</h1>
-          <p className="text-green-700/70 mt-1">View and manage all patient appointments</p>
-        </div>
+    <div className="min-h-screen bg-slate-50 p-6 space-y-6 animate-fade-in-up">
 
-        {/* Stats */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          {[
-            { label: "Total", value: stats.total, icon: '📅', color: 'text-blue-600' },
-            { label: "Confirmed", value: stats.confirmed, icon: '✅', color: 'text-green-600' },
-            { label: "Pending", value: stats.pending, icon: '⏳', color: 'text-orange-600' },
-            { label: "Urgent", value: stats.urgent, icon: '🚨', color: 'text-red-600' },
-          ].map(({ label, value, icon, color }) => (
-            <div key={label} className="bg-white rounded-xl shadow p-5">
-              <div className="text-2xl mb-2">{icon}</div>
-              <p className="text-sm text-gray-500 font-medium">{label}</p>
-              <p className={`text-3xl font-bold ${color}`}>{loading ? '—' : value}</p>
+      {/* ── Header ── */}
+      <div className="bg-gradient-to-r from-teal-900 via-teal-800 to-emerald-900 rounded-2xl p-6 text-white shadow-lg">
+        <div className="flex items-center justify-between flex-wrap gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center">
+              <CalendarDays className="w-5 h-5 text-teal-200" />
             </div>
-          ))}
+            <div>
+              <h1 className="text-2xl font-extrabold tracking-tight">Appointment Scheduling</h1>
+              <p className="text-teal-200 text-sm mt-0.5">View and manage all patient appointments</p>
+            </div>
+          </div>
+          <div className="text-right hidden md:block">
+            <p className="text-teal-200 text-xs">Today</p>
+            <p className="text-white font-bold text-sm">{new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</p>
+          </div>
         </div>
+      </div>
 
-        {/* Filter */}
-        <div className="bg-white rounded-xl shadow p-4 mb-6 flex gap-2 flex-wrap">
-          {['ALL', 'CONFIRMED', 'PENDING', 'URGENT', 'COMPLETED', 'CANCELLED'].map(s => (
-            <button key={s} onClick={() => setFilter(s)}
-              className={`btn btn-sm ${filter === s ? 'btn-primary' : 'btn-ghost'}`}>
-              {s}
-            </button>
-          ))}
-        </div>
+      {/* ── KPI ── */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <HealthcareKPICard title="Total"     value={loading ? '—' : stats.total}     icon={CalendarDays}  accentColor="border-teal-500"    bgAccent="bg-teal-50"    iconColor="text-teal-600" loading={loading} />
+        <HealthcareKPICard title="Confirmed" value={loading ? '—' : stats.confirmed} icon={CheckCircle2}  accentColor="border-emerald-500" bgAccent="bg-emerald-50" iconColor="text-emerald-600" loading={loading} />
+        <HealthcareKPICard title="Pending"   value={loading ? '—' : stats.pending}   icon={Clock}         accentColor="border-amber-500"   bgAccent="bg-amber-50"   iconColor="text-amber-600" loading={loading} />
+        <HealthcareKPICard title="Urgent"    value={loading ? '—' : stats.urgent}    icon={Siren}         accentColor="border-red-500"     bgAccent="bg-red-50"     iconColor="text-red-600" loading={loading} />
+      </div>
 
-        {/* Table */}
-        <div className="bg-white rounded-xl shadow p-6 overflow-x-auto">
-          <h2 className="text-xl font-bold text-green-800 mb-4">
+      {/* ── Filter Pills ── */}
+      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-3 flex gap-2 flex-wrap items-center">
+        <Filter className="w-4 h-4 text-slate-400 ml-1" />
+        {FILTERS.map(s => (
+          <button
+            key={s}
+            onClick={() => setFilter(s)}
+            className={`px-4 py-1.5 rounded-full text-xs font-semibold border transition-all duration-200 ${
+              filter === s
+                ? 'bg-teal-600 text-white border-teal-600 shadow-sm'
+                : 'bg-white text-slate-600 border-slate-200 hover:border-teal-300 hover:text-teal-600'
+            }`}
+          >
+            {s === 'ALL' ? 'All' : s}
+          </button>
+        ))}
+        <span className="ml-auto text-xs text-slate-400">{filtered.length} shown</span>
+      </div>
+
+      {/* ── Table ── */}
+      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+        <div className="px-5 py-4 border-b border-slate-100">
+          <h2 className="text-base font-bold text-slate-800">
             {filter === 'ALL' ? 'All Appointments' : `${filter} Appointments`} ({filtered.length})
           </h2>
-
-          {loading ? (
-            <div className="flex justify-center py-16"><span className="loading loading-spinner loading-lg text-green-600" /></div>
-          ) : filtered.length === 0 ? (
-            <div className="text-center py-16 text-gray-400">No appointments found</div>
-          ) : (
-            <table className="table table-zebra w-full">
-              <thead>
-                <tr><th>ID</th><th>Patient</th><th>Doctor</th><th>Time</th><th>Type</th><th>Status</th><th>Notes</th></tr>
-              </thead>
-              <tbody>
-                {filtered.map(a => (
-                  <tr key={a.id}>
-                    <td className="font-mono text-xs">{a.appointmentId}</td>
-                    <td className="font-semibold">{a.patientName}</td>
-                    <td>{a.doctorName}</td>
-                    <td className="text-sm">{fmtTime(a.appointmentTime)}</td>
-                    <td><span className="badge badge-outline badge-sm">{TYPE_LABELS[a.type] ?? a.type}</span></td>
-                    <td><span className={`badge ${STATUS_BADGE[a.status] ?? 'badge-info'}`}>{a.status}</span></td>
-                    <td className="text-sm text-gray-500 max-w-xs truncate">{a.notes ?? '—'}</td>
-                  </tr>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="bg-slate-50 border-b border-slate-100">
+                {['ID', 'Patient', 'Doctor', 'Scheduled Time', 'Type', 'Status', 'Notes'].map(h => (
+                  <th key={h} className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">{h}</th>
                 ))}
-              </tbody>
-            </table>
-          )}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-50">
+              {loading ? (
+                Array.from({ length: 8 }).map((_, i) => <SkeletonRow key={i} cols={7} />)
+              ) : filtered.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="px-4 py-16 text-center text-slate-400">
+                    <CalendarDays className="w-10 h-10 mx-auto mb-2 opacity-30" />
+                    <p className="font-medium">No appointments found</p>
+                  </td>
+                </tr>
+              ) : (
+                filtered.map(a => {
+                  const sc = STATUS_CONFIG[a.status] || { classes: 'bg-slate-100 text-slate-600', dot: 'bg-slate-400' };
+                  const isUrgent = a.status === 'URGENT';
+                  return (
+                    <tr key={a.id} className={`transition-colors duration-150 ${isUrgent ? 'bg-red-50/30 hover:bg-red-50/60' : 'hover:bg-teal-50/40'}`}>
+                      <td className="px-4 py-3 font-mono text-xs text-slate-500">{a.appointmentId}</td>
+                      <td className="px-4 py-3 font-semibold text-slate-800">{a.patientName}</td>
+                      <td className="px-4 py-3 text-slate-600">{a.doctorName}</td>
+                      <td className="px-4 py-3 text-xs text-slate-500 whitespace-nowrap">{fmtTime(a.appointmentTime)}</td>
+                      <td className="px-4 py-3">
+                        <span className="inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 border border-slate-200">
+                          {TYPE_LABELS[a.type] ?? a.type}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold ${sc.classes}`}>
+                          <span className={`w-1.5 h-1.5 rounded-full ${sc.dot}`} />
+                          {a.status}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-xs text-slate-400 max-w-[160px] truncate">{a.notes ?? '—'}</td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>

@@ -1,0 +1,24 @@
+
+C:\Users\naveenchary\OneDrive\Desktop\cms\frontend\src\components\banking\BankingKPICard.jsx
+  23:3  error  'borderColor' is assigned a value but never used  no-unused-vars
+
+C:\Users\naveenchary\OneDrive\Desktop\cms\frontend\src\pages\banking\user\BankingStatementsPage.jsx
+  20:14  error  'e' is defined but never used  no-unused-vars
+
+C:\Users\naveenchary\OneDrive\Desktop\cms\frontend\src\pages\banking\user\BankingTransactionsPage.jsx
+  23:14  error  'e' is defined but never used  no-unused-vars
+
+C:\Users\naveenchary\OneDrive\Desktop\cms\frontend\src\pages\banking\user\BankingUserDashboard.jsx
+  24:16  error  'e' is defined but never used  no-unused-vars
+
+C:\Users\naveenchary\OneDrive\Desktop\cms\frontend\src\pages\healthcare\user\HealthcareUserDashboard.jsx
+  9:12  error  'error' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+C:\Users\naveenchary\OneDrive\Desktop\cms\frontend\src\pages\healthcare\user\MyAppointmentsPage.jsx
+  68:14  error  'error' is defined but never used  no-unused-vars
+
+C:\Users\naveenchary\OneDrive\Desktop\cms\frontend\src\pages\healthcare\user\MyInsurancePage.jsx
+  30:9  error  'totalAmt' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+Γ£û 7 problems (7 errors, 0 warnings)
+
