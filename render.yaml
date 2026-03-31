@@ -1,0 +1,83 @@
+# ============================================================
+# render.yaml — Render.com Infrastructure as Code
+# Domain: api.cms.ankithtech.xyz → cms-backend.onrender.com
+# ============================================================
+# Usage:
+#   1. Push this file to GitHub repo root
+#   2. Go to render.com → New → Blueprint → Connect repo
+#   3. Fill in the "sync: false" values in the Render dashboard
+#   4. After deploy, set custom domain: api.cms.ankithtech.xyz
+# ============================================================
+
+services:
+  - type: web
+    name: cms-backend
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    region: oregon
+    branch: main
+    healthCheckPath: /actuator/health
+
+    envVars:
+      # ── Spring Profile ───────────────────────────────────────
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+
+      # ── Database (Neon) ───────────────────────────────────────
+      # Format: jdbc:postgresql://ep-xxx.us-east-1.aws.neon.tech/neondb?sslmode=require
+      - key: DB_URL
+        sync: false
+      - key: DB_USER
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+
+      # ── JWT (128 hex chars — generated via generate-secrets.ps1) ─
+      - key: JWT_SECRET
+        sync: false
+      - key: JWT_EXPIRATION
+        value: "86400000"
+
+      # ── AES-256 Encryption (base64 32-byte key) ──────────────
+      - key: ENCRYPTION_KEY
+        sync: false
+
+      # ── Redis (Upstash) ──────────────────────────────────────
+      - key: REDIS_HOST
+        sync: false
+      - key: REDIS_PORT
+        value: "6379"
+      - key: REDIS_PASSWORD
+        sync: false
+      - key: REDIS_SSL
+        value: "true"
+
+      # ── Kafka — Confluent Cloud ──────────────────────────────
+      # Bootstrap: pkc-xxxxx.us-east-1.aws.confluent.cloud:9092
+      - key: KAFKA_BOOTSTRAP_SERVERS
+        sync: false
+      - key: KAFKA_API_KEY
+        sync: false
+      - key: KAFKA_API_SECRET
+        sync: false
+
+      # ── Mail (Brevo SMTP) ─────────────────────────────────────
+      - key: MAIL_HOST
+        value: smtp-relay.brevo.com
+      - key: MAIL_PORT
+        value: "587"
+      - key: MAIL_USERNAME
+        sync: false
+      - key: MAIL_PASSWORD
+        sync: false
+      - key: MAIL_ENABLED
+        value: "true"
+
+      # ── CORS / WebSocket ─────────────────────────────────────
+      - key: WEBSOCKET_ALLOWED_ORIGINS
+        value: "https://cms.ankithtech.xyz"
+
+      # ── Frontend URL (for password-reset email links) ─────────
+      - key: FRONTEND_URL
+        value: "https://cms.ankithtech.xyz"

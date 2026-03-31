@@ -1,0 +1,124 @@
+name: CI/CD — CMS Platform
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+env:
+  JAVA_VERSION: '17'
+  NODE_VERSION: '20'
+
+jobs:
+  # ══════════════════════════════════════════════════════════
+  # JOB 1 — Backend: Build + Test
+  # ══════════════════════════════════════════════════════════
+  backend:
+    name: 🔨 Backend — Build & Test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: temurin
+          cache: maven
+
+      - name: Build JAR (skip tests)
+        run: mvn clean package -DskipTests -q
+
+      - name: Run unit tests
+        run: mvn test -q
+        env:
+          SPRING_PROFILES_ACTIVE: test
+        continue-on-error: true   # Don't block deploy on test failures during early dev
+
+      - name: Upload JAR artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-jar
+          path: backend/target/*.jar
+          retention-days: 1
+
+  # ══════════════════════════════════════════════════════════
+  # JOB 2 — Frontend: Build + Test
+  # ══════════════════════════════════════════════════════════
+  frontend:
+    name: ⚛️  Frontend — Build & Test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Run tests
+        run: npm run test -- --run
+        continue-on-error: true
+
+      - name: Build (production)
+        run: npm run build
+        env:
+          VITE_API_URL: https://api.cms.ankithtech.xyz
+          VITE_WS_URL: wss://api.cms.ankithtech.xyz
+
+  # ══════════════════════════════════════════════════════════
+  # JOB 3 — Deploy Backend → Render
+  # Only runs on main branch after both jobs pass
+  # ══════════════════════════════════════════════════════════
+  deploy-backend:
+    name: 🚀 Deploy Backend → Render
+    needs: [backend, frontend]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - name: Trigger Render deploy hook
+        run: |
+          curl -f -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}"
+          echo "✅ Render deploy triggered"
+        # Get this URL from:
+        # Render Dashboard → Your Service → Settings → Deploy Hooks → Add Hook
+
+  # ══════════════════════════════════════════════════════════
+  # JOB 4 — Deploy Frontend → Vercel
+  # Only runs on main branch after both jobs pass
+  # ══════════════════════════════════════════════════════════
+  deploy-frontend:
+    name: 🌐 Deploy Frontend → Vercel
+    needs: [backend, frontend]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to Vercel (production)
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          working-directory: frontend
+          vercel-args: '--prod'

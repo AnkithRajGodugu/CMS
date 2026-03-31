@@ -4,6 +4,7 @@ import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.common.config.SaslConfigs;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,6 +37,38 @@ public class KafkaConfig {
     @Value("${spring.kafka.topic.replication-factor:1}")
     private short defaultReplicationFactor;
 
+    // ── Confluent Cloud SASL/SSL (empty string = local plaintext mode) ──────────
+    @Value("${spring.kafka.security.protocol:PLAINTEXT}")
+    private String securityProtocol;
+
+    @Value("${spring.kafka.properties.sasl.mechanism:PLAIN}")
+    private String saslMechanism;
+
+    @Value("${kafka.api.key:}")
+    private String kafkaApiKey;
+
+    @Value("${kafka.api.secret:}")
+    private String kafkaApiSecret;
+
+    /**
+     * Injects SASL/SSL properties into any config map when
+     * security.protocol is SASL_SSL (i.e., Confluent Cloud).
+     * No-op for local PLAINTEXT connections.
+     */
+    private void addSaslConfig(Map<String, Object> props) {
+        if ("SASL_SSL".equalsIgnoreCase(securityProtocol)) {
+            props.put("security.protocol", "SASL_SSL");
+            props.put(SaslConfigs.SASL_MECHANISM, saslMechanism);
+            props.put(SaslConfigs.SASL_JAAS_CONFIG,
+                String.format(
+                    "org.apache.kafka.common.security.plain.PlainLoginModule required " +
+                    "username=\"%s\" password=\"%s\";",
+                    kafkaApiKey, kafkaApiSecret
+                )
+            );
+        }
+    }
+
     // Producer Configuration
     @Bean
     public ProducerFactory<String, Object> producerFactory() {
@@ -46,6 +79,7 @@ public class KafkaConfig {
         configProps.put(ProducerConfig.ACKS_CONFIG, "all");
         configProps.put(ProducerConfig.RETRIES_CONFIG, 3);
         configProps.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, true);
+        addSaslConfig(configProps);   // ← Confluent Cloud SASL/SSL (no-op locally)
         return new DefaultKafkaProducerFactory<>(configProps);
     }
 
@@ -64,6 +98,7 @@ public class KafkaConfig {
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
         props.put(JsonDeserializer.TRUSTED_PACKAGES, "*");
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+        addSaslConfig(props);   // ← Confluent Cloud SASL/SSL (no-op locally)
         return new DefaultKafkaConsumerFactory<>(props);
     }
 
@@ -80,11 +115,12 @@ public class KafkaConfig {
         Map<String, Object> configs = new HashMap<>();
         configs.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         // Fail faster if Kafka is down
-        configs.put(AdminClientConfig.REQUEST_TIMEOUT_MS_CONFIG, "3000");
-        configs.put(AdminClientConfig.DEFAULT_API_TIMEOUT_MS_CONFIG, "3000");
+        configs.put(AdminClientConfig.REQUEST_TIMEOUT_MS_CONFIG, "5000");
+        configs.put(AdminClientConfig.DEFAULT_API_TIMEOUT_MS_CONFIG, "5000");
+        addSaslConfig(configs);   // ← Confluent Cloud SASL/SSL (no-op locally)
         KafkaAdmin admin = new KafkaAdmin(configs);
         admin.setFatalIfBrokerNotAvailable(false);
-        admin.setAutoCreate(false);
+        admin.setAutoCreate(true);  // ← Let Confluent auto-create topics on first use
         return admin;
     }
 
