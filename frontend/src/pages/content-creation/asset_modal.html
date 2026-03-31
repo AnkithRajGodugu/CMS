@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Nocturnal Asset Library | Register Asset</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "error": "#ff6e84",
+                        "on-primary-fixed-variant": "#001d83",
+                        "secondary-fixed": "#cbceff",
+                        "primary-fixed-dim": "#748aff",
+                        "surface-container-highest": "#23262c",
+                        "on-surface": "#f6f6fc",
+                        "surface-dim": "#0c0e12",
+                        "on-background": "#f6f6fc",
+                        "on-tertiary-container": "#650d58",
+                        "on-tertiary-fixed-variant": "#701961",
+                        "tertiary-fixed": "#ff95e3",
+                        "on-primary-container": "#00166c",
+                        "tertiary": "#ffade6",
+                        "secondary-dim": "#8d96f4",
+                        "on-secondary": "#0b1574",
+                        "secondary-container": "#343d96",
+                        "error-container": "#a70138",
+                        "on-primary": "#001f89",
+                        "error-dim": "#d73357",
+                        "on-secondary-fixed": "#1f2882",
+                        "surface": "#0c0e12",
+                        "outline-variant": "#46484d",
+                        "primary": "#99a8ff",
+                        "on-tertiary": "#711a62",
+                        "inverse-surface": "#f9f9ff",
+                        "on-surface-variant": "#aaabb0",
+                        "on-error-container": "#ffb2b9",
+                        "on-tertiary-fixed": "#430039",
+                        "primary-fixed": "#879aff",
+                        "surface-tint": "#99a8ff",
+                        "surface-container-lowest": "#000000",
+                        "tertiary-dim": "#f088d4",
+                        "secondary-fixed-dim": "#babfff",
+                        "primary-container": "#879aff",
+                        "on-secondary-fixed-variant": "#3e47a0",
+                        "secondary": "#929bfa",
+                        "inverse-on-surface": "#53555a",
+                        "background": "#0c0e12",
+                        "surface-container-high": "#1d2025",
+                        "on-secondary-container": "#c9cdff",
+                        "inverse-primary": "#2c4de3",
+                        "outline": "#74757a",
+                        "tertiary-container": "#ff95e3",
+                        "surface-container": "#171a1f",
+                        "primary-dim": "#4765f9",
+                        "tertiary-fixed-dim": "#f088d4",
+                        "surface-variant": "#23262c",
+                        "surface-bright": "#292c32",
+                        "on-error": "#490013",
+                        "on-primary-fixed": "#000000",
+                        "surface-container-low": "#111318"
+                    },
+                    fontFamily: {
+                        "headline": ["Manrope"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" },
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .glass-panel {
+            background: rgba(35, 38, 44, 0.7);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(70, 72, 77, 0.4);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body selection:bg-primary/30">
+<!-- Sidebar Navigation Shell -->
+<aside class="fixed left-0 top-0 h-full flex flex-col p-4 bg-[#111318] dark:bg-[#111318] h-screen w-64 border-r border-[#46484d]/20 font-manrope text-sm tracking-tight z-50">
+<div class="mb-10 px-2">
+<h1 class="text-xl font-bold tracking-tighter text-[#f6f6fc]">Nocturnal</h1>
+<p class="text-xs text-on-surface-variant/60 font-medium">Asset Library</p>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 bg-[#23262c] text-[#f6f6fc] rounded-lg shadow-inner transition-all duration-300 scale-98 active:scale-95" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span>Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#aaabb0] hover:text-[#f6f6fc] hover:bg-[#1d2025] transition-all duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="folder_open">folder_open</span>
+<span>Assets</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#aaabb0] hover:text-[#f6f6fc] hover:bg-[#1d2025] transition-all duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="account_tree">account_tree</span>
+<span>Projects</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#aaabb0] hover:text-[#f6f6fc] hover:bg-[#1d2025] transition-all duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span>Settings</span>
+</a>
+</nav>
+<div class="mt-auto pt-6 border-t border-outline-variant/10">
+<button class="w-full flex items-center justify-center gap-2 py-3 bg-gradient-to-br from-primary to-primary-dim text-on-primary-container font-bold rounded-xl shadow-lg shadow-primary/10 hover:brightness-110 transition-all">
+<span class="material-symbols-outlined" data-icon="add_circle">add_circle</span>
+                New Asset
+            </button>
+</div>
+</aside>
+<!-- Top Navigation Bar Shell -->
+<header class="fixed top-0 right-0 left-64 flex justify-between items-center px-8 z-40 bg-[#0c0e12]/80 backdrop-blur-xl h-16 border-b border-[#46484d]/20 font-inter text-sm">
+<div class="flex items-center w-1/3">
+<div class="relative w-full max-w-sm group">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-lg">search</span>
+<input class="w-full bg-surface-container-low border-none rounded-full pl-10 pr-4 py-2 text-on-surface placeholder:text-on-surface-variant/40 focus:ring-1 focus:ring-primary/50 transition-all" placeholder="Search resources..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-4 text-[#aaabb0]">
+<button class="hover:text-[#f6f6fc] transition-colors">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="hover:text-[#f6f6fc] transition-colors">
+<span class="material-symbols-outlined" data-icon="help_outline">help_outline</span>
+</button>
+</div>
+<div class="h-8 w-[1px] bg-outline-variant/20"></div>
+<div class="flex items-center gap-3">
+<div class="text-right">
+<p class="text-xs font-semibold text-on-surface">Alex Rivera</p>
+<p class="text-[10px] text-on-surface-variant">Pro Creator</p>
+</div>
+<img alt="User profile" class="w-10 h-10 rounded-full border border-outline-variant/30 object-cover" data-alt="Professional headshot of a creative director in studio lighting with a neutral gray background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCq3m0y5cT9g4vt7uu8f-y__FYVSjLWSfsT4fuS-4e5JkASORml_wN5CChyfo2Tgk4kbb2UsZNmNiC7NiH_jUMm-NmTAnRTJg7HWkPIYZ5eZeE1dkDcm--WRaPx1gdNrMpjNsDIw4InBjwne5TzunPeXEZOyZrd82pSjEfzjmjKJturwExHqjAM5UAbtgFWBesBjxQY-Pb-fZ3XjzNZoc1FI7el8yDo3e-IX-AWxbVbTd1Ly-RPMWCYYMKw5hxvm8MoFPQvv0SG2fyS"/>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="ml-64 pt-24 p-8 min-h-screen">
+<!-- Dashboard Header -->
+<div class="mb-12">
+<h2 class="font-headline text-5xl font-extrabold tracking-tight text-on-surface mb-2">Workspace</h2>
+<p class="text-on-surface-variant max-w-2xl">Manage your digital universe. High-fidelity asset tracking and project synchronization in one central observatory.</p>
+</div>
+<!-- Bento Grid Layout for Dashboard Content -->
+<div class="grid grid-cols-12 gap-6 mb-12">
+<!-- Hero Stats Card -->
+<div class="col-span-8 bg-surface-container rounded-3xl p-8 border border-outline-variant/10 relative overflow-hidden group">
+<div class="absolute top-0 right-0 w-64 h-64 bg-primary/10 blur-[100px] -mr-32 -mt-32 rounded-full"></div>
+<div class="relative z-10">
+<div class="flex justify-between items-start mb-12">
+<div>
+<span class="text-xs font-bold uppercase tracking-widest text-primary mb-2 block">Storage Utilization</span>
+<h3 class="text-4xl font-headline font-bold text-on-surface">2.4 TB <span class="text-xl font-normal text-on-surface-variant">/ 5 TB</span></h3>
+</div>
+<div class="flex -space-x-3">
+<img alt="team" class="w-10 h-10 rounded-full border-2 border-surface" data-alt="close-up of a smiling young woman with dark hair" src="https://lh3.googleusercontent.com/aida-public/AB6AXuARJHG5jm928MoxppGipdlWSxXojJXkR7ylYrEN-v6ZR7x1zIMNnJC1ZMZd95cJthsiNR5aOdOyd2b9jCkO3pRN7nBceGzq14-Vhf0kamkQsH6Jo_axjt2tRzNTU5sshrOgUWYSY4sLUjYEbHh3DFpPlvRlQHlpukg-kD6NHt1PqeFk2I5PdWJBigGJnelwb4kYUy3LI6en0cj9cROY23aM12Lb5GfjaxUpxhSkwhz_UZCt2-XUMJMDJnDOw2GhN5gARQkhH9MN03jD"/>
+<img alt="team" class="w-10 h-10 rounded-full border-2 border-surface" data-alt="portrait of a woman with vibrant energy and warm lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDj_XjfI6ddMyCJ9zO6Sc9eDD19kBweTPI8LXqfJm_cz2Tt3IiV1Gnjj_skpjrlgaxNfj5wX-hrbh0Cz2iiMeEIeJLSTvk0NjoWNsXAhN6HjJJokrAQQmhhlaZ9-u_j_Y6KHH30bW-QgAX8PfEotVrKo9EBYW0a3CPM8SiHqETOflG9a5czABerdt0yQWpxLuIlvuhMDBSJL8RkKwuSDC47Ll1HZApoitwJty-z65A7g3qOgfErAI0DbI8kAsNBM7rHpGqvrhi0Aon9"/>
+<div class="w-10 h-10 rounded-full bg-surface-container-highest border-2 border-surface flex items-center justify-center text-xs font-bold text-on-surface">+4</div>
+</div>
+</div>
+<div class="w-full h-3 bg-surface-container-lowest rounded-full overflow-hidden mb-8">
+<div class="h-full bg-gradient-to-r from-primary to-secondary w-[48%] rounded-full shadow-[0_0_15px_rgba(153,168,255,0.4)]"></div>
+</div>
+<div class="grid grid-cols-3 gap-8">
+<div>
+<p class="text-on-surface-variant text-xs mb-1">Active Projects</p>
+<p class="text-xl font-headline font-bold">12</p>
+</div>
+<div>
+<p class="text-on-surface-variant text-xs mb-1">Total Assets</p>
+<p class="text-xl font-headline font-bold">1,842</p>
+</div>
+<div>
+<p class="text-on-surface-variant text-xs mb-1">Shared Nodes</p>
+<p class="text-xl font-headline font-bold">85</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Side Card: Quick Access -->
+<div class="col-span-4 bg-surface-container-high rounded-3xl p-6 border border-outline-variant/10 flex flex-col justify-between">
+<div>
+<h4 class="font-headline font-bold text-lg mb-6">Recent Nodes</h4>
+<div class="space-y-4">
+<div class="flex items-center gap-4 group cursor-pointer">
+<div class="w-10 h-10 rounded-lg bg-surface-container-lowest flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-on-primary transition-all">
+<span class="material-symbols-outlined" data-icon="movie">movie</span>
+</div>
+<div class="flex-1 border-b border-outline-variant/5 pb-2">
+<p class="text-sm font-semibold text-on-surface">Summer_Campaign_v2.mp4</p>
+<p class="text-[10px] text-on-surface-variant">Video • 482 MB • 2h ago</p>
+</div>
+</div>
+<div class="flex items-center gap-4 group cursor-pointer">
+<div class="w-10 h-10 rounded-lg bg-surface-container-lowest flex items-center justify-center text-secondary group-hover:bg-secondary group-hover:text-on-secondary transition-all">
+<span class="material-symbols-outlined" data-icon="image">image</span>
+</div>
+<div class="flex-1 border-b border-outline-variant/5 pb-2">
+<p class="text-sm font-semibold text-on-surface">Brand_Styleguide_2024.pdf</p>
+<p class="text-[10px] text-on-surface-variant">Document • 12 MB • 5h ago</p>
+</div>
+</div>
+<div class="flex items-center gap-4 group cursor-pointer">
+<div class="w-10 h-10 rounded-lg bg-surface-container-lowest flex items-center justify-center text-tertiary group-hover:bg-tertiary group-hover:text-on-tertiary transition-all">
+<span class="material-symbols-outlined" data-icon="audio_file">audio_file</span>
+</div>
+<div class="flex-1 border-b border-outline-variant/5 pb-2">
+<p class="text-sm font-semibold text-on-surface">Voiceover_Rev_03.wav</p>
+<p class="text-[10px] text-on-surface-variant">Audio • 45 MB • Yesterday</p>
+</div>
+</div>
+</div>
+</div>
+<button class="w-full text-xs font-bold text-primary flex items-center justify-center gap-2 hover:bg-primary/10 py-2 rounded-lg transition-all">
+                    View All Assets <span class="material-symbols-outlined text-sm" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+<!-- Activity List (Asymmetric Width) -->
+<div class="col-span-12 bg-surface-container-low rounded-3xl p-8 border border-outline-variant/10">
+<div class="flex justify-between items-center mb-8">
+<h4 class="font-headline font-bold text-xl">Project Velocity</h4>
+<div class="flex gap-2">
+<span class="px-3 py-1 bg-surface-container-highest rounded-full text-[10px] font-bold text-primary">Live</span>
+<span class="px-3 py-1 bg-surface-container-highest rounded-full text-[10px] font-bold text-on-surface-variant">Archive</span>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-separate border-spacing-y-3">
+<thead>
+<tr class="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">
+<th class="px-4 pb-2">Project Name</th>
+<th class="px-4 pb-2">Health</th>
+<th class="px-4 pb-2">Contributors</th>
+<th class="px-4 pb-2">Timeline</th>
+<th class="px-4 pb-2 text-right">Actions</th>
+</tr>
+</thead>
+<tbody>
+<tr class="bg-surface-container-lowest/30 hover:bg-surface-container-highest/40 transition-colors">
+<td class="px-4 py-4 rounded-l-2xl font-semibold">Neon Horizon Rebrand</td>
+<td class="px-4 py-4">
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981]"></div>
+<span class="text-xs">Optimal</span>
+</div>
+</td>
+<td class="px-4 py-4">
+<div class="flex -space-x-2">
+<div class="w-7 h-7 rounded-full bg-primary/20 border border-primary/40"></div>
+<div class="w-7 h-7 rounded-full bg-secondary/20 border border-secondary/40"></div>
+</div>
+</td>
+<td class="px-4 py-4 text-xs">84% Complete</td>
+<td class="px-4 py-4 rounded-r-2xl text-right">
+<button class="material-symbols-outlined text-on-surface-variant hover:text-on-surface" data-icon="more_horiz">more_horiz</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</main>
+<!-- Modal Overlay Backdrop -->
+<div class="fixed inset-0 z-[100] bg-surface-container-lowest/80 backdrop-blur-md flex items-center justify-center p-4">
+<!-- Register Digital Asset Modal -->
+<div class="glass-panel w-full max-w-lg rounded-[2.5rem] shadow-2xl shadow-primary/10 overflow-hidden relative">
+<!-- Modal Header -->
+<div class="px-10 pt-10 pb-6 flex justify-between items-start">
+<div>
+<h2 class="font-headline text-3xl font-extrabold tracking-tight text-on-surface mb-1">Register Asset</h2>
+<p class="text-on-surface-variant text-sm font-body">Add a new entity to your celestial library.</p>
+</div>
+<button class="w-10 h-10 flex items-center justify-center rounded-full bg-surface-container-highest text-on-surface-variant hover:text-on-surface transition-all">
+<span class="material-symbols-outlined" data-icon="close">close</span>
+</button>
+</div>
+<!-- Modal Content Form -->
+<form class="px-10 pb-10 space-y-6">
+<!-- Asset Title Input -->
+<div class="space-y-2">
+<label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant px-1">Asset Title</label>
+<div class="relative group">
+<input class="w-full bg-surface-container-lowest border border-outline-variant/20 rounded-2xl px-5 py-4 text-on-surface placeholder:text-on-surface-variant/30 focus:ring-2 focus:ring-primary/40 focus:border-primary/40 outline-none transition-all font-medium" placeholder="e.g. Cinematic_Landscape_Master" type="text"/>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<!-- Asset Type Dropdown -->
+<div class="space-y-2">
+<label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant px-1">Type</label>
+<div class="relative">
+<select class="w-full bg-surface-container-lowest border border-outline-variant/20 rounded-2xl px-5 py-4 text-on-surface focus:ring-2 focus:ring-primary/40 focus:border-primary/40 outline-none transition-all appearance-none cursor-pointer">
+<option>Video Master</option>
+<option>High-Res Image</option>
+<option>Project Source</option>
+<option>Audio Raw</option>
+</select>
+<span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant" data-icon="expand_more">expand_more</span>
+</div>
+</div>
+<!-- Project Linking Dropdown -->
+<div class="space-y-2">
+<label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant px-1">Project Link</label>
+<div class="relative">
+<select class="w-full bg-surface-container-lowest border border-outline-variant/20 rounded-2xl px-5 py-4 text-on-surface focus:ring-2 focus:ring-primary/40 focus:border-primary/40 outline-none transition-all appearance-none cursor-pointer">
+<option>Neon Horizon</option>
+<option>Solaris 2.0</option>
+<option>Winter Echoes</option>
+<option>Unlinked</option>
+</select>
+<span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant" data-icon="expand_more">expand_more</span>
+</div>
+</div>
+</div>
+<!-- File URL Input -->
+<div class="space-y-2">
+<label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant px-1">Source URL / Path</label>
+<div class="relative group">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant text-lg">link</span>
+<input class="w-full bg-surface-container-lowest border border-outline-variant/20 rounded-2xl pl-12 pr-5 py-4 text-on-surface placeholder:text-on-surface-variant/30 focus:ring-2 focus:ring-primary/40 focus:border-primary/40 outline-none transition-all font-medium" placeholder="s3://buckets/production/assets/v1..." type="url"/>
+</div>
+</div>
+<!-- Primary Action Button -->
+<div class="pt-4">
+<button class="w-full py-5 bg-gradient-to-br from-primary to-primary-dim text-on-primary-container font-extrabold text-lg rounded-2xl shadow-xl shadow-primary/20 hover:shadow-primary/30 active:scale-95 transition-all" type="submit">
+                        Deploy to Library
+                    </button>
+<p class="text-center text-[10px] text-on-surface-variant mt-4 font-medium uppercase tracking-tighter">
+                        Assets are indexed across global edge nodes for <span class="text-primary">maximum velocity</span>
+</p>
+</div>
+</form>
+</div>
+</div>
+</body></html>

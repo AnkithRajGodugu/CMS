@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import api from '../../services/api';
-import {
-  FaRoute, FaPlus, FaMapMarkedAlt, FaClock, FaExclamationTriangle,
-  FaRoad, FaTimes, FaChartLine, FaLocationArrow, FaCheck
-} from 'react-icons/fa';
 import { toast } from 'sonner';
+import {
+  Route, Plus, Map, Clock, AlertTriangle,
+  Road, X, TrendingUp, Navigation, Check
+} from 'lucide-react';
 
 // Leaflet CSS must be loaded
 import 'leaflet/dist/leaflet.css';
@@ -19,7 +19,11 @@ L.Icon.Default.mergeOptions({
   shadowUrl:     'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
 });
 
-/* ── City lat/lng lookup (India) ─────────────────────────────────────────── */
+const cx = (...c) => c.filter(Boolean).join(' ');
+const inputCls  = "w-full bg-[#0c0e12] border border-[#46484d]/20 rounded-xl px-4 py-3 text-sm text-[#f6f6fc] placeholder-[#46484d] focus:outline-none focus:border-[#99a8ff]/50 transition-all";
+const labelCls  = "block text-xs font-bold uppercase tracking-widest text-[#aaabb0] mb-2";
+
+/* ── City lat/lng lookup (India) ──────────────────────────────────────────── */
 const CITY_LATLNG = {
   Mumbai:              [19.0760,  72.8777],
   Delhi:               [28.6139,  77.2090],
@@ -36,7 +40,7 @@ const CITY_LATLNG = {
   Nagpur:              [21.1458,  79.0882],
   Bhopal:              [23.2599,  77.4126],
   Chandigarh:          [30.7333,  76.7794],
-  Kochi:               [9.9312,   76.2673],
+  Kochi:               [ 9.9312,  76.2673],
   Coimbatore:          [11.0168,  76.9558],
   Visakhapatnam:       [17.6868,  83.2185],
   Patna:               [25.5941,  85.1376],
@@ -51,41 +55,28 @@ const CITY_LATLNG = {
 function cityLatLng(name) {
   if (!name) return null;
   if (CITY_LATLNG[name]) return CITY_LATLNG[name];
-  // fuzzy match on first word
   const first = name.split(' ')[0];
   return CITY_LATLNG[first] || null;
 }
 
-/* ── Custom colored markers ──────────────────────────────────────────────── */
 function makeMarkerIcon(color) {
   return L.divIcon({
     className: '',
-    html: `<div style="
-      width:14px;height:14px;
-      background:${color};
-      border:2.5px solid white;
-      border-radius:50%;
-      box-shadow:0 2px 6px rgba(0,0,0,0.4);
-    "></div>`,
+    html: `<div style="width:14px;height:14px;background:${color};border:2.5px solid white;border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,0.4);"></div>`,
     iconSize: [14, 14],
     iconAnchor: [7, 7],
   });
 }
 
-/* ── Leaflet Map Component ───────────────────────────────────────────────── */
+/* ── Leaflet Map ──────────────────────────────────────────────────────────── */
 function LeafletMap({ routes, selectedRoute, onRouteClick }) {
-  const mapRef = useRef(null);
+  const mapRef         = useRef(null);
   const mapInstanceRef = useRef(null);
-  const layersRef = useRef([]);
+  const layersRef      = useRef([]);
 
-  // Initialise map once
   useEffect(() => {
     if (mapInstanceRef.current) return;
-    const map = L.map(mapRef.current, {
-      center: [20.5937, 78.9629], // India center
-      zoom: 5,
-      zoomControl: true,
-    });
+    const map = L.map(mapRef.current, { center: [20.5937, 78.9629], zoom: 5, zoomControl: true });
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
       maxZoom: 18,
@@ -94,15 +85,11 @@ function LeafletMap({ routes, selectedRoute, onRouteClick }) {
     return () => { map.remove(); mapInstanceRef.current = null; };
   }, []);
 
-  // Draw/redraw routes whenever they change
   useEffect(() => {
     const map = mapInstanceRef.current;
     if (!map) return;
-
-    // Clear existing layers
     layersRef.current.forEach(l => map.removeLayer(l));
     layersRef.current = [];
-
     const bounds = [];
 
     routes.forEach(route => {
@@ -113,135 +100,84 @@ function LeafletMap({ routes, selectedRoute, onRouteClick }) {
       const isSelected = selectedRoute?.id === route.id;
       const isOpt      = route.status === 'OPTIMIZED';
       const lineColor  = isSelected ? '#f59e0b' : isOpt ? '#10b981' : '#6b7280';
-      const lineWeight = isSelected ? 5 : 3;
 
-      // Polyline
       const line = L.polyline([fromLL, toLL], {
-        color: lineColor,
-        weight: lineWeight,
-        opacity: isSelected ? 1 : 0.75,
-        dashArray: isOpt ? null : '8, 6',
+        color: lineColor, weight: isSelected ? 5 : 3,
+        opacity: isSelected ? 1 : 0.75, dashArray: isOpt ? null : '8, 6',
       })
-        .bindPopup(`
-          <div style="font-family:sans-serif;min-width:160px">
-            <b>${route.startLocation} → ${route.endLocation}</b><br/>
-            <span style="color:#6b7280;font-size:12px">
-              📏 ${route.distanceKm} km &nbsp; ⏱ ${route.estimatedTimeMinutes} min
-            </span><br/>
-            <span style="
-              display:inline-block;margin-top:4px;padding:2px 8px;
-              background:${isOpt ? '#d1fae5' : '#fef3c7'};
-              color:${isOpt ? '#065f46' : '#92400e'};
-              border-radius:99px;font-size:11px;font-weight:bold
-            ">${route.status}</span>
-          </div>
-        `)
+        .bindPopup(`<div style="font-family:sans-serif;min-width:160px"><b>${route.startLocation} → ${route.endLocation}</b><br/><span style="color:#6b7280;font-size:12px">📏 ${route.distanceKm} km &nbsp; ⏱ ${route.estimatedTimeMinutes} min</span></div>`)
         .on('click', () => onRouteClick(route));
 
       line.addTo(map);
       layersRef.current.push(line);
       bounds.push(fromLL, toLL);
 
-      // Start marker (green)
-      const startM = L.marker(fromLL, { icon: makeMarkerIcon(isOpt ? '#10b981' : '#f59e0b') })
-        .bindTooltip(route.startLocation, { permanent: false, direction: 'top' });
-      startM.addTo(map);
-      layersRef.current.push(startM);
-
-      // End marker (blue/red)
-      const endM = L.marker(toLL, { icon: makeMarkerIcon(isSelected ? '#f59e0b' : '#3b82f6') })
-        .bindTooltip(route.endLocation, { permanent: false, direction: 'top' });
-      endM.addTo(map);
-      layersRef.current.push(endM);
+      const startM = L.marker(fromLL, { icon: makeMarkerIcon(isOpt ? '#10b981' : '#f59e0b') }).bindTooltip(route.startLocation, { permanent: false, direction: 'top' });
+      const endM   = L.marker(toLL,   { icon: makeMarkerIcon(isSelected ? '#f59e0b' : '#3b82f6') }).bindTooltip(route.endLocation, { permanent: false, direction: 'top' });
+      startM.addTo(map); layersRef.current.push(startM);
+      endM.addTo(map);   layersRef.current.push(endM);
     });
 
-    // Fit map to show all routes
-    if (bounds.length > 0) {
-      try { map.fitBounds(bounds, { padding: [40, 40] }); } catch {}
-    }
+    if (bounds.length > 0) { try { map.fitBounds(bounds, { padding: [40, 40] }); } catch {} }
   }, [routes, selectedRoute]);
 
-  return (
-    <div
-      ref={mapRef}
-      style={{ width: '100%', height: '100%', borderRadius: '0.75rem', zIndex: 0 }}
-    />
-  );
+  return <div ref={mapRef} style={{ width: '100%', height: '100%', borderRadius: '0.75rem', zIndex: 0 }} />;
 }
 
-/* ── Route Detail Side Panel ─────────────────────────────────────────────── */
+/* ── Route Detail Overlay ─────────────────────────────────────────────────── */
 function RouteDetailPanel({ route, onClose, onOptimize }) {
   if (!route) return null;
-  const speedKmh = route.estimatedTimeMinutes > 0
-    ? Math.round((route.distanceKm / route.estimatedTimeMinutes) * 60)
-    : '—';
+  const speedKmh   = route.estimatedTimeMinutes > 0 ? Math.round((route.distanceKm / route.estimatedTimeMinutes) * 60) : '—';
   const efficiency = route.status === 'OPTIMIZED' ? 92 : 54;
+  const isOpt      = route.status === 'OPTIMIZED';
 
   return (
-    <div className="absolute top-4 right-4 z-[999] w-72 bg-base-100 rounded-2xl shadow-2xl border border-base-200 overflow-hidden animate-in slide-in-from-right">
-      {/* Header */}
-      <div className={`p-4 text-white ${route.status === 'OPTIMIZED' ? 'bg-gradient-to-r from-emerald-500 to-teal-600' : 'bg-gradient-to-r from-amber-500 to-orange-500'}`}>
+    <div className="absolute top-4 right-4 z-[999] w-72 bg-[#111318] rounded-2xl border border-[#46484d]/20 shadow-2xl overflow-hidden">
+      <div className={cx('p-4 text-white', isOpt ? 'bg-gradient-to-r from-emerald-600/70 to-teal-700/70' : 'bg-gradient-to-r from-amber-600/70 to-orange-700/70')}>
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-2 min-w-0">
-            <FaMapMarkedAlt className="flex-shrink-0"/>
+            <Map className="w-4 h-4 shrink-0" />
             <div className="min-w-0">
-              <div className="font-bold text-sm truncate">{route.startLocation}</div>
-              <div className="text-white/60 text-xs">↓</div>
-              <div className="font-bold text-sm truncate">{route.endLocation}</div>
+              <p className="font-bold text-sm truncate">{route.startLocation}</p>
+              <p className="text-white/40 text-xs">↓</p>
+              <p className="font-bold text-sm truncate">{route.endLocation}</p>
             </div>
           </div>
-          <button className="btn btn-circle btn-xs btn-ghost text-white flex-shrink-0" onClick={onClose}>
-            <FaTimes/>
-          </button>
+          <button onClick={onClose} className="p-1 rounded-lg text-white/70 hover:text-white hover:bg-white/10 transition-all shrink-0"><X className="w-4 h-4" /></button>
         </div>
-        <div className="mt-2">
-          <span className={`badge badge-sm font-bold ${route.status === 'OPTIMIZED' ? 'bg-white/20 text-white border-white/30' : 'bg-white/20 text-white border-white/30'}`}>
-            {route.status}
-          </span>
-        </div>
+        <span className={cx('mt-2 inline-block text-[10px] font-bold uppercase px-2 py-0.5 rounded-full border', isOpt ? 'border-emerald-400/30 text-emerald-200 bg-emerald-400/10' : 'border-amber-400/30 text-amber-200 bg-amber-400/10')}>
+          {route.status}
+        </span>
       </div>
-
-      {/* Stats */}
       <div className="p-4 space-y-3">
         <div className="grid grid-cols-3 gap-2 text-center">
           {[
-            { label: 'Distance', value: `${route.distanceKm} km`, color: 'text-amber-500' },
-            { label: 'Time', value: `${route.estimatedTimeMinutes}m`, color: 'text-blue-500' },
-            { label: 'Avg Speed', value: `${speedKmh} km/h`, color: 'text-emerald-500' },
+            { label: 'Distance', value: `${route.distanceKm} km`,  color: 'text-amber-400' },
+            { label: 'Time',     value: `${route.estimatedTimeMinutes}m`, color: 'text-sky-400' },
+            { label: 'Avg Spd', value: `${speedKmh}km/h`,          color: 'text-emerald-400' },
           ].map(s => (
-            <div key={s.label} className="bg-base-200 rounded-xl py-2 px-1">
-              <div className={`font-bold text-sm ${s.color}`}>{s.value}</div>
-              <div className="text-xs opacity-40 mt-0.5">{s.label}</div>
+            <div key={s.label} className="bg-[#0c0e12] rounded-xl py-2 px-1">
+              <p className={cx('font-bold text-xs', s.color)}>{s.value}</p>
+              <p className="text-[10px] text-[#46484d] mt-0.5">{s.label}</p>
             </div>
           ))}
         </div>
-
-        {/* Efficiency */}
         <div>
           <div className="flex justify-between text-xs font-semibold mb-1">
-            <span className="opacity-50">Route Efficiency</span>
-            <span>{efficiency}%</span>
+            <span className="text-[#aaabb0]">Route Efficiency</span>
+            <span className="text-[#f6f6fc]">{efficiency}%</span>
           </div>
-          <div className="bg-base-200 h-2 rounded-full overflow-hidden">
-            <div
-              className={`h-full rounded-full transition-all duration-700 ${route.status === 'OPTIMIZED' ? 'bg-emerald-500' : 'bg-amber-500'}`}
-              style={{ width: `${efficiency}%` }}
-            />
+          <div className="bg-[#0c0e12] h-2 rounded-full overflow-hidden">
+            <div className={cx('h-full rounded-full transition-all duration-700', isOpt ? 'bg-gradient-to-r from-emerald-400 to-emerald-600' : 'bg-gradient-to-r from-amber-400 to-amber-600')} style={{ width: `${efficiency}%` }} />
           </div>
         </div>
-
-        {/* Actions */}
-        {route.status !== 'OPTIMIZED' && (
-          <button
-            className="btn btn-warning text-white w-full gap-2 btn-sm"
-            onClick={() => onOptimize(route.id)}
-          >
-            <FaChartLine className="text-xs"/> Mark as Optimized
+        {!isOpt ? (
+          <button onClick={() => onOptimize(route.id)} className="w-full py-2.5 rounded-xl text-xs font-bold text-[#000] bg-gradient-to-br from-amber-400 to-amber-600 hover:shadow-lg active:scale-95 transition-all flex items-center justify-center gap-2">
+            <TrendingUp className="w-3.5 h-3.5" /> Mark as Optimized
           </button>
-        )}
-        {route.status === 'OPTIMIZED' && (
-          <div className="flex items-center gap-2 text-emerald-600 text-xs font-semibold bg-emerald-50 rounded-xl p-2.5">
-            <FaCheck/> Route is fully optimized
+        ) : (
+          <div className="flex items-center gap-2 text-emerald-400 text-xs font-semibold bg-emerald-500/5 border border-emerald-500/20 rounded-xl p-2.5">
+            <Check className="w-3.5 h-3.5" /> Route is fully optimized
           </div>
         )}
       </div>
@@ -249,34 +185,27 @@ function RouteDetailPanel({ route, onClose, onOptimize }) {
   );
 }
 
-/* ── Main Page ───────────────────────────────────────────────────────────── */
+/* ── Main Page ────────────────────────────────────────────────────────────── */
 const LogisticsRouteOptimizationPage = () => {
   const { user, sector } = useAuth();
-  const [routes, setRoutes] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [routes, setRoutes]             = useState([]);
+  const [loading, setLoading]           = useState(true);
+  const [isModalOpen, setIsModalOpen]   = useState(false);
   const [selectedRoute, setSelectedRoute] = useState(null);
-  const [filter, setFilter] = useState('ALL');
-  const [newRoute, setNewRoute] = useState({
-    startLocation: '', endLocation: '', distanceKm: 0, estimatedTimeMinutes: 0, status: 'PENDING'
-  });
+  const [filter, setFilter]             = useState('ALL');
+  const [newRoute, setNewRoute]         = useState({ startLocation: '', endLocation: '', distanceKm: 0, estimatedTimeMinutes: 0, status: 'PENDING' });
 
   const fetchRoutes = async () => {
     try {
       setLoading(true);
-      const res = await api.get('/logistics/routes');
+      const res  = await api.get('/logistics/routes');
       const data = res.data?.data ?? res.data;
       setRoutes(data?.content ?? (Array.isArray(data) ? data : []));
-    } catch {
-      toast.error('Failed to load route data');
-    } finally {
-      setLoading(false);
-    }
+    } catch { toast.error('Failed to load route data'); }
+    finally { setLoading(false); }
   };
 
-  useEffect(() => {
-    if (user && sector?.code?.toLowerCase() === 'logistics') fetchRoutes();
-  }, [user, sector]);
+  useEffect(() => { if (user && sector?.code?.toLowerCase() === 'logistics') fetchRoutes(); }, [user, sector]);
 
   const handleCreateRoute = async (e) => {
     e.preventDefault();
@@ -290,9 +219,7 @@ const LogisticsRouteOptimizationPage = () => {
   };
 
   const handleOptimize = async (routeId) => {
-    try {
-      await api.put(`/logistics/routes/${routeId}`, { status: 'OPTIMIZED' });
-    } catch {}
+    try { await api.put(`/logistics/routes/${routeId}`, { status: 'OPTIMIZED' }); } catch {}
     setRoutes(prev => prev.map(r => r.id === routeId ? { ...r, status: 'OPTIMIZED' } : r));
     setSelectedRoute(prev => prev?.id === routeId ? { ...prev, status: 'OPTIMIZED' } : prev);
     toast.success('Route marked as optimized!');
@@ -300,171 +227,137 @@ const LogisticsRouteOptimizationPage = () => {
 
   if (!user || sector?.code?.toLowerCase() !== 'logistics') {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-base-200">
-        <div className="card bg-base-100 shadow-xl p-8 text-center max-w-md">
-          <FaExclamationTriangle className="text-5xl text-warning mx-auto mb-4"/>
-          <h2 className="text-2xl font-bold mb-2">Logistics Access Only</h2>
+      <div className="min-h-screen flex items-center justify-center bg-[#0c0e12]">
+        <div className="flex flex-col items-center gap-6 p-10 bg-[#111318] rounded-3xl border border-[#46484d]/20 max-w-md">
+          <AlertTriangle className="w-16 h-16 text-amber-400" />
+          <h2 className="text-2xl font-bold text-[#f6f6fc]">Logistics Access Only</h2>
         </div>
       </div>
     );
   }
 
-  const filteredRoutes = routes.filter(r => {
-    if (filter === 'OPTIMIZED') return r.status === 'OPTIMIZED';
-    if (filter === 'PENDING') return r.status !== 'OPTIMIZED';
-    return true;
-  });
-
-  const optimizedCount = routes.filter(r => r.status === 'OPTIMIZED').length;
-  const pendingCount   = routes.filter(r => r.status !== 'OPTIMIZED').length;
-  const avgDist        = routes.length > 0
-    ? Math.round(routes.reduce((s, r) => s + (r.distanceKm || 0), 0) / routes.length)
-    : 0;
+  const filteredRoutes  = routes.filter(r => filter === 'OPTIMIZED' ? r.status === 'OPTIMIZED' : filter === 'PENDING' ? r.status !== 'OPTIMIZED' : true);
+  const optimizedCount  = routes.filter(r => r.status === 'OPTIMIZED').length;
+  const pendingCount    = routes.filter(r => r.status !== 'OPTIMIZED').length;
+  const avgDist         = routes.length > 0 ? Math.round(routes.reduce((s, r) => s + (r.distanceKm || 0), 0) / routes.length) : 0;
 
   return (
-    <div className="min-h-screen bg-base-200 p-4 md:p-6 space-y-4">
-
-      {/* ── Header ── */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-extrabold flex items-center gap-3">
-            <FaRoute className="text-amber-500"/> Route Optimization
-          </h1>
-          <p className="text-base-content/60 mt-1 text-sm">
-            Live route network on OpenStreetMap · Click a route to inspect it
-          </p>
+    <div className="min-h-screen bg-[#0c0e12] text-[#f6f6fc] font-sans p-8">
+      <div className="fixed bottom-0 right-0 w-[500px] h-[500px] bg-[#99a8ff]/10 blur-[120px] rounded-full pointer-events-none -z-10 translate-x-1/2 translate-y-1/2" />
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pt-4">
+          <div>
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-xs font-bold uppercase tracking-widest text-[#aaabb0] opacity-60">Logistics</span>
+              <span className="text-[#46484d]">/</span>
+              <span className="text-xs font-bold uppercase tracking-widest text-amber-400">Route Optimization</span>
+            </div>
+            <h1 className="text-5xl font-extrabold tracking-tighter text-[#f6f6fc] mb-2">Route Optimization</h1>
+            <p className="text-[#aaabb0]">Live route network on OpenStreetMap · Click a route to inspect it.</p>
+          </div>
+          <button onClick={() => setIsModalOpen(true)} className="flex items-center gap-2 px-8 py-3.5 rounded-xl font-bold text-sm text-[#000] bg-gradient-to-br from-[#99a8ff] to-[#4765f9] shadow-xl shadow-[#99a8ff]/10 hover:shadow-[#99a8ff]/25 active:scale-95 transition-all whitespace-nowrap">
+            <Plus className="w-4 h-4" /> New Route
+          </button>
         </div>
-        <button className="btn btn-warning gap-2 text-white shadow-lg" onClick={() => setIsModalOpen(true)}>
-          <FaPlus/> New Route
-        </button>
-      </div>
 
-      {/* ── KPI Row ── */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        {[
-          { label: 'Total Routes',   value: routes.length,   color: 'text-base-content', border: 'border-base-300' },
-          { label: 'Optimized',      value: optimizedCount,  color: 'text-emerald-500',  border: 'border-emerald-400' },
-          { label: 'Pending',        value: pendingCount,    color: 'text-amber-500',    border: 'border-amber-400' },
-          { label: 'Avg Distance',   value: `${avgDist} km`, color: 'text-blue-500',     border: 'border-blue-400' },
-        ].map(k => (
-          <div key={k.label} className={`card bg-base-100 shadow border-l-4 ${k.border}`}>
-            <div className="card-body py-3 px-5">
-              <p className="text-xs uppercase opacity-40 font-bold">{k.label}</p>
-              <p className={`text-2xl font-extrabold ${k.color}`}>{loading ? '—' : k.value}</p>
+        {/* KPIs */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {[
+            { label: 'Total Routes',  value: routes.length,   Icon: Route,       color: 'text-[#99a8ff] bg-[#99a8ff]/10 border-[#99a8ff]/20' },
+            { label: 'Optimized',     value: optimizedCount,  Icon: Check,       color: 'text-emerald-300 bg-emerald-500/10 border-emerald-500/20' },
+            { label: 'Pending',       value: pendingCount,    Icon: Clock,       color: 'text-amber-300 bg-amber-500/10 border-amber-500/20' },
+            { label: 'Avg Distance',  value: `${avgDist} km`, Icon: Navigation,  color: 'text-sky-300 bg-sky-500/10 border-sky-500/20' },
+          ].map(({ label, value, Icon, color }) => (
+            <div key={label} className="bg-[#111318] rounded-2xl border border-[#46484d]/10 p-5 flex items-center gap-4">
+              <div className={cx('p-2.5 rounded-xl border shrink-0', color.split(' ').slice(1).join(' '))}><Icon className={cx('w-5 h-5', color.split(' ')[0])} /></div>
+              <div>
+                <p className="text-2xl font-extrabold text-[#f6f6fc]">{loading ? '—' : value}</p>
+                <p className="text-xs text-[#aaabb0] font-medium">{label}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Main layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Map */}
+          <div className="lg:col-span-2 bg-[#111318] rounded-3xl border border-[#46484d]/10 overflow-hidden" style={{ minHeight: '520px' }}>
+            <div className="px-5 py-3.5 border-b border-[#46484d]/10 flex items-center gap-2 text-sm font-semibold text-[#aaabb0]">
+              <Navigation className="w-4 h-4 text-amber-400" /> Live Route Network
+              <span className="ml-auto text-xs text-[#46484d]">Powered by OpenStreetMap</span>
+            </div>
+            <div className="relative" style={{ height: '480px' }}>
+              {loading ? (
+                <div className="absolute inset-0 flex items-center justify-center bg-[#0c0e12]/60">
+                  <div className="w-10 h-10 rounded-full border-2 border-[#99a8ff]/20 border-t-[#99a8ff] animate-spin" />
+                </div>
+              ) : (
+                <LeafletMap routes={filteredRoutes} selectedRoute={selectedRoute} onRouteClick={r => setSelectedRoute(r.id === selectedRoute?.id ? null : r)} />
+              )}
+              {selectedRoute && <RouteDetailPanel route={selectedRoute} onClose={() => setSelectedRoute(null)} onOptimize={handleOptimize} />}
             </div>
           </div>
-        ))}
-      </div>
 
-      {/* ── Main layout: Map (left) + Route List (right) ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          {/* Route list */}
+          <div className="space-y-4">
+            <div className="flex bg-[#111318] rounded-xl p-1 border border-[#46484d]/10">
+              {['ALL', 'OPTIMIZED', 'PENDING'].map(f => (
+                <button key={f} onClick={() => setFilter(f)}
+                  className={cx('flex-1 py-2 rounded-lg text-xs font-bold transition-all', filter === f ? 'bg-[#99a8ff] text-[#000]' : 'text-[#aaabb0] hover:text-[#f6f6fc]')}>
+                  {f === 'ALL' ? 'All' : f === 'OPTIMIZED' ? '✓ Done' : '⏳ Pending'}
+                </button>
+              ))}
+            </div>
 
-        {/* Map — takes 2/3 */}
-        <div className="lg:col-span-2 card bg-base-100 shadow-xl overflow-hidden" style={{ minHeight: '520px' }}>
-          <div className="p-3 border-b border-base-200 flex items-center gap-2 text-sm font-semibold opacity-60">
-            <FaLocationArrow className="text-amber-500"/> Live Route Network
-            <span className="ml-auto text-xs font-normal opacity-60">Powered by OpenStreetMap</span>
-          </div>
-          <div className="relative" style={{ height: '480px' }}>
-            {loading ? (
-              <div className="absolute inset-0 flex items-center justify-center bg-base-200/60">
-                <span className="loading loading-spinner loading-lg text-warning"/>
-              </div>
-            ) : (
-              <LeafletMap
-                routes={filteredRoutes}
-                selectedRoute={selectedRoute}
-                onRouteClick={r => setSelectedRoute(r.id === selectedRoute?.id ? null : r)}
-              />
-            )}
-            {/* Route detail overlay */}
-            {selectedRoute && (
-              <RouteDetailPanel
-                route={selectedRoute}
-                onClose={() => setSelectedRoute(null)}
-                onOptimize={handleOptimize}
-              />
-            )}
-          </div>
-        </div>
-
-        {/* Route list — takes 1/3 */}
-        <div className="space-y-3">
-          {/* Filter tabs */}
-          <div className="tabs tabs-boxed bg-base-100 shadow w-full">
-            {['ALL', 'OPTIMIZED', 'PENDING'].map(f => (
-              <button
-                key={f}
-                className={`tab flex-1 ${filter === f ? 'tab-active' : ''}`}
-                onClick={() => setFilter(f)}
-              >
-                {f === 'ALL' ? 'All' : f === 'OPTIMIZED' ? '✓ Done' : '⏳ Pending'}
-              </button>
-            ))}
-          </div>
-
-          {/* Scrollable route cards */}
-          <div className="space-y-2 overflow-y-auto" style={{ maxHeight: '460px' }}>
-            {loading ? (
-              <div className="flex justify-center py-8">
-                <span className="loading loading-spinner loading-md text-warning"/>
-              </div>
-            ) : filteredRoutes.length === 0 ? (
-              <div className="card bg-base-100 shadow p-8 text-center opacity-40 italic text-sm">
-                No routes found. Create one!
-              </div>
-            ) : filteredRoutes.map(route => {
-              const isSelected = selectedRoute?.id === route.id;
-              const isOpt = route.status === 'OPTIMIZED';
-              return (
-                <div
-                  key={route.id}
-                  className={`card bg-base-100 shadow cursor-pointer border-l-4 transition-all hover:shadow-md
-                    ${isSelected
-                      ? 'border-amber-400 shadow-amber-100 scale-[1.01]'
-                      : isOpt ? 'border-emerald-400' : 'border-base-300'
-                    }`}
-                  onClick={() => setSelectedRoute(isSelected ? null : route)}
-                >
-                  <div className="card-body p-4 gap-2">
-                    <div className="flex items-start justify-between gap-2">
+            <div className="space-y-2 overflow-y-auto" style={{ maxHeight: '430px' }}>
+              {loading ? (
+                <div className="flex justify-center py-8"><div className="w-7 h-7 rounded-full border-2 border-[#99a8ff]/20 border-t-[#99a8ff] animate-spin" /></div>
+              ) : filteredRoutes.length === 0 ? (
+                <div className="bg-[#111318] rounded-2xl border border-[#46484d]/10 p-10 text-center text-[#46484d] italic text-sm">No routes found. Create one!</div>
+              ) : filteredRoutes.map(route => {
+                const isSelected = selectedRoute?.id === route.id;
+                const isOpt      = route.status === 'OPTIMIZED';
+                return (
+                  <button key={route.id} onClick={() => setSelectedRoute(isSelected ? null : route)}
+                    className={cx('w-full text-left bg-[#111318] rounded-2xl border border-l-4 p-4 transition-all hover:border-[#46484d]/30',
+                      isSelected ? 'border-amber-500 shadow-lg shadow-amber-500/10 scale-[1.01]' : isOpt ? 'border-emerald-500' : 'border-[#46484d]/10')}>
+                    <div className="flex items-start justify-between gap-2 mb-2">
                       <div className="flex items-center gap-2 min-w-0">
-                        <div className={`p-1.5 rounded-lg flex-shrink-0 ${isOpt ? 'bg-emerald-100 text-emerald-600' : 'bg-amber-100 text-amber-600'}`}>
-                          <FaMapMarkedAlt className="text-xs"/>
+                        <div className={cx('p-1.5 rounded-lg shrink-0', isOpt ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-400')}>
+                          <Map className="w-3.5 h-3.5" />
                         </div>
                         <div className="min-w-0">
-                          <div className="font-bold text-sm truncate">{route.startLocation}</div>
-                          <div className="text-xs opacity-30">↓</div>
-                          <div className="font-bold text-sm truncate">{route.endLocation}</div>
+                          <p className="font-bold text-sm text-[#f6f6fc] truncate">{route.startLocation}</p>
+                          <p className="text-[#46484d] text-xs">↓</p>
+                          <p className="font-bold text-sm text-[#f6f6fc] truncate">{route.endLocation}</p>
                         </div>
                       </div>
-                      <span className={`badge badge-sm font-bold flex-shrink-0 ${isOpt ? 'badge-success' : 'badge-warning'}`}>
+                      <span className={cx('text-[10px] font-bold uppercase px-2 py-0.5 rounded-full border shrink-0', isOpt ? 'text-emerald-300 bg-emerald-500/10 border-emerald-500/20' : 'text-amber-300 bg-amber-500/10 border-amber-500/20')}>
                         {isOpt ? '✓' : '⏳'} {route.status}
                       </span>
                     </div>
-                    <div className="flex gap-3 text-xs opacity-50 pt-1 border-t border-base-200">
-                      <span className="flex items-center gap-1"><FaRoad/> {route.distanceKm} km</span>
-                      <span className="flex items-center gap-1"><FaClock/> {route.estimatedTimeMinutes} min</span>
+                    <div className="flex gap-4 text-xs text-[#aaabb0] pt-2 border-t border-[#46484d]/10">
+                      <span>{route.distanceKm} km</span>
+                      <span>{route.estimatedTimeMinutes} min</span>
                     </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+                  </button>
+                );
+              })}
+            </div>
 
-          {/* Traffic Insights */}
-          <div className="card bg-base-100 shadow border border-amber-200">
-            <div className="card-body p-4">
-              <h2 className="text-xs font-bold uppercase opacity-50 mb-3 tracking-wider">Traffic Insights</h2>
-              <div className="space-y-2 text-sm">
+            {/* Traffic Insights */}
+            <div className="bg-[#111318] rounded-2xl border border-amber-500/20 p-4">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-amber-400 mb-3">Traffic Insights</p>
+              <div className="space-y-2">
                 {[
-                  { dot: 'bg-success', text: 'NH-48 corridor 15% faster today' },
-                  { dot: 'bg-warning', text: 'Construction on Bridge X-2' },
-                  { dot: 'bg-info',    text: 'AI suggests 12PM departures for Node B' },
+                  { dot: 'bg-emerald-400', text: 'NH-48 corridor 15% faster today' },
+                  { dot: 'bg-amber-400',   text: 'Construction on Bridge X-2' },
+                  { dot: 'bg-sky-400',     text: 'AI suggests 12PM departures for Node B' },
                 ].map((item, i) => (
-                  <div key={i} className="flex items-center gap-2">
-                    <div className={`w-2 h-2 rounded-full ${item.dot} flex-shrink-0`}/>
-                    <span className="opacity-70">{item.text}</span>
+                  <div key={i} className="flex items-center gap-2.5 text-sm text-[#aaabb0]">
+                    <div className={cx('w-2 h-2 rounded-full shrink-0', item.dot)} />
+                    <span>{item.text}</span>
                   </div>
                 ))}
               </div>
@@ -473,61 +366,46 @@ const LogisticsRouteOptimizationPage = () => {
         </div>
       </div>
 
-      {/* ── New Route Modal ── */}
+      {/* New Route Modal */}
       {isModalOpen && (
-        <div className="modal modal-open">
-          <div className="modal-box max-w-md">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="font-bold text-xl flex items-center gap-2">
-                <FaRoute className="text-amber-500"/> Create New Route
-              </h3>
-              <button className="btn btn-circle btn-ghost btn-sm" onClick={() => setIsModalOpen(false)}>
-                <FaTimes/>
-              </button>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-[#111318] rounded-3xl border border-[#46484d]/20 w-full max-w-md shadow-2xl">
+            <div className="flex items-center justify-between p-6 border-b border-[#46484d]/10">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-amber-500/10 rounded-xl border border-amber-500/20"><Route className="w-5 h-5 text-amber-400" /></div>
+                <h3 className="font-bold text-[#f6f6fc] text-lg">Create New Route</h3>
+              </div>
+              <button onClick={() => setIsModalOpen(false)} className="p-2 rounded-xl text-[#aaabb0] hover:text-[#f6f6fc] hover:bg-[#23262c] transition-all"><X className="w-5 h-5" /></button>
             </div>
-            <form onSubmit={handleCreateRoute} className="space-y-4">
+            <form onSubmit={handleCreateRoute} className="p-6 space-y-4">
               <div className="grid grid-cols-2 gap-4">
-                <div className="form-control">
-                  <label className="label"><span className="label-text font-semibold">Start City</span></label>
-                  <input
-                    type="text" className="input input-bordered" required
-                    placeholder="e.g. Mumbai"
-                    list="city-suggestions"
-                    value={newRoute.startLocation}
-                    onChange={e => setNewRoute({...newRoute, startLocation: e.target.value})}
-                  />
+                <div>
+                  <label className={labelCls}>Start City</label>
+                  <input type="text" required placeholder="e.g. Mumbai" list="city-suggestions" className={inputCls}
+                    value={newRoute.startLocation} onChange={e => setNewRoute({...newRoute, startLocation: e.target.value})} />
                 </div>
-                <div className="form-control">
-                  <label className="label"><span className="label-text font-semibold">End City</span></label>
-                  <input
-                    type="text" className="input input-bordered" required
-                    placeholder="e.g. Delhi"
-                    list="city-suggestions"
-                    value={newRoute.endLocation}
-                    onChange={e => setNewRoute({...newRoute, endLocation: e.target.value})}
-                  />
+                <div>
+                  <label className={labelCls}>End City</label>
+                  <input type="text" required placeholder="e.g. Delhi" list="city-suggestions" className={inputCls}
+                    value={newRoute.endLocation} onChange={e => setNewRoute({...newRoute, endLocation: e.target.value})} />
                 </div>
               </div>
-              <datalist id="city-suggestions">
-                {Object.keys(CITY_LATLNG).map(c => <option key={c} value={c}/>)}
-              </datalist>
+              <datalist id="city-suggestions">{Object.keys(CITY_LATLNG).map(c => <option key={c} value={c}/>)}</datalist>
               <div className="grid grid-cols-2 gap-4">
-                <div className="form-control">
-                  <label className="label"><span className="label-text font-semibold">Distance (km)</span></label>
-                  <input type="number" step="0.1" min="1" className="input input-bordered" required
-                    value={newRoute.distanceKm}
-                    onChange={e => setNewRoute({...newRoute, distanceKm: parseFloat(e.target.value)})}/>
+                <div>
+                  <label className={labelCls}>Distance (km)</label>
+                  <input type="number" step="0.1" min="1" required className={inputCls}
+                    value={newRoute.distanceKm} onChange={e => setNewRoute({...newRoute, distanceKm: parseFloat(e.target.value)})} />
                 </div>
-                <div className="form-control">
-                  <label className="label"><span className="label-text font-semibold">Est. Time (min)</span></label>
-                  <input type="number" min="1" className="input input-bordered" required
-                    value={newRoute.estimatedTimeMinutes}
-                    onChange={e => setNewRoute({...newRoute, estimatedTimeMinutes: parseInt(e.target.value)})}/>
+                <div>
+                  <label className={labelCls}>Est. Time (min)</label>
+                  <input type="number" min="1" required className={inputCls}
+                    value={newRoute.estimatedTimeMinutes} onChange={e => setNewRoute({...newRoute, estimatedTimeMinutes: parseInt(e.target.value)})} />
                 </div>
               </div>
-              <div className="modal-action">
-                <button type="button" className="btn btn-ghost" onClick={() => setIsModalOpen(false)}>Cancel</button>
-                <button type="submit" className="btn btn-warning text-white px-8">Create Route</button>
+              <div className="flex gap-3 pt-2">
+                <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 py-3 rounded-xl text-sm font-semibold text-[#aaabb0] bg-[#23262c] hover:text-[#f6f6fc] transition-all">Cancel</button>
+                <button type="submit" className="flex-1 py-3 rounded-xl text-sm font-bold text-[#000] bg-gradient-to-br from-[#99a8ff] to-[#4765f9] hover:shadow-lg active:scale-95 transition-all">Create Route</button>
               </div>
             </form>
           </div>

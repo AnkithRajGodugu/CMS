@@ -2,43 +2,56 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { Link } from 'react-router-dom';
 import api from '../../services/api';
-import { FaRobot, FaPlus, FaPlay, FaExclamationTriangle, FaCheckCircle, FaTimes, FaList, FaLightbulb } from 'react-icons/fa';
 import { toast } from 'sonner';
+import {
+  Bot, Plus, Play, AlertTriangle, CheckCircle2, X,
+  List, Lightbulb, Zap, ChevronRight
+} from 'lucide-react';
+
+const cx = (...c) => c.filter(Boolean).join(' ');
+const inputCls = "w-full bg-[#0c0e12] border border-[#46484d]/20 rounded-xl px-4 py-3 text-sm text-[#f6f6fc] placeholder-[#46484d] focus:outline-none focus:border-[#99a8ff]/50 focus:ring-1 focus:ring-[#99a8ff]/20 transition-all";
+const labelCls = "block text-xs font-bold uppercase tracking-widest text-[#aaabb0] mb-2";
+const Modal = ({ onClose, children }) => (
+  <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+    <div className="bg-[#111318] rounded-3xl border border-[#46484d]/20 w-full max-w-lg shadow-2xl max-h-[90vh] overflow-y-auto">
+      {children}
+    </div>
+  </div>
+);
 
 const AUTOMATION_TEMPLATES = [
-  { name: 'Auto-Publish to YouTube', trigger: 'Asset Upload (VIDEO)', action: 'Publish to YouTube', icon: '📹' },
-  { name: 'Instagram Story Push', trigger: 'Asset Upload (IMAGE)', action: 'Post to Instagram Stories', icon: '📸' },
-  { name: 'Slack Notify on Approval', trigger: 'Milestone Approved', action: 'Send Slack Message', icon: '💬' },
-  { name: 'Auto-Archive Completed Projects', trigger: 'Project COMPLETED', action: 'Move to Archive folder', icon: '📦' },
-  { name: 'Weekly Performance Report', trigger: 'Every Monday 9AM', action: 'Email Analytics Summary', icon: '📊' },
-  { name: 'Asset Sync to Cloud Drive', trigger: 'Asset Upload (ANY)', action: 'Sync to Google Drive', icon: '☁️' },
+  { name: 'Auto-Publish to YouTube',        trigger: 'Asset Upload (VIDEO)',   action: 'Publish to YouTube',       icon: '📹' },
+  { name: 'Instagram Story Push',           trigger: 'Asset Upload (IMAGE)',   action: 'Post to Instagram Stories', icon: '📸' },
+  { name: 'Slack Notify on Approval',       trigger: 'Milestone Approved',     action: 'Send Slack Message',        icon: '💬' },
+  { name: 'Auto-Archive Completed Projects', trigger: 'Project COMPLETED',    action: 'Move to Archive folder',    icon: '📦' },
+  { name: 'Weekly Performance Report',      trigger: 'Every Monday 9AM',       action: 'Email Analytics Summary',   icon: '📊' },
+  { name: 'Asset Sync to Cloud Drive',      trigger: 'Asset Upload (ANY)',     action: 'Sync to Google Drive',      icon: '☁️' },
+];
+
+const MOCK_LOGS = [
+  { date: 'Today, 10:15',      action: 'IG Distribution',    status: 'SUCCESS', latency: '1.2ms' },
+  { date: 'Today, 09:30',      action: 'YT Metadata Sync',   status: 'SUCCESS', latency: '0.8ms' },
+  { date: 'Today, 08:00',      action: 'Cloud Drive Sync',   status: 'SUCCESS', latency: '3.1ms' },
+  { date: 'Yesterday, 22:00',  action: 'Weekly Report Email', status: 'SUCCESS', latency: '120ms' },
+  { date: 'Yesterday, 18:45',  action: 'Slack Notification', status: 'FAILED',  latency: 'timeout' },
 ];
 
 const WorkflowAutomationPage = () => {
   const { user, sector } = useAuth();
-  const [projects, setProjects] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [isLogsModalOpen, setIsLogsModalOpen] = useState(false);
+  const [projects, setProjects]             = useState([]);
+  const [loading, setLoading]               = useState(true);
+  const [isCreateModalOpen, setIsCreateModalOpen]       = useState(false);
+  const [isLogsModalOpen, setIsLogsModalOpen]           = useState(false);
   const [isTemplatesModalOpen, setIsTemplatesModalOpen] = useState(false);
-  const [automatorForm, setAutomatorForm] = useState({ name: '', trigger: 'ASSET_UPLOAD', action: 'PUBLISH_YOUTUBE', projectId: '' });
-  const [activeAutomators, setActiveAutomators] = useState([]);
-
-  const fetchData = async () => {
-    setLoading(true);
-    try {
-      const response = await api.get('/content/projects');
-      setProjects(Array.isArray(response.data?.data) ? response.data.data : response.data?.data?.content || []);
-    } catch (err) {
-      console.error('Failed to fetch projects for workflow', err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [automatorForm, setAutomatorForm]   = useState({ name: '', trigger: 'ASSET_UPLOAD', action: 'PUBLISH_YOUTUBE', projectId: '' });
+  const [activeAutomators, setActiveAutomators]         = useState([]);
 
   useEffect(() => {
     if (sector?.code?.toLowerCase() === 'content') {
-      fetchData();
+      api.get('/content/projects')
+        .then(res => setProjects(Array.isArray(res.data?.data) ? res.data.data : res.data?.data?.content || []))
+        .catch(err => console.error('Failed to fetch projects for workflow', err))
+        .finally(() => setLoading(false));
     }
   }, [user, sector]);
 
@@ -59,186 +72,177 @@ const WorkflowAutomationPage = () => {
     setAutomatorForm({ name: '', trigger: 'ASSET_UPLOAD', action: 'PUBLISH_YOUTUBE', projectId: '' });
   };
 
-  const toggleAutomator = (id) => {
-    setActiveAutomators(prev => prev.map(a => a.id === id ? { ...a, enabled: !a.enabled } : a));
-  };
+  const toggleAutomator = (id) => setActiveAutomators(prev => prev.map(a => a.id === id ? { ...a, enabled: !a.enabled } : a));
 
   const applyTemplate = (template) => {
-    const newAutomator = {
-      id: Date.now(),
-      name: template.name,
-      trigger: template.trigger,
-      action: template.action,
-      enabled: true,
-      projectName: 'All Projects'
-    };
+    const newAutomator = { id: Date.now(), name: template.name, trigger: template.trigger, action: template.action, enabled: true, projectName: 'All Projects' };
     setActiveAutomators(prev => [...prev, newAutomator]);
     toast.success(`Template "${template.name}" applied and activated!`);
     setIsTemplatesModalOpen(false);
   };
 
-  const mockLogs = [
-    { date: 'Today, 10:15', action: 'IG Distribution', status: 'SUCCESS', latency: '1.2ms' },
-    { date: 'Today, 09:30', action: 'YT Metadata Sync', status: 'SUCCESS', latency: '0.8ms' },
-    { date: 'Today, 08:00', action: 'Cloud Drive Sync', status: 'SUCCESS', latency: '3.1ms' },
-    { date: 'Yesterday, 22:00', action: 'Weekly Report Email', status: 'SUCCESS', latency: '120ms' },
-    { date: 'Yesterday, 18:45', action: 'Slack Notification', status: 'FAILED', latency: 'timeout' },
-  ];
-
-  const allTriggers = [...(projects.slice(0, 3).map(p => ({
-    id: p.id,
-    label: `Auto-Sync: ${p.projectName}`,
-    desc: 'Event: Asset Upload → Trigger: YouTube Publish',
-    enabled: true
-  }))), ...activeAutomators];
+  const allTriggers = [...(projects.slice(0, 3).map(p => ({ id: p.id, label: `Auto-Sync: ${p.projectName}`, desc: 'Event: Asset Upload → Trigger: YouTube Publish', enabled: true }))), ...activeAutomators];
 
   if (!user || sector?.code?.toLowerCase() !== 'content') {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-base-200">
-        <div className="card bg-base-100 shadow-xl p-8 text-center max-w-md mx-auto mt-20">
-          <FaExclamationTriangle className="text-6xl text-warning mx-auto mb-4" />
-          <h2 className="text-3xl font-bold mb-4">Content Sector Access Only</h2>
-          <p className="mb-6 text-base-content/70">Please log in with your content creator credentials to manage automated workflows.</p>
-          <Link to="/login" className="btn btn-primary">Go to Login</Link>
+      <div className="min-h-screen flex items-center justify-center bg-[#0c0e12]">
+        <div className="flex flex-col items-center gap-6 text-center p-10 bg-[#111318] rounded-3xl border border-[#46484d]/20 max-w-md">
+          <AlertTriangle className="w-16 h-16 text-amber-400" />
+          <h2 className="text-2xl font-bold text-[#f6f6fc]">Content Sector Access Only</h2>
+          <Link to="/login" className="px-8 py-3 rounded-xl font-bold text-sm text-[#000] bg-gradient-to-br from-[#99a8ff] to-[#4765f9]">Go to Login</Link>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-base-200 flex flex-col">
-      <main className="flex-grow pt-24 pb-12 px-4 md:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
-            <div>
-              <h1 className="text-4xl font-extrabold flex items-center gap-4">
-                <FaRobot className="text-info" /> Workflow Automation
-              </h1>
-              <p className="text-base-content/60 mt-2 text-lg">Streamline your creative pipeline with automated triggers, publishing rules, and asset syncing.</p>
-            </div>
-            <button className="btn btn-info btn-md shadow-lg gap-2 text-white" onClick={() => setIsCreateModalOpen(true)}>
-              <FaPlus /> Create Automator
-            </button>
-          </div>
+    <div className="min-h-screen bg-[#0c0e12] text-[#f6f6fc] font-sans">
+      <div className="fixed bottom-0 right-0 w-[500px] h-[500px] bg-[#99a8ff]/10 blur-[120px] rounded-full pointer-events-none -z-10 translate-x-1/2 translate-y-1/2" />
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Active Triggers */}
-            <div className="card bg-base-100 shadow-xl">
-              <div className="card-body">
-                <h2 className="card-title mb-6 border-b pb-2">Active Triggers</h2>
-                <div className="space-y-4">
-                  {loading ? (
-                    <span className="loading loading-dots loading-md text-info"></span>
-                  ) : allTriggers.length === 0 ? (
-                    <p className="opacity-30 italic py-6 text-center">No active automators. Create one to get started!</p>
-                  ) : (
-                    allTriggers.map((t, idx) => (
-                      <div key={t.id || idx} className="flex items-center justify-between p-4 border border-base-200 rounded-xl hover:bg-base-200/50 transition-colors">
-                        <div className="flex items-center gap-4">
-                          <FaPlay className={`text-xs ${t.enabled !== false ? 'text-success' : 'text-base-content/30'}`} />
-                          <div>
-                            <p className="font-bold font-mono text-sm uppercase">{t.label || t.name}</p>
-                            <p className="text-xs opacity-50">{t.desc || `${t.trigger} → ${t.action}`}</p>
-                          </div>
-                        </div>
-                        <input
-                          type="checkbox"
-                          className="toggle toggle-info toggle-sm"
-                          checked={t.enabled !== false}
-                          onChange={() => toggleAutomator(t.id)}
-                        />
-                      </div>
-                    ))
-                  )}
+      <main className="p-8 max-w-7xl mx-auto">
+        <section className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 pt-4">
+          <div>
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-xs font-bold uppercase tracking-widest text-[#aaabb0] opacity-60">Content Creation</span>
+              <span className="text-[#46484d]">/</span>
+              <span className="text-xs font-bold uppercase tracking-widest text-[#99a8ff]">Workflow Automation</span>
+            </div>
+            <h1 className="text-5xl font-extrabold tracking-tighter text-[#f6f6fc] mb-3">Workflow Automation</h1>
+            <p className="text-[#aaabb0] max-w-lg">Streamline your creative pipeline with automated triggers, publishing rules, and asset syncing.</p>
+          </div>
+          <button onClick={() => setIsCreateModalOpen(true)}
+            className="flex items-center gap-2 px-8 py-3.5 rounded-xl font-bold text-sm text-[#000] bg-gradient-to-br from-[#99a8ff] to-[#4765f9] shadow-xl shadow-[#99a8ff]/10 hover:shadow-[#99a8ff]/25 active:scale-95 transition-all whitespace-nowrap">
+            <Plus className="w-4 h-4" /> Create Automator
+          </button>
+        </section>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
+          {/* Active Triggers */}
+          <div className="bg-[#111318] rounded-3xl border border-[#46484d]/10 overflow-hidden">
+            <div className="px-6 py-5 border-b border-[#46484d]/10 flex items-center justify-between">
+              <h2 className="font-bold text-[#f6f6fc]">Active Triggers</h2>
+              <span className="text-xs text-[#aaabb0]">{allTriggers.length} automators</span>
+            </div>
+            <div className="p-4 space-y-2">
+              {loading ? (
+                <div className="flex justify-center py-10"><div className="w-6 h-6 rounded-full border-2 border-[#99a8ff]/20 border-t-[#99a8ff] animate-spin" /></div>
+              ) : allTriggers.length === 0 ? (
+                <div className="flex flex-col items-center py-12 gap-3">
+                  <Bot className="w-10 h-10 text-[#46484d]" />
+                  <p className="text-[#46484d] italic text-sm">No active automators. Create one to get started!</p>
                 </div>
-              </div>
+              ) : (
+                allTriggers.map((t, idx) => (
+                  <div key={t.id || idx} className="flex items-center justify-between p-4 bg-[#0c0e12] rounded-xl hover:bg-[#171a1f] transition-colors">
+                    <div className="flex items-center gap-3">
+                      <div className={cx('p-1.5 rounded-lg', t.enabled !== false ? 'bg-emerald-500/10' : 'bg-[#23262c]')}>
+                        <Play className={cx('w-3 h-3', t.enabled !== false ? 'text-emerald-400' : 'text-[#46484d]')} />
+                      </div>
+                      <div>
+                        <p className="font-bold font-mono text-xs uppercase text-[#f6f6fc]">{t.label || t.name}</p>
+                        <p className="text-[10px] text-[#aaabb0]">{t.desc || `${t.trigger} → ${t.action}`}</p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => toggleAutomator(t.id)}
+                      className={cx('relative w-10 h-5 rounded-full transition-colors duration-300', t.enabled !== false ? 'bg-[#99a8ff]' : 'bg-[#23262c]')}
+                    >
+                      <span className={cx('absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform duration-300', t.enabled !== false ? 'translate-x-5' : 'translate-x-0.5')} />
+                    </button>
+                  </div>
+                ))
+              )}
             </div>
+          </div>
 
-            {/* Automation History */}
-            <div className="card bg-base-100 shadow-xl overflow-hidden">
-              <div className="p-6 bg-info/5 flex items-center justify-between border-b border-info/20">
-                <h2 className="font-bold flex items-center gap-2">
-                  <FaCheckCircle className="text-success" /> Automation History
-                </h2>
-                <button className="btn btn-ghost btn-xs gap-1" onClick={() => setIsLogsModalOpen(true)}>
-                  <FaList /> View Logs
-                </button>
+          {/* History */}
+          <div className="bg-[#111318] rounded-3xl border border-[#46484d]/10 overflow-hidden">
+            <div className="px-6 py-5 border-b border-[#46484d]/10 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                <h2 className="font-bold text-[#f6f6fc]">Automation History</h2>
               </div>
-              <div className="p-0">
-                <table className="table table-sm w-full">
-                  <thead>
-                    <tr className="bg-base-200/50">
-                      <th>Date</th>
-                      <th>Action</th>
-                      <th>Status</th>
-                      <th>Latency</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {mockLogs.slice(0, 3).map((log, i) => (
-                      <tr key={i} className="hover">
-                        <td className="text-xs opacity-60">{log.date}</td>
-                        <td className="font-bold text-sm">{log.action}</td>
-                        <td><span className={`badge badge-xs ${log.status === 'SUCCESS' ? 'badge-success' : 'badge-error'}`}>{log.status}</span></td>
-                        <td className="font-mono text-[10px]">{log.latency}</td>
-                      </tr>
+              <button onClick={() => setIsLogsModalOpen(true)} className="flex items-center gap-1.5 text-xs font-bold text-[#99a8ff] hover:text-[#f6f6fc] transition-colors">
+                <List className="w-3.5 h-3.5" /> View Logs
+              </button>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-[#46484d]/10">
+                    {['Date', 'Action', 'Status', 'Latency'].map(h => (
+                      <th key={h} className="text-left px-6 py-3 text-[10px] font-bold uppercase tracking-widest text-[#aaabb0]">{h}</th>
                     ))}
-                  </tbody>
-                </table>
-              </div>
+                  </tr>
+                </thead>
+                <tbody>
+                  {MOCK_LOGS.slice(0, 3).map((log, i) => (
+                    <tr key={i} className="border-b border-[#46484d]/5 hover:bg-[#171a1f] transition-colors">
+                      <td className="px-6 py-3.5 text-xs text-[#aaabb0] font-mono">{log.date}</td>
+                      <td className="px-6 py-3.5 font-bold text-sm text-[#f6f6fc]">{log.action}</td>
+                      <td className="px-6 py-3.5">
+                        <span className={cx('text-[10px] font-bold uppercase px-2 py-0.5 rounded-full', log.status === 'SUCCESS' ? 'text-emerald-300 bg-emerald-500/10' : 'text-red-300 bg-red-500/10')}>{log.status}</span>
+                      </td>
+                      <td className="px-6 py-3.5 font-mono text-[10px] text-[#aaabb0]">{log.latency}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
+        </div>
 
-          {/* Bottom CTA */}
-          <div className="card bg-gradient-to-r from-info/20 to-transparent mt-12 p-10 text-center border border-info/10">
-            <FaRobot className="text-6xl text-info mx-auto mb-6 animate-bounce" />
-            <h2 className="text-2xl font-black mb-2 uppercase tracking-widest">Master Automation Dashboard</h2>
-            <p className="max-w-xl mx-auto opacity-60">
-              You have saved <span className="font-bold text-info">124 hours</span> this month by using automated creative workflows. Keep optimizing your pipeline!
-            </p>
-            <button className="btn btn-info btn-wide text-white mt-8 gap-2" onClick={() => setIsTemplatesModalOpen(true)}>
-              <FaLightbulb /> Explore Templates
-            </button>
-          </div>
+        {/* Bottom CTA Banner */}
+        <div className="relative overflow-hidden bg-gradient-to-r from-[#99a8ff]/10 to-[#4765f9]/5 rounded-3xl border border-[#99a8ff]/10 p-10 text-center">
+          <div className="absolute -top-10 -right-10 w-40 h-40 bg-[#99a8ff]/10 rounded-full blur-2xl" />
+          <Bot className="w-14 h-14 text-[#99a8ff] mx-auto mb-5 animate-bounce" />
+          <h2 className="text-2xl font-black mb-2 uppercase tracking-widest text-[#f6f6fc]">Master Automation Dashboard</h2>
+          <p className="max-w-xl mx-auto text-[#aaabb0] text-sm">
+            You have saved <span className="font-bold text-[#99a8ff]">124 hours</span> this month by using automated creative workflows. Keep optimizing your pipeline!
+          </p>
+          <button onClick={() => setIsTemplatesModalOpen(true)}
+            className="mt-8 flex items-center gap-2 px-8 py-3 rounded-xl font-bold text-sm text-[#000] bg-gradient-to-br from-[#99a8ff] to-[#4765f9] mx-auto hover:shadow-lg hover:shadow-[#99a8ff]/20 active:scale-95 transition-all">
+            <Lightbulb className="w-4 h-4" /> Explore Templates
+          </button>
         </div>
       </main>
 
       {/* Create Automator Modal */}
       {isCreateModalOpen && (
-        <div className="modal modal-open">
-          <div className="modal-box max-w-md">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="font-bold text-lg flex items-center gap-2"><FaRobot className="text-info" /> Create Automator</h3>
-              <button className="btn btn-ghost btn-sm btn-circle" onClick={() => setIsCreateModalOpen(false)}><FaTimes /></button>
+        <Modal onClose={() => setIsCreateModalOpen(false)}>
+          <div className="flex items-center justify-between p-6 border-b border-[#46484d]/10">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-[#99a8ff]/10 rounded-xl border border-[#99a8ff]/20"><Bot className="w-5 h-5 text-[#99a8ff]" /></div>
+              <h3 className="font-bold text-[#f6f6fc] text-lg">Create Automator</h3>
             </div>
-            <form onSubmit={handleCreateAutomator} className="space-y-4">
-              <div className="form-control">
-                <label className="label">Automator Name</label>
-                <input type="text" className="input input-bordered" placeholder="e.g. Auto-Publish to YouTube"
-                  value={automatorForm.name} onChange={e => setAutomatorForm({...automatorForm, name: e.target.value})} />
-              </div>
-              <div className="form-control">
-                <label className="label">Linked Project</label>
-                <select className="select select-bordered"
-                  value={automatorForm.projectId} onChange={e => setAutomatorForm({...automatorForm, projectId: e.target.value})}>
-                  <option value="">All Projects</option>
-                  {projects.map(p => <option key={p.id} value={p.id}>{p.projectName}</option>)}
-                </select>
-              </div>
-              <div className="form-control">
-                <label className="label">Trigger Event</label>
-                <select className="select select-bordered"
-                  value={automatorForm.trigger} onChange={e => setAutomatorForm({...automatorForm, trigger: e.target.value})}>
+            <button onClick={() => setIsCreateModalOpen(false)} className="p-2 rounded-xl text-[#aaabb0] hover:text-[#f6f6fc] hover:bg-[#23262c] transition-all"><X className="w-5 h-5" /></button>
+          </div>
+          <form onSubmit={handleCreateAutomator} className="p-6 space-y-5">
+            <div>
+              <label className={labelCls}>Automator Name</label>
+              <input type="text" placeholder="e.g. Auto-Publish to YouTube" className={inputCls}
+                value={automatorForm.name} onChange={e => setAutomatorForm({...automatorForm, name: e.target.value})} />
+            </div>
+            <div>
+              <label className={labelCls}>Linked Project</label>
+              <select className={inputCls} value={automatorForm.projectId} onChange={e => setAutomatorForm({...automatorForm, projectId: e.target.value})}>
+                <option value="">All Projects</option>
+                {projects.map(p => <option key={p.id} value={p.id}>{p.projectName}</option>)}
+              </select>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className={labelCls}>Trigger Event</label>
+                <select className={inputCls} value={automatorForm.trigger} onChange={e => setAutomatorForm({...automatorForm, trigger: e.target.value})}>
                   <option value="ASSET_UPLOAD">Asset Upload</option>
                   <option value="MILESTONE_APPROVED">Milestone Approved</option>
                   <option value="PROJECT_COMPLETED">Project Completed</option>
                   <option value="SCHEDULE_WEEKLY">Weekly Schedule</option>
                 </select>
               </div>
-              <div className="form-control">
-                <label className="label">Automated Action</label>
-                <select className="select select-bordered"
-                  value={automatorForm.action} onChange={e => setAutomatorForm({...automatorForm, action: e.target.value})}>
+              <div>
+                <label className={labelCls}>Automated Action</label>
+                <select className={inputCls} value={automatorForm.action} onChange={e => setAutomatorForm({...automatorForm, action: e.target.value})}>
                   <option value="PUBLISH_YOUTUBE">Publish to YouTube</option>
                   <option value="POST_INSTAGRAM">Post to Instagram</option>
                   <option value="SYNC_DRIVE">Sync to Cloud Drive</option>
@@ -246,78 +250,80 @@ const WorkflowAutomationPage = () => {
                   <option value="EMAIL_REPORT">Send Email Report</option>
                 </select>
               </div>
-              <div className="modal-action">
-                <button type="button" className="btn btn-ghost" onClick={() => setIsCreateModalOpen(false)}>Cancel</button>
-                <button type="submit" className="btn btn-info text-white gap-2"><FaRobot /> Activate Automator</button>
-              </div>
-            </form>
-          </div>
-        </div>
+            </div>
+            <div className="flex gap-3 pt-2">
+              <button type="button" onClick={() => setIsCreateModalOpen(false)} className="flex-1 py-3 rounded-xl text-sm font-semibold text-[#aaabb0] bg-[#23262c] hover:text-[#f6f6fc] transition-all">Cancel</button>
+              <button type="submit" className="flex-1 py-3 rounded-xl text-sm font-bold text-[#000] bg-gradient-to-br from-[#99a8ff] to-[#4765f9] hover:shadow-lg active:scale-95 transition-all">Activate Automator</button>
+            </div>
+          </form>
+        </Modal>
       )}
 
       {/* Logs Modal */}
       {isLogsModalOpen && (
-        <div className="modal modal-open">
-          <div className="modal-box max-w-2xl">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="font-bold text-lg flex items-center gap-2"><FaList className="text-info" /> Automation Logs</h3>
-              <button className="btn btn-ghost btn-sm btn-circle" onClick={() => setIsLogsModalOpen(false)}><FaTimes /></button>
+        <Modal onClose={() => setIsLogsModalOpen(false)}>
+          <div className="flex items-center justify-between p-6 border-b border-[#46484d]/10">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-[#99a8ff]/10 rounded-xl border border-[#99a8ff]/20"><List className="w-5 h-5 text-[#99a8ff]" /></div>
+              <h3 className="font-bold text-[#f6f6fc] text-lg">Automation Logs</h3>
             </div>
-            <div className="overflow-x-auto">
-              <table className="table table-zebra table-sm">
+            <button onClick={() => setIsLogsModalOpen(false)} className="p-2 rounded-xl text-[#aaabb0] hover:text-[#f6f6fc] hover:bg-[#23262c] transition-all"><X className="w-5 h-5" /></button>
+          </div>
+          <div className="p-6">
+            <div className="overflow-x-auto rounded-xl border border-[#46484d]/10">
+              <table className="w-full text-sm">
                 <thead>
-                  <tr>
-                    <th>Date & Time</th>
-                    <th>Automation Action</th>
-                    <th>Status</th>
-                    <th>Latency</th>
+                  <tr className="border-b border-[#46484d]/10 bg-[#0c0e12]">
+                    {['Date & Time', 'Action', 'Status', 'Latency'].map(h => <th key={h} className="text-left px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-[#aaabb0]">{h}</th>)}
                   </tr>
                 </thead>
                 <tbody>
-                  {mockLogs.map((log, i) => (
-                    <tr key={i} className="hover">
-                      <td className="font-mono text-xs">{log.date}</td>
-                      <td className="font-bold">{log.action}</td>
-                      <td><span className={`badge badge-sm font-bold ${log.status === 'SUCCESS' ? 'badge-success' : 'badge-error'}`}>{log.status}</span></td>
-                      <td className="font-mono text-xs">{log.latency}</td>
+                  {MOCK_LOGS.map((log, i) => (
+                    <tr key={i} className="border-b border-[#46484d]/5 hover:bg-[#171a1f] transition-colors">
+                      <td className="px-4 py-3 font-mono text-xs text-[#aaabb0]">{log.date}</td>
+                      <td className="px-4 py-3 font-bold text-[#f6f6fc]">{log.action}</td>
+                      <td className="px-4 py-3"><span className={cx('text-[10px] font-bold uppercase px-2 py-0.5 rounded-full', log.status === 'SUCCESS' ? 'text-emerald-300 bg-emerald-500/10' : 'text-red-300 bg-red-500/10')}>{log.status}</span></td>
+                      <td className="px-4 py-3 font-mono text-xs text-[#aaabb0]">{log.latency}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
-            <div className="modal-action">
-              <button className="btn btn-ghost" onClick={() => setIsLogsModalOpen(false)}>Close</button>
-              <button className="btn btn-outline gap-2" onClick={() => { toast.success('Log export started...'); }}>Export CSV</button>
+            <div className="flex gap-3 mt-5">
+              <button onClick={() => setIsLogsModalOpen(false)} className="flex-1 py-3 rounded-xl text-sm font-semibold text-[#aaabb0] bg-[#23262c] hover:text-[#f6f6fc] transition-all">Close</button>
+              <button onClick={() => toast.success('Log export started...')} className="flex-1 py-3 rounded-xl text-sm font-bold text-[#99a8ff] bg-[#99a8ff]/10 border border-[#99a8ff]/20 hover:bg-[#99a8ff]/20 transition-all">Export CSV</button>
             </div>
           </div>
-        </div>
+        </Modal>
       )}
 
       {/* Templates Modal */}
       {isTemplatesModalOpen && (
-        <div className="modal modal-open">
-          <div className="modal-box max-w-2xl">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="font-bold text-lg flex items-center gap-2"><FaLightbulb className="text-warning" /> Automation Templates</h3>
-              <button className="btn btn-ghost btn-sm btn-circle" onClick={() => setIsTemplatesModalOpen(false)}><FaTimes /></button>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-[#111318] rounded-3xl border border-[#46484d]/20 w-full max-w-2xl shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between p-6 border-b border-[#46484d]/10">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-amber-500/10 rounded-xl border border-amber-500/20"><Lightbulb className="w-5 h-5 text-amber-300" /></div>
+                <h3 className="font-bold text-[#f6f6fc] text-lg">Automation Templates</h3>
+              </div>
+              <button onClick={() => setIsTemplatesModalOpen(false)} className="p-2 rounded-xl text-[#aaabb0] hover:text-[#f6f6fc] hover:bg-[#23262c] transition-all"><X className="w-5 h-5" /></button>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
               {AUTOMATION_TEMPLATES.map((t, i) => (
-                <div key={i} className="card bg-base-200 hover:bg-base-300 transition-colors cursor-pointer border border-base-300">
-                  <div className="card-body p-4">
-                    <div className="text-3xl mb-2">{t.icon}</div>
-                    <h3 className="font-bold text-sm">{t.name}</h3>
-                    <p className="text-xs opacity-50">Trigger: {t.trigger}</p>
-                    <p className="text-xs opacity-50">Action: {t.action}</p>
-                    <button className="btn btn-sm btn-info text-white mt-3 gap-1" onClick={() => applyTemplate(t)}>
-                      Apply Template
-                    </button>
-                  </div>
+                <div key={i} className="bg-[#0c0e12] rounded-2xl p-5 border border-[#46484d]/10 hover:border-[#99a8ff]/20 transition-all group">
+                  <div className="text-3xl mb-3">{t.icon}</div>
+                  <h3 className="font-bold text-sm text-[#f6f6fc] mb-1">{t.name}</h3>
+                  <p className="text-xs text-[#aaabb0] mb-0.5">Trigger: {t.trigger}</p>
+                  <p className="text-xs text-[#aaabb0] mb-4">Action: {t.action}</p>
+                  <button onClick={() => applyTemplate(t)}
+                    className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-[#000] bg-gradient-to-br from-[#99a8ff] to-[#4765f9] hover:shadow-md active:scale-95 transition-all">
+                    <Zap className="w-3 h-3" /> Apply Template
+                  </button>
                 </div>
               ))}
             </div>
-            <div className="modal-action">
-              <button className="btn btn-ghost" onClick={() => setIsTemplatesModalOpen(false)}>Close</button>
+            <div className="p-6 pt-0">
+              <button onClick={() => setIsTemplatesModalOpen(false)} className="w-full py-3 rounded-xl text-sm font-semibold text-[#aaabb0] bg-[#23262c] hover:text-[#f6f6fc] transition-all">Close</button>
             </div>
           </div>
         </div>

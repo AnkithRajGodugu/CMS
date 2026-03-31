@@ -2,13 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { Link } from 'react-router-dom';
 import api from '../../services/api';
-import { FaShieldAlt, FaExclamationTriangle, FaCheckCircle, FaClock, FaPercent, FaHandshake } from 'react-icons/fa';
 import { toast } from 'sonner';
+import {
+  ShieldCheck, AlertTriangle, CheckCircle2, Clock,
+  Percent, Handshake, TrendingUp, FileText
+} from 'lucide-react';
+
+const cx = (...c) => c.filter(Boolean).join(' ');
 
 const ServiceLevelAgreementPage = () => {
   const { user, sector } = useAuth();
   const [shipments, setShipments] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading]     = useState(true);
 
   const fetchShipments = async () => {
     try {
@@ -17,164 +22,152 @@ const ServiceLevelAgreementPage = () => {
       if (response.data && response.data.success) {
         setShipments(response.data.data?.content || response.data.data);
       }
-    } catch (err) {
-      console.error('Failed to fetch shipments for SLA', err);
-    } finally {
-      setLoading(false);
-    }
+    } catch (err) { console.error('Failed to fetch shipments for SLA', err); }
+    finally { setLoading(false); }
   };
 
   useEffect(() => {
-    if (user && sector?.code?.toLowerCase() === 'logistics') {
-      fetchShipments();
-    }
+    if (user && sector?.code?.toLowerCase() === 'logistics') fetchShipments();
   }, [user, sector]);
 
-  // Derive SLA metrics from shipments
-  const delivered = shipments.filter(s => s.status === 'DELIVERED').length;
-  const delayed = shipments.filter(s => s.status === 'DELAYED').length;
-  const total = shipments.length || 1;
+  const delivered  = shipments.filter(s => s.status === 'DELIVERED').length;
+  const delayed    = shipments.filter(s => s.status === 'DELAYED').length;
   const onTimeRate = Math.round(((delivered) / (delivered + delayed || 1)) * 100);
 
   if (!user || sector?.code?.toLowerCase() !== 'logistics') {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-base-200">
-        
-        <div className="card bg-base-100 shadow-xl p-8 text-center max-w-md mx-auto mt-20">
-          <FaExclamationTriangle className="text-6xl text-warning mx-auto mb-4" />
-          <h2 className="text-3xl font-bold mb-4">Logistics Access Only</h2>
-          <p className="mb-6 text-base-content/70">Please log in with your logistics credentials to view SLA compliance.</p>
-          <Link to="/login" className="btn btn-primary">Go to Login</Link>
+      <div className="min-h-screen flex items-center justify-center bg-[#0c0e12]">
+        <div className="flex flex-col items-center gap-6 text-center p-10 bg-[#111318] rounded-3xl border border-[#46484d]/20 max-w-md">
+          <AlertTriangle className="w-16 h-16 text-amber-400" />
+          <h2 className="text-2xl font-bold text-[#f6f6fc]">Logistics Access Only</h2>
+          <p className="text-[#aaabb0]">Please log in with your logistics credentials to view SLA compliance.</p>
+          <Link to="/login" className="px-6 py-2.5 rounded-xl font-bold text-sm text-[#000] bg-gradient-to-br from-[#99a8ff] to-[#4765f9]">Go to Login</Link>
         </div>
       </div>
     );
   }
 
+  const slaMetrics = [
+    { label: 'On-Time Delivery', value: `${onTimeRate}%`, sub: 'Target: 98.5%', Icon: Percent,        color: 'text-emerald-300 bg-emerald-500/10 border-emerald-500/20', good: onTimeRate >= 98 },
+    { label: 'Avg. Latency',     value: '4.2h',           sub: 'Target: < 2.0h', Icon: Clock,         color: 'text-amber-300 bg-amber-500/10 border-amber-500/20',    good: false },
+    { label: 'Open Breaches',    value: loading ? '—' : delayed, sub: 'Requiring resolution', Icon: AlertTriangle, color: delayed > 0 ? 'text-red-300 bg-red-500/10 border-red-500/20' : 'text-emerald-300 bg-emerald-500/10 border-emerald-500/20', good: delayed === 0 },
+    { label: 'Compliance Score', value: '94.8',            sub: 'Quarterly average', Icon: TrendingUp, color: 'text-sky-300 bg-sky-500/10 border-sky-500/20',            good: true },
+  ];
+
+  const slaClause = [
+    { name: 'Next Day Delivery (NDD)',   desc: '99% success rate required for Tier 1', pct: 92,  color: 'text-emerald-400' },
+    { name: 'Carbon Neutral Routing',    desc: '80% of routes must be optimized',       pct: 65,  color: 'text-amber-400' },
+    { name: 'Damage-Free Rate',          desc: 'Zero tolerance policy for hardware',    pct: 100, color: 'text-sky-400' },
+  ];
+
+  const delayedShipments = shipments.filter(s => s.status === 'DELAYED');
+
   return (
-    <div className="min-h-screen bg-base-200 flex flex-col">
-      
-      
-      <main className="flex-grow pt-24 pb-12 px-4 md:px-8">
-        <div className="max-w-7xl mx-auto">
-          
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
-            <div>
-              <h1 className="text-4xl font-extrabold flex items-center gap-4">
-                <FaShieldAlt className="text-secondary" />
-                Service Level Agreements
-              </h1>
-              <p className="text-base-content/60 mt-2 text-lg">Compliance monitoring, performance targets, and contractual obligation tracking.</p>
+    <div className="min-h-screen bg-[#0c0e12] text-[#f6f6fc] font-sans p-8">
+      <div className="fixed top-0 left-0 w-[600px] h-[400px] bg-[#4765f9]/5 blur-[150px] rounded-full pointer-events-none -z-10" />
+      <div className="fixed bottom-0 right-0 w-[400px] h-[400px] bg-[#99a8ff]/10 blur-[120px] rounded-full pointer-events-none -z-10 translate-x-1/2 translate-y-1/2" />
+      <div className="max-w-7xl mx-auto space-y-8">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pt-4">
+          <div>
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-xs font-bold uppercase tracking-widest text-[#aaabb0] opacity-60">Logistics</span>
+              <span className="text-[#46484d]">/</span>
+              <span className="text-xs font-bold uppercase tracking-widest text-[#99a8ff]">SLA</span>
             </div>
-            <div className="badge badge-secondary badge-lg p-4 font-bold gap-2">
-               <FaHandshake /> ACTIVE CONTRACTS
+            <h1 className="text-5xl font-extrabold tracking-tighter text-[#f6f6fc] mb-2">Service Level Agreements</h1>
+            <p className="text-[#aaabb0] max-w-lg">Compliance monitoring, performance targets, and contractual obligation tracking.</p>
+          </div>
+          <span className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm text-sky-300 bg-sky-500/10 border border-sky-500/20 whitespace-nowrap">
+            <Handshake className="w-4 h-4" /> ACTIVE CONTRACTS
+          </span>
+        </div>
+
+        {/* SLA Metrics */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {slaMetrics.map(({ label, value, sub, Icon, color }) => (
+            <div key={label} className="bg-[#111318] rounded-2xl border border-[#46484d]/10 p-6 flex flex-col gap-3">
+              <div className={cx('p-2.5 rounded-xl border w-fit', color.split(' ').slice(1).join(' '))}>
+                <Icon className={cx('w-5 h-5', color.split(' ')[0])} />
+              </div>
+              <div>
+                <p className="text-3xl font-extrabold text-[#f6f6fc]">{loading && label === 'Open Breaches' ? '—' : value}</p>
+                <p className="text-xs text-[#aaabb0] font-medium mt-0.5">{label}</p>
+                <p className="text-[10px] text-[#46484d] mt-1">{sub}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Compliance Details */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Active SLA Clauses */}
+          <div className="bg-[#111318] rounded-3xl border border-[#46484d]/10 p-6 space-y-5">
+            <div className="flex items-center gap-3 border-b border-[#46484d]/10 pb-4">
+              <ShieldCheck className="w-5 h-5 text-[#99a8ff]" />
+              <h2 className="font-bold text-[#f6f6fc]">Active SLA Clauses</h2>
+            </div>
+            <div className="space-y-5">
+              {slaClause.map(clause => (
+                <div key={clause.name} className="flex items-center justify-between gap-4">
+                  <div className="flex-1">
+                    <p className="font-semibold text-[#f6f6fc] text-sm">{clause.name}</p>
+                    <p className="text-[10px] text-[#aaabb0] mt-0.5">{clause.desc}</p>
+                    <div className="h-1.5 bg-[#0c0e12] rounded-full mt-2 overflow-hidden">
+                      <div className="h-full rounded-full bg-gradient-to-r from-[#4765f9] to-[#99a8ff] transition-all duration-700" style={{ width: `${clause.pct}%` }} />
+                    </div>
+                  </div>
+                  <span className={cx('font-bold text-lg font-mono shrink-0', clause.color)}>{clause.pct}%</span>
+                </div>
+              ))}
             </div>
           </div>
 
-          {/* SLA Overview Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-             <div className="stats shadow bg-base-100 overflow-hidden">
-                <div className="stat">
-                   <div className="stat-figure text-success"><FaPercent className="text-3xl" /></div>
-                   <div className="stat-title">On-Time Delivery</div>
-                   <div className="stat-value text-success">{onTimeRate}%</div>
-                   <div className="stat-desc">Target: 98.5%</div>
-                </div>
-             </div>
-             <div className="stats shadow bg-base-100">
-                <div className="stat">
-                   <div className="stat-figure text-warning"><FaClock className="text-3xl" /></div>
-                   <div className="stat-title">Avg. Latency</div>
-                   <div className="stat-value text-warning">4.2h</div>
-                   <div className="stat-desc">Target: &lt; 2.0h</div>
-                </div>
-             </div>
-             <div className="stats shadow bg-base-100">
-                <div className="stat">
-                   <div className="stat-figure text-error"><FaExclamationTriangle className="text-3xl" /></div>
-                   <div className="stat-title">Open Breaches</div>
-                   <div className="stat-value text-error">{delayed}</div>
-                   <div className="stat-desc">Requiring resolution</div>
-                </div>
-             </div>
-             <div className="stats shadow bg-base-100">
-                <div className="stat">
-                   <div className="stat-figure text-info"><FaCheckCircle className="text-3xl" /></div>
-                   <div className="stat-title">Compliance Score</div>
-                   <div className="stat-value text-info">94.8</div>
-                   <div className="stat-desc">Quarterly average</div>
-                </div>
-             </div>
-          </div>
-
-          {/* Compliance Details */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-             <div className="card bg-base-100 shadow-xl">
-                <div className="card-body">
-                   <h2 className="card-title mb-6 border-b pb-2">Active SLA Clauses</h2>
-                   <div className="space-y-6">
-                      <div className="flex justify-between items-center group">
-                         <div>
-                            <p className="font-bold">Next Day Delivery (NDD)</p>
-                            <p className="text-xs opacity-50">99% success rate required for Tier 1</p>
-                         </div>
-                         <div className="radial-progress text-success border-4 border-base-200" style={{ "--value": 92, "--size": "3rem" }} role="progressbar">92%</div>
-                      </div>
-                      <div className="flex justify-between items-center group">
-                         <div>
-                            <p className="font-bold">Carbon Neutral Routing</p>
-                            <p className="text-xs opacity-50">80% of routes must be optimized</p>
-                         </div>
-                         <div className="radial-progress text-warning border-4 border-base-200" style={{ "--value": 65, "--size": "3rem" }} role="progressbar">65%</div>
-                      </div>
-                      <div className="flex justify-between items-center group">
-                         <div>
-                            <p className="font-bold">Damage-Free Rate</p>
-                            <p className="text-xs opacity-50">Zero tolerance policy for hardware</p>
-                         </div>
-                         <div className="radial-progress text-info border-4 border-base-200" style={{ "--value": 100, "--size": "3rem" }} role="progressbar">100%</div>
-                      </div>
-                   </div>
-                </div>
-             </div>
-
-             <div className="card bg-base-100 shadow-xl">
-                <div className="card-body">
-                   <h2 className="card-title mb-6 border-b pb-2 text-error">Critical Breaches</h2>
-                   <div className="overflow-x-auto">
-                      <table className="table table-xs">
-                         <thead>
-                            <tr>
-                               <th>Event ID</th>
-                               <th>Contract</th>
-                               <th>Threshold</th>
-                               <th>Actual</th>
-                               <th>Penalty</th>
-                            </tr>
-                         </thead>
-                         <tbody>
-                            {shipments.filter(s => s.status === 'DELAYED').map(s => (
-                               <tr key={s.id}>
-                                  <td className="font-mono text-error">BR-{s.id}</td>
-                                  <td>Logistics G1</td>
-                                  <td>24h</td>
-                                  <td>31h</td>
-                                  <td className="text-error font-bold">$150.00</td>
-                               </tr>
-                            ))}
-                            {shipments.filter(s => s.status === 'DELAYED').length === 0 && (
-                               <tr><td colSpan="5" className="text-center py-4 opacity-50">No SLA breaches detected. Well done!</td></tr>
-                            )}
-                         </tbody>
-                      </table>
-                   </div>
-                   <div className="card-actions justify-end mt-4">
-                      <button className="btn btn-sm btn-outline">Full Report</button>
-                   </div>
-                </div>
-             </div>
+          {/* Critical Breaches */}
+          <div className="bg-[#111318] rounded-3xl border border-[#46484d]/10 overflow-hidden">
+            <div className="flex items-center gap-3 p-6 border-b border-[#46484d]/10">
+              <AlertTriangle className="w-5 h-5 text-red-400" />
+              <h2 className="font-bold text-[#f6f6fc]">Critical Breaches</h2>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-[#46484d]/10">
+                    {['Event ID', 'Contract', 'Threshold', 'Actual', 'Penalty'].map(h => (
+                      <th key={h} className="text-left px-5 py-3 text-[10px] font-bold uppercase tracking-widest text-[#aaabb0]">{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {loading ? (
+                    <tr><td colSpan="5" className="text-center py-12"><div className="flex justify-center"><div className="w-7 h-7 rounded-full border-2 border-[#99a8ff]/20 border-t-[#99a8ff] animate-spin" /></div></td></tr>
+                  ) : delayedShipments.length === 0 ? (
+                    <tr>
+                      <td colSpan="5" className="text-center py-12">
+                        <CheckCircle2 className="w-8 h-8 text-emerald-400 mx-auto mb-2" />
+                        <p className="text-sm text-[#46484d]">No SLA breaches detected. Well done!</p>
+                      </td>
+                    </tr>
+                  ) : delayedShipments.map(s => (
+                    <tr key={s.id} className="border-b border-[#46484d]/5 hover:bg-[#171a1f] transition-colors">
+                      <td className="px-5 py-3 font-mono text-red-400 text-xs">BR-{s.id}</td>
+                      <td className="px-5 py-3 text-[#aaabb0]">Logistics G1</td>
+                      <td className="px-5 py-3 text-[#aaabb0]">24h</td>
+                      <td className="px-5 py-3 text-red-400">31h</td>
+                      <td className="px-5 py-3 font-bold text-red-400">$150.00</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div className="p-5 flex justify-end">
+              <button className="flex items-center gap-2 text-xs font-bold text-[#99a8ff] hover:text-[#f6f6fc] transition-colors border border-[#46484d]/20 px-4 py-2 rounded-xl hover:border-[#46484d]/40">
+                <FileText className="w-3.5 h-3.5" /> Full Report
+              </button>
+            </div>
           </div>
         </div>
-      </main>
+      </div>
     </div>
   );
 };
