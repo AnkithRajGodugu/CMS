@@ -189,4 +189,13 @@ public class KafkaConfig {
     public NewTopic customerEventsTopic() {
         return new NewTopic("customer-events", defaultPartitions, defaultReplicationFactor);
     }
-}
+
+    /**
+     * Generic notifications topic — consumed by KafkaConsumerService.
+     * Topic name must match @KafkaListener(topics = "notifications").
+     */
+    @Bean
+    public NewTopic notificationsTopic() {
+        return new NewTopic("notifications", defaultPartitions, defaultReplicationFactor);
+    }
+}
