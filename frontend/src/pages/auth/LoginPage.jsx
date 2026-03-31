@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { login as authLogin } from '../../utils/auth';
 import { getHomeRoute } from '../../utils/roleUtils';
@@ -17,7 +17,11 @@ const LoginPage = () => {
     const [twoFaCode, setTwoFaCode] = useState('');
 
     const navigate = useNavigate();
+    const location = useLocation();
     const { login } = useAuth();
+
+    // Message passed back from ResetPasswordPage after a successful reset
+    const successMessage = location.state?.successMessage || null;
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -132,6 +136,15 @@ const LoginPage = () => {
                 <div className="card bg-base-100 shadow-xl">
                     <div className="card-body">
 
+                        {successMessage && (
+                            <div className="alert alert-success mb-4">
+                                <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                </svg>
+                                <span>{successMessage}</span>
+                            </div>
+                        )}
+
                         {error && (
                             <div className="alert alert-error mb-4">
                                 <span>{error}</span>
@@ -201,12 +214,9 @@ const LoginPage = () => {
                                     />
                                 </div>
 
-                                <div className="form-control">
-
-                                    <label className="label">
-                                        <span className="label-text">
-                                            Password
-                                        </span>
+                                <div className="form-control mb-6">
+                                    <label className="label pb-1">
+                                        <span className="label-text font-medium">Password</span>
                                     </label>
 
                                     <input
@@ -214,21 +224,20 @@ const LoginPage = () => {
                                         name="password"
                                         value={formData.password}
                                         onChange={handleChange}
-                                        className="input input-bordered"
+                                        className="input input-bordered w-full focus:ring-2 focus:ring-primary/20 transition-all"
                                         placeholder="Enter your password"
                                         required
                                         disabled={isLoading}
                                     />
-
-                                    <label className="label">
+                                    
+                                    <label className="label justify-end pt-2 pb-0">
                                         <Link
                                             to="/forgot-password"
-                                            className="label-text-alt link link-hover"
+                                            className="label-text-alt text-primary font-medium hover:underline transition-all"
                                         >
                                             Forgot password?
                                         </Link>
                                     </label>
-
                                 </div>
 
                                 <div className="form-control">

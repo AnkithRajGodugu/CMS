@@ -122,6 +122,16 @@ public class DataInitializer implements CommandLineRunner {
 
         System.out.println("✅ Test users explicitly verified/initialized");
 
+        // ── Dev SMTP test: sync admin email so forgot-password can be tested ──────
+        // Update admin's email to the real address used for SMTP testing.
+        // Mailtrap sandbox will capture emails sent to any address.
+        User adminUser = userRepository.findByUsername("admin");
+        if (adminUser != null) {
+            adminUser.setEmail("ankithrajgodugu@gmail.com");
+            userRepository.save(adminUser);
+            System.out.println("✅ Admin email set to ankithrajgodugu@gmail.com for SMTP testing");
+        }
+
         User bankUser = userRepository.findByUsername("bank_user");
         User healthUser = userRepository.findByUsername("health_user");
         User logisticsUser = userRepository.findByUsername("logistics_user");

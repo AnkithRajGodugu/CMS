@@ -561,6 +561,33 @@ public class AuthController {
         }
     }
 
+    /**
+     * GET /api/auth/validate-reset-token?token=... — pre-validates a password-reset token.
+     * The frontend calls this on page load so users get an immediate error
+     * instead of discovering token expiry AFTER they submit a new password.
+     */
+    @GetMapping("/validate-reset-token")
+    public ResponseEntity<Map<String, Object>> validateResetToken(@RequestParam String token) {
+        if (token == null || token.isBlank()) {
+            return ResponseEntity.badRequest().body(Map.of(
+                "valid", false,
+                "message", "Token is required."
+            ));
+        }
+        boolean valid = authService.isResetTokenValid(token);
+        if (valid) {
+            return ResponseEntity.ok(Map.of(
+                "valid", true,
+                "message", "Token is valid."
+            ));
+        } else {
+            return ResponseEntity.ok(Map.of(
+                "valid", false,
+                "message", "This password reset link has expired or is invalid. Please request a new one."
+            ));
+        }
+    }
+
     // ─── Refresh Token ────────────────────────────────────────────────────────
 
     @PostMapping("/refresh")

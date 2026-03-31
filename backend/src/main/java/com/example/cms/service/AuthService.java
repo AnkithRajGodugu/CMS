@@ -357,19 +357,48 @@ public class AuthService {
 
     @Transactional
     public void createPasswordResetToken(String email) {
-        User user = userRepository.findByEmail(email); // Need to add to UserRepository
+        // findByEmail() uses a DB-level equality query which CANNOT match AES-GCM
+        // encrypted emails (random IV per write = unique ciphertext every time).
+        // We must scan in-memory and decrypt at the JPA converter layer instead —
+        // exactly the same pattern used in authenticate().
+        String normalised = email.toLowerCase().trim();
+        User user = userRepository.findAll().stream()
+                .filter(u -> {
+                    try {
+                        String decryptedEmail = u.getEmail(); // JPA converter decrypts here
+                        return normalised.equals(decryptedEmail);
+                    } catch (Exception ignored) {
+                        return false;
+                    }
+                })
+                .findFirst()
+                .orElse(null);
+
         if (user == null) {
-            return; // Fail silently for security
+            // Fail silently — never reveal whether the email is registered
+            log.info("Password reset requested for unknown email (silently ignored)");
+            return;
         }
 
-        // Delete old token if exists
+        // Delete any existing token for this user before issuing a new one
         passwordResetTokenRepository.deleteByUser(user);
 
         String token = UUID.randomUUID().toString();
         PasswordResetToken resetToken = new PasswordResetToken(token, user, 60); // 1 hour expiry
         passwordResetTokenRepository.save(resetToken);
-        
+
         mailService.sendPasswordResetEmail(user.getEmail(), token);
+        log.info("Password reset token created for user '{}' (email delivery attempted)", user.getUsername());
+    }
+
+    /**
+     * Non-destructive check: returns true if the token exists and has not expired.
+     * The token is NOT deleted here — only consumed by resetPassword().
+     */
+    public boolean isResetTokenValid(String token) {
+        return passwordResetTokenRepository.findByToken(token)
+                .map(t -> !t.isExpired())
+                .orElse(false);
     }
 
     @Transactional
@@ -388,8 +417,9 @@ public class AuthService {
         User user = resetToken.getUser();
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
-        
+
         passwordResetTokenRepository.delete(resetToken);
+        log.info("Password reset successfully for user '{}'", user.getUsername());
         return true;
     }
 }

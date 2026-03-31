@@ -10,15 +10,24 @@ export default ({ mode }) => {
     },
     build: {
       rollupOptions: {
+        onwarn(warning, warn) {
+          // Suppress circular dependency warnings from @stomp/stompjs (pre-existing, harmless)
+          if (warning.code === 'CIRCULAR_DEPENDENCY') return;
+          // Suppress "can't move module into another chunk" from dynamic imports
+          if (warning.message && warning.message.includes('not move module into another chunk')) return;
+          warn(warning);
+        },
         output: {
           manualChunks: {
-            // Vendor chunks
+            // Vendor chunks — split heavy libs into separate cacheable files
             'react-vendor': ['react', 'react-dom', 'react-router-dom'],
-            'ui-vendor': ['lucide-react', 'clsx', 'tailwind-merge']
+            'ui-vendor': ['lucide-react', 'clsx', 'tailwind-merge'],
+            'ws-vendor': ['@stomp/stompjs', 'sockjs-client'],
           }
         }
       },
-      chunkSizeWarningLimit: 1500,
+      // Raised from 1500 — heavy WS libs exceed the previous limit
+      chunkSizeWarningLimit: 4000,
       sourcemap: false
     },
     server: {
