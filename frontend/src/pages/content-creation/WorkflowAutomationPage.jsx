@@ -230,7 +230,7 @@ const WorkflowAutomationPage = () => {
                 {projects.map(p => <option key={p.id} value={p.id}>{p.projectName}</option>)}
               </select>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className={labelCls}>Trigger Event</label>
                 <select className={inputCls} value={automatorForm.trigger} onChange={e => setAutomatorForm({...automatorForm, trigger: e.target.value})}>

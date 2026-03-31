@@ -166,7 +166,7 @@ const UploadModal = ({ onClose, onSubmit, projects }) => {
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">Type</label>
               <select
@@ -240,7 +240,7 @@ const DetailsModal = ({ asset, onClose, onDownload, onCopyUrl }) => {
           {asset.type === 'IMAGE' && asset.url && (
             <img src={asset.url} alt={asset.title} className="w-full h-48 object-cover rounded-2xl" />
           )}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="bg-[#F7F9FC] rounded-xl p-4">
               <p className="text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-1">Asset ID</p>
               <p className="font-mono font-bold text-[#1F2937]">#{asset.id}</p>

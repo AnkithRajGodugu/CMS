@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+﻿import { Link } from 'react-router-dom';
 const LogisticsSectorPage = () => {
   const features = [
     {
@@ -157,7 +157,7 @@ const LogisticsSectorPage = () => {
             <div className="card bg-base-100 shadow-xl">
               <div className="card-body">
                 <h3 className="card-title text-2xl mb-6">Logistics Performance</h3>
-                <div className="grid grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <div className="text-center">
                     <div className="text-3xl font-bold text-orange-600">30%</div>
                     <div className="text-sm opacity-70">Cost Reduction</div>

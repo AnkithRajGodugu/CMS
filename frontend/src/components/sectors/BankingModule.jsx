@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { SectorLayout, StatCard, ChartWidget, chartColors } from '../shared';
 import { DollarSign, TrendingUp, Users, CreditCard } from 'lucide-react';

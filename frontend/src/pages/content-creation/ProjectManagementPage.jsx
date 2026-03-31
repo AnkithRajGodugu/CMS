@@ -92,7 +92,7 @@ const ProjectCard = ({ project, onDetails, onManageAssets }) => {
         </div>
 
         {/* Meta grid */}
-        <div className="grid grid-cols-2 gap-3 mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
           <div className="bg-[#F7F9FC] rounded-xl p-3">
             <div className="flex items-center gap-1.5 text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-1">
               <Calendar className="w-3 h-3" /> Deadline
@@ -294,7 +294,7 @@ const ProjectManagementPage = () => {
               <input type="text" required placeholder="e.g. Acme Corp" className={inputCls}
                 value={newProject.clientName} onChange={e => setNewProject({ ...newProject, clientName: e.target.value })} />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className={labelCls}>Start Date</label>
                 <input type="date" required className={inputCls}
@@ -330,7 +330,7 @@ const ProjectManagementPage = () => {
                 <h2 className="text-2xl font-black text-[#1F2937]">{detailsProject.projectName}</h2>
                 <p className="text-xs text-gray-500 font-mono mt-1">Project #{detailsProject.id}</p>
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {[
                   { label: 'Client', value: detailsProject.clientName || '—', Icon: User },
                   { label: 'Status', value: null, badge: status },

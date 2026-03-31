@@ -104,7 +104,7 @@ const ContentDistributionPage = () => {
                   </span>
                 </div>
                 <h2 className="font-black text-lg text-[#1F2937] mb-4">{p.platform}</h2>
-                <div className="grid grid-cols-2 gap-3 mb-5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5">
                   <div>
                     <p className="text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-0.5">Followers</p>
                     <p className="font-bold text-[#1F2937]">{p.followers?.toLocaleString() || '—'}</p>
@@ -186,7 +186,7 @@ const ContentDistributionPage = () => {
               <input type="text" required placeholder="e.g. Q2 Brand Awareness Push" className={inputCls}
                 value={campaignForm.name} onChange={e => setCampaignForm({...campaignForm, name: e.target.value})} />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className={labelCls}>Platform</label>
                 <select className={inputCls} value={campaignForm.platform} onChange={e => setCampaignForm({...campaignForm, platform: e.target.value})}>
@@ -207,7 +207,7 @@ const ContentDistributionPage = () => {
                 </select>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className={labelCls}>Start Date</label>
                 <input type="date" required className={inputCls} value={campaignForm.startDate} onChange={e => setCampaignForm({...campaignForm, startDate: e.target.value})} />
@@ -236,7 +236,7 @@ const ContentDistributionPage = () => {
             <button onClick={() => setManagePlatform(null)} className="p-2 rounded-xl text-gray-500 hover:text-[#1F2937] hover:bg-gray-100 transition-all"><X className="w-5 h-5" /></button>
           </div>
           <div className="p-6 space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="bg-[#F7F9FC] rounded-xl p-4">
                 <p className="text-xs text-gray-500 uppercase tracking-widest font-bold mb-1">Followers</p>
                 <p className="text-2xl font-extrabold text-[#1F2937]">{managePlatform.followers?.toLocaleString() || '—'}</p>
@@ -250,7 +250,7 @@ const ContentDistributionPage = () => {
               <span className="font-bold text-[#1F2937] text-sm">Connection Status</span>
               <span className={cx('px-3 py-1 rounded-full text-xs font-bold uppercase border', managePlatform.status === 'CONNECTED' ? 'text-emerald-700 bg-emerald-50 border-emerald-200' : 'text-red-700 bg-red-50 border-red-200')}>{managePlatform.status}</span>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <button onClick={() => { toast.success(`Refreshing ${managePlatform.platform} analytics...`); setManagePlatform(null); }}
                 className="flex items-center justify-center gap-2 py-3 rounded-xl text-xs font-bold text-violet-600 bg-[#F7F9FC] border border-gray-100 hover:border-[#99a8ff]/30 transition-all">
                 <Radio className="w-3.5 h-3.5" /> Refresh Analytics

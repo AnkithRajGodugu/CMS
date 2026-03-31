@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 
 const TelemedicineModal = ({ appointment, isOpen, onClose }) => {
     if (!isOpen || !appointment) return null;

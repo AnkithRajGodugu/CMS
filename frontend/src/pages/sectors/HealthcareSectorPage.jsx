@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+﻿import { Link } from 'react-router-dom';
 const HealthcareSectorPage = () => {
   const features = [
     {
@@ -145,7 +145,7 @@ const HealthcareSectorPage = () => {
             <div className="card bg-base-100 shadow-xl">
               <div className="card-body">
                 <h3 className="card-title text-2xl mb-6">Healthcare Impact</h3>
-                <div className="grid grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <div className="text-center">
                     <div className="text-3xl font-bold text-green-600">50%</div>
                     <div className="text-sm opacity-70">Reduced Wait Times</div>

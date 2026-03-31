@@ -73,16 +73,15 @@ const LogisticsDashboard = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-base-200">
-      <div className="container mx-auto p-6">
+    <div className="space-y-6">
         
-          <div className="flex justify-between items-end mb-2">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-3 mb-2">
             <div>
-              <div className="flex items-center gap-3 mb-2">
-                <FaTruck className="text-4xl text-warning" />
-                <h1 className="text-4xl font-bold">Logistics Dashboard</h1>
+              <div className="flex items-center gap-2 mb-1">
+                <FaTruck className="text-2xl md:text-4xl text-warning" />
+                <h1 className="text-2xl md:text-4xl font-bold">Logistics Dashboard</h1>
               </div>
-              <p className="text-base-content/70">Manage shipments, inventory, and supply chain operations</p>
+              <p className="text-base-content/70 text-sm md:text-base">Manage shipments, inventory, and supply chain operations</p>
             </div>
             <ReportExportButtons sectorCode="LOGISTICS" />
           </div>
@@ -94,14 +93,14 @@ const LogisticsDashboard = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {stats.map((stat, index) => (
             <div key={index} className="card bg-base-100 shadow-xl">
-              <div className="card-body">
+              <div className="card-body p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-base-content/70">{stat.label}</p>
-                    <p className="text-3xl font-bold mt-1">{stat.value}</p>
-                    <p className={`text-sm mt-1 ${stat.color}`}>{stat.change} from last month</p>
+                    <p className="text-xs md:text-sm text-base-content/70">{stat.label}</p>
+                    <p className="text-2xl md:text-3xl font-bold mt-1">{stat.value}</p>
+                    <p className={`text-xs md:text-sm mt-1 ${stat.color}`}>{stat.change} from last month</p>
                   </div>
-                  <stat.icon className={`text-4xl ${stat.color}`} />
+                  <stat.icon className={`text-3xl md:text-4xl ${stat.color}`} />
                 </div>
               </div>
             </div>
@@ -110,8 +109,8 @@ const LogisticsDashboard = () => {
 
         {/* Quick Actions */}
         <div className="mb-8">
-          <h2 className="text-2xl font-bold mb-4">Quick Actions</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <h2 className="text-xl md:text-2xl font-bold mb-4">Quick Actions</h2>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4">
             {quickActions.map((action, index) => (
               <Link key={index} to={action.path}>
                 <div className="card bg-base-100 shadow-xl hover:shadow-2xl transition-all cursor-pointer">
@@ -130,46 +129,41 @@ const LogisticsDashboard = () => {
         {/* Recent Shipments */}
         <div className="card bg-base-100 shadow-xl">
           <div className="card-body">
-            <h2 className="card-title">Recent Shipments</h2>
-            <div className="overflow-x-auto">
+          <h2 className="card-title">Recent Shipments</h2>
+            {/* Mobile card view */}
+            <div className="md:hidden space-y-3 mt-2">
+              {shipments.length === 0 ? (
+                <p className="text-center text-base-content/50 py-4">No shipments found.</p>
+              ) : shipments.slice(0,5).map(s => (
+                <div key={s.id} className="table-card-row bg-base-200/40 border border-base-200">
+                  <div className="flex justify-between"><span className="table-card-row-label">Tracking ID</span><span className="text-sm font-mono">{s.trackingId}</span></div>
+                  <div className="flex justify-between"><span className="table-card-row-label">Destination</span><span className="text-sm">{s.destination}</span></div>
+                  <div className="flex justify-between items-center"><span className="table-card-row-label">Status</span>
+                    <span className={`badge badge-sm ${s.status==='DELIVERED'?'badge-success':s.status==='IN_TRANSIT'?'badge-info':'badge-warning'}`}>{s.status}</span></div>
+                  <div className="flex justify-between"><span className="table-card-row-label">ETA</span><span className="text-xs">{s.estimatedDelivery ? new Date(s.estimatedDelivery).toLocaleDateString() : 'Pending'}</span></div>
+                </div>
+              ))}
+            </div>
+            {/* Desktop table */}
+            <div className="hidden md:block overflow-x-auto">
               <table className="table">
-                <thead>
-                  <tr>
-                    <th>Tracking ID</th>
-                    <th>Destination</th>
-                    <th>Status</th>
-                    <th>ETA</th>
-                  </tr>
-                </thead>
+                <thead><tr><th>Tracking ID</th><th>Destination</th><th>Status</th><th>ETA</th></tr></thead>
                 <tbody>
-                  {loading ? (
-                    <tr><td colSpan="4" className="text-center">Loading...</td></tr>
-                  ) : shipments.length === 0 ? (
+                  {shipments.length === 0 ? (
                     <tr><td colSpan="4" className="text-center">No shipments found.</td></tr>
-                  ) : (
-                    shipments.map(shipment => (
-                      <tr key={shipment.id}>
-                        <td>{shipment.trackingId}</td>
-                        <td>{shipment.destination}</td>
-                        <td>
-                          <span className={`badge ${
-                            shipment.status === 'DELIVERED' ? 'badge-success' : 
-                            shipment.status === 'IN_TRANSIT' ? 'badge-info' : 
-                            'badge-warning'
-                          }`}>
-                            {shipment.status}
-                          </span>
-                        </td>
-                        <td>{shipment.estimatedDelivery ? new Date(shipment.estimatedDelivery).toLocaleDateString() : 'Pending'}</td>
-                      </tr>
-                    ))
-                  )}
+                  ) : shipments.map(shipment => (
+                    <tr key={shipment.id}>
+                      <td>{shipment.trackingId}</td>
+                      <td>{shipment.destination}</td>
+                      <td><span className={`badge ${shipment.status==='DELIVERED'?'badge-success':shipment.status==='IN_TRANSIT'?'badge-info':'badge-warning'}`}>{shipment.status}</span></td>
+                      <td>{shipment.estimatedDelivery ? new Date(shipment.estimatedDelivery).toLocaleDateString() : 'Pending'}</td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
           </div>
         </div>
-      </div>
     </div>
   );
 };

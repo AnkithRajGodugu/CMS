@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import {
   ClipboardList, FlaskConical, Hospital, Syringe,
   FileText, Scan, Pill, Search, X, Filter
@@ -111,7 +111,7 @@ const MedicalHistoryPage = () => {
       </div>
 
       {/* ── KPI Cards ── */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <HealthcareKPICard title="Total Records"  value={loading ? '—' : summary.total}        icon={ClipboardList}  accentColor="border-teal-500"    bgAccent="bg-teal-50"    iconColor="text-teal-600" loading={loading} />
         <HealthcareKPICard title="Lab Results"    value={loading ? '—' : summary.labResults}   icon={FlaskConical}   accentColor="border-cyan-500"    bgAccent="bg-cyan-50"    iconColor="text-cyan-600" loading={loading} />
         <HealthcareKPICard title="Visits"         value={loading ? '—' : summary.visits}       icon={Hospital}       accentColor="border-emerald-500" bgAccent="bg-emerald-50" iconColor="text-emerald-600" loading={loading} />

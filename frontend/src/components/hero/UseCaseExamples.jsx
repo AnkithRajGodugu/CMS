@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 
 const UseCaseExamples = ({ sector }) => {
   // Define use cases for each sector

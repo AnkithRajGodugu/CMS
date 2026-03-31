@@ -88,16 +88,15 @@ const HealthcareDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-base-200">
-      <div className="container mx-auto p-6">
+    <div className="space-y-6">
         
-          <div className="flex justify-between items-end mb-2">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-3 mb-2">
             <div>
-              <div className="flex items-center gap-3 mb-2">
-                <FaHospital className="text-4xl text-success" />
-                <h1 className="text-4xl font-bold">Healthcare Dashboard</h1>
+              <div className="flex items-center gap-2 mb-1">
+                <FaHospital className="text-2xl md:text-4xl text-success" />
+                <h1 className="text-2xl md:text-4xl font-bold">Healthcare Dashboard</h1>
               </div>
-              <p className="text-base-content/70">Manage patients, appointments, and medical records</p>
+              <p className="text-base-content/70 text-sm md:text-base">Manage patients, appointments, and medical records</p>
             </div>
             <ReportExportButtons sectorCode="HEALTHCARE" />
           </div>
@@ -149,17 +148,24 @@ const HealthcareDashboard = () => {
         {/* Recent Activity */}
         <div className="card bg-base-100 shadow-xl">
           <div className="card-body">
-            <h2 className="card-title">Recent Appointments</h2>
-            <div className="overflow-x-auto">
+          <h2 className="card-title">Recent Appointments</h2>
+            {/* Mobile card view */}
+            <div className="md:hidden space-y-3 mt-2">
+              {recentActivity.length === 0 ? (
+                <p className="text-center text-base-content/50 py-4">No recent activity found.</p>
+              ) : recentActivity.map((activity, idx) => (
+                <div key={idx} className="table-card-row bg-base-200/40 border border-base-200">
+                  <div className="flex justify-between"><span className="table-card-row-label">Patient</span><span className="text-sm font-medium">{activity.patientName || 'Unknown'}</span></div>
+                  <div className="flex justify-between"><span className="table-card-row-label">Type</span><span className="text-sm">{(activity.type || 'General')} Appointment</span></div>
+                  <div className="flex justify-between"><span className="table-card-row-label">Time</span><span className="text-xs">{activity.createdAt ? new Date(activity.createdAt).toLocaleString() : 'N/A'}</span></div>
+                  <div className="flex justify-between items-center"><span className="table-card-row-label">Status</span><span className={`badge badge-sm ${getStatusBadge(activity.status)}`}>{activity.status || 'PENDING'}</span></div>
+                </div>
+              ))}
+            </div>
+            {/* Desktop table */}
+            <div className="hidden md:block overflow-x-auto">
               <table className="table">
-                <thead>
-                  <tr>
-                    <th>Patient</th>
-                    <th>Action</th>
-                    <th>Time</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
+                <thead><tr><th>Patient</th><th>Action</th><th>Time</th><th>Status</th></tr></thead>
                 <tbody>
                   {recentActivity.length > 0 ? recentActivity.map((activity, idx) => (
                     <tr key={idx}>
@@ -169,16 +175,13 @@ const HealthcareDashboard = () => {
                       <td><span className={`badge ${getStatusBadge(activity.status)}`}>{activity.status || 'PENDING'}</span></td>
                     </tr>
                   )) : (
-                    <tr>
-                        <td colSpan="4" className="text-center opacity-50 py-4">No recent activity found.</td>
-                    </tr>
+                    <tr><td colSpan="4" className="text-center opacity-50 py-4">No recent activity found.</td></tr>
                   )}
                 </tbody>
               </table>
             </div>
           </div>
         </div>
-      </div>
     </div>
   );
 };

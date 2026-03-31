@@ -84,7 +84,7 @@ const ServiceLevelAgreementPage = () => {
         </div>
 
         {/* SLA Metrics */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {slaMetrics.map(({ label, value, sub, Icon, color }) => (
             <div key={label} className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 flex flex-col gap-3">
               <div className={cx('p-2.5 rounded-xl border w-fit', color.split(' ').slice(1).join(' '))}>

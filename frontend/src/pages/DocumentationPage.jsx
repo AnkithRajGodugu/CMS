@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { useTheme } from '../context/SectorThemeProvider';
 import { useSector } from '../hooks/useSector';
 import DynamicLogo from '../components/logos/DynamicLogo';

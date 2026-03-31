@@ -1,4 +1,4 @@
-import { NavLink, useLocation } from 'react-router-dom';
+﻿import { NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { useTheme } from '../../context/SectorThemeProvider';
 import { getSectorNavItems } from '../../utils/roleUtils';
@@ -9,6 +9,12 @@ const SectorIcon = ({ iconName, className }) => {
     const Icon = FaIcons[iconName];
     if (!Icon) return <span className="w-4 h-4 inline-block" />;
     return <Icon className={className} />;
+};
+
+// Closes the DaisyUI drawer on mobile when a nav item is tapped
+const closeMobileDrawer = () => {
+    const toggle = document.getElementById('mobile-sidebar-drawer');
+    if (toggle) toggle.checked = false;
 };
 
 const Sidebar = () => {
@@ -51,8 +57,8 @@ const Sidebar = () => {
                 style={{ background: `linear-gradient(90deg, ${primaryColor}, ${primaryColor}44)` }}
             />
 
-            {/* Collapse Toggle */}
-            <div className={`flex ${collapsed ? 'justify-center' : 'justify-end'} px-3 pt-3 pb-1`}>
+            {/* Collapse Toggle — desktop only */}
+            <div className={`hidden lg:flex ${collapsed ? 'justify-center' : 'justify-end'} px-3 pt-3 pb-1`}>
                 <button
                     onClick={() => setCollapsed(!collapsed)}
                     className="btn btn-ghost btn-square btn-xs opacity-50 hover:opacity-100 transition-opacity"
@@ -69,6 +75,8 @@ const Sidebar = () => {
                     </svg>
                 </button>
             </div>
+            {/* Mobile top spacer */}
+            <div className="lg:hidden pt-2" />
 
             {/* Nav Items */}
             <ul className="flex flex-col gap-0.5 px-2 flex-1 overflow-y-auto overflow-x-hidden mt-1 pb-2">
@@ -78,8 +86,11 @@ const Sidebar = () => {
                             to={item.path}
                             end={item.path.split('/').length <= 3}
                             title={collapsed ? item.label : undefined}
+                            onClick={closeMobileDrawer}
                             className={({ isActive }) =>
-                                `group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-all duration-200 ${
+                                `group relative flex items-center gap-3 rounded-xl px-3 py-2.5 lg:py-2.5 text-sm transition-all duration-200
+                                min-h-[44px] lg:min-h-0
+                                ${
                                     isActive
                                         ? 'text-white font-semibold shadow-sm'
                                         : 'text-base-content/70 hover:text-base-content hover:bg-base-200/80'
@@ -95,18 +106,18 @@ const Sidebar = () => {
                             }
                         >
                             {/* Icon */}
-                            <span className="flex-shrink-0 w-4 h-4 flex items-center justify-center">
-                                <SectorIcon iconName={item.icon} className="w-4 h-4" />
+                            <span className="flex-shrink-0 w-5 h-5 lg:w-4 lg:h-4 flex items-center justify-center">
+                                <SectorIcon iconName={item.icon} className="w-5 h-5 lg:w-4 lg:h-4" />
                             </span>
 
                             {/* Label */}
                             {!collapsed && (
-                                <span className="whitespace-nowrap truncate tracking-wide">
+                                <span className="whitespace-nowrap truncate tracking-wide text-sm lg:text-sm">
                                     {item.label}
                                 </span>
                             )}
 
-                            {/* Collapsed tooltip */}
+                            {/* Collapsed tooltip (desktop only) */}
                             {collapsed && (
                                 <span className="
                                     absolute left-full ml-3 z-50 px-2.5 py-1.5

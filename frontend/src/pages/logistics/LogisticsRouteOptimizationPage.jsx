@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+﻿import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import api from '../../services/api';
 import { toast } from 'sonner';
@@ -150,7 +150,7 @@ function RouteDetailPanel({ route, onClose, onOptimize }) {
         </span>
       </div>
       <div className="p-4 space-y-3">
-        <div className="grid grid-cols-3 gap-2 text-center">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-center">
           {[
             { label: 'Distance', value: `${route.distanceKm} km`,  color: 'text-amber-600' },
             { label: 'Time',     value: `${route.estimatedTimeMinutes}m`, color: 'text-sky-600' },
@@ -262,7 +262,7 @@ const LogisticsRouteOptimizationPage = () => {
         </div>
 
         {/* KPIs */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {[
             { label: 'Total Routes',  value: routes.length,   Icon: Route,       color: 'text-amber-700 bg-amber-50 border-amber-200' },
             { label: 'Optimized',     value: optimizedCount,  Icon: Check,       color: 'text-emerald-700 bg-emerald-50 border-emerald-200' },
@@ -378,7 +378,7 @@ const LogisticsRouteOptimizationPage = () => {
               <button onClick={() => setIsModalOpen(false)} className="p-2 rounded-xl text-gray-500 hover:text-[#1F2937] hover:bg-gray-100 transition-all"><X className="w-5 h-5" /></button>
             </div>
             <form onSubmit={handleCreateRoute} className="p-6 space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className={labelCls}>Start City</label>
                   <input type="text" required placeholder="e.g. Mumbai" list="city-suggestions" className={inputCls}
@@ -391,7 +391,7 @@ const LogisticsRouteOptimizationPage = () => {
                 </div>
               </div>
               <datalist id="city-suggestions">{Object.keys(CITY_LATLNG).map(c => <option key={c} value={c}/>)}</datalist>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className={labelCls}>Distance (km)</label>
                   <input type="number" step="0.1" min="1" required className={inputCls}

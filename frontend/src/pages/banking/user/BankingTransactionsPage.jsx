@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+﻿import { useState, useEffect, useCallback } from 'react';
 import api from '../../../services/api';
 
 const statusClass = (s) => ({ COMPLETED: 'badge-success', PENDING: 'badge-warning', FAILED: 'badge-error' }[s] || 'badge-neutral');

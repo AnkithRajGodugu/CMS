@@ -1,4 +1,4 @@
-import { Link, useNavigate } from 'react-router-dom';
+﻿import { Link, useNavigate } from 'react-router-dom';
 import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { useTheme } from '../../context/SectorThemeProvider';
@@ -6,7 +6,7 @@ import { getHomeRoute, isAdmin, isManager, isSuperAdmin, isUser } from '../../ut
 import DynamicLogo from '../logos/DynamicLogo';
 import NotificationsDropdown from '../NotificationsDropdown';
 
-const SafeNavbar = ({ hideSectorSwitcher = false }) => {
+const SafeNavbar = ({ hideSectorSwitcher = false, externalSearchOpen = false, onExternalSearchClose }) => {
   const { user, logout, isAuthenticated } = useAuth();
   const { currentTheme, changeSector, getAllSectors } = useTheme();
   const navigate = useNavigate();
@@ -18,6 +18,9 @@ const SafeNavbar = ({ hideSectorSwitcher = false }) => {
   const searchRef    = useRef(null);
   const inputRef     = useRef(null);
   const resultsRef   = useRef(null);
+
+  // Merge external trigger (from MobileBottomNav) with internal state
+  const effectiveSearchOpen = isSearchOpen || externalSearchOpen;
 
   // Close on outside click
   useEffect(() => {
@@ -44,7 +47,12 @@ const SafeNavbar = ({ hideSectorSwitcher = false }) => {
   }, []);
 
   const openSearch  = () => { setIsSearchOpen(true); setTimeout(() => inputRef.current?.focus(), 50); };
-  const closeSearch = () => { setIsSearchOpen(false); setSearchQuery(''); setActiveIdx(0); };
+  const closeSearch = () => {
+      setIsSearchOpen(false);
+      setSearchQuery('');
+      setActiveIdx(0);
+      onExternalSearchClose?.(); // notify SectorLayout
+  };
 
   // ── Searchable Pages (role-aware) ────────────────────────────────────────
   const allPages = [
@@ -137,6 +145,11 @@ const SafeNavbar = ({ hideSectorSwitcher = false }) => {
     el?.scrollIntoView({ block: 'nearest' });
   }, [activeIdx]);
 
+  // Open when external trigger fires (from MobileBottomNav)
+  useEffect(() => {
+    if (externalSearchOpen && !isSearchOpen) openSearch();
+  }, [externalSearchOpen]); // eslint-disable-line react-hooks/exhaustive-deps
+
   return (
     <div
       className="navbar bg-base-100 shadow-lg transition-all duration-300 z-50 relative"
@@ -200,30 +213,44 @@ const SafeNavbar = ({ hideSectorSwitcher = false }) => {
       </div>
 
       <div className="navbar-end">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 lg:gap-2">
 
-          {/* ── Premium Command Palette Search ──────────────────────────── */}
+          {/* ── Mobile Search Icon (shows on < md) ─────────────────────── */}
+          {isAuthenticated && (
+            <button
+              onClick={openSearch}
+              className="flex md:hidden btn btn-ghost btn-circle btn-sm touch-target"
+              aria-label="Search"
+            >
+              <svg className="w-5 h-5 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                  d="M21 21l-4.35-4.35M17 11A6 6 0 111 11a6 6 0 0116 0z" />
+              </svg>
+            </button>
+          )}
+
+          {/* ── Desktop Command Palette Search ──────────────────────────── */}
           {isAuthenticated && (
             <div className="hidden md:block relative" ref={searchRef}>
 
-              {/* Trigger button */}
-              <button
-                onClick={openSearch}
-                className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl border border-base-300 bg-base-200/60 hover:bg-base-200 hover:border-primary/40 transition-all duration-200 text-base-content/50 hover:text-base-content group"
-                style={{ minWidth: '200px' }}
-              >
-                <svg className="w-3.5 h-3.5 flex-shrink-0 group-hover:text-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-4.35-4.35M17 11A6 6 0 111 11a6 6 0 0116 0z" />
-                </svg>
-                <span className="text-sm flex-1 text-left">Search everywhere…</span>
-                <span className="flex items-center gap-0.5 flex-shrink-0">
-                  <kbd className="px-1.5 py-0.5 text-[10px] font-mono font-semibold bg-base-100 border border-base-300 rounded text-base-content/40 shadow-sm">⌘</kbd>
-                  <kbd className="px-1.5 py-0.5 text-[10px] font-mono font-semibold bg-base-100 border border-base-300 rounded text-base-content/40 shadow-sm">K</kbd>
-                </span>
-              </button>
+                {/* Trigger button */}
+                <button
+                  onClick={openSearch}
+                  className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl border border-base-300 bg-base-200/60 hover:bg-base-200 hover:border-primary/40 transition-all duration-200 text-base-content/50 hover:text-base-content group"
+                  style={{ minWidth: '200px' }}
+                >
+                  <svg className="w-3.5 h-3.5 flex-shrink-0 group-hover:text-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-4.35-4.35M17 11A6 6 0 111 11a6 6 0 0116 0z" />
+                  </svg>
+                  <span className="text-sm flex-1 text-left">Search everywhere…</span>
+                  <span className="flex items-center gap-0.5 flex-shrink-0">
+                    <kbd className="px-1.5 py-0.5 text-[10px] font-mono font-semibold bg-base-100 border border-base-300 rounded text-base-content/40 shadow-sm">⌘</kbd>
+                    <kbd className="px-1.5 py-0.5 text-[10px] font-mono font-semibold bg-base-100 border border-base-300 rounded text-base-content/40 shadow-sm">K</kbd>
+                  </span>
+                </button>
 
               {/* ── Palette Overlay ── */}
-              {isSearchOpen && (
+              {effectiveSearchOpen && (
                 <>
                   {/* Backdrop */}
                   <div
@@ -231,9 +258,9 @@ const SafeNavbar = ({ hideSectorSwitcher = false }) => {
                     onClick={closeSearch}
                   />
 
-                  {/* Palette panel */}
+                  {/* Palette panel — full-width on mobile, constrained on desktop */}
                   <div
-                    className="fixed top-[12%] left-1/2 -translate-x-1/2 w-full max-w-xl z-[210] animate-in fade-in slide-in-from-top-4 duration-200"
+                    className="fixed top-[5%] md:top-[12%] left-1/2 -translate-x-1/2 w-[96vw] max-w-xl z-[210] animate-in fade-in slide-in-from-top-4 duration-200"
                     onKeyDown={handleKeyDown}
                   >
                     <div className="bg-base-100 rounded-2xl shadow-2xl border border-base-300 overflow-hidden"

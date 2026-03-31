@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+﻿import { useState, useMemo } from 'react';
 import { FaPlus, FaTimes, FaSearch, FaEllipsisH, FaArrowRight } from 'react-icons/fa';
 import { toast } from 'sonner';
 
@@ -259,7 +259,7 @@ const MyTasksPage = () => {
                   onChange={e => setNewTask({...newTask, title: e.target.value})}
                 />
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="form-control">
                   <label className="label text-sm">Project</label>
                   <input

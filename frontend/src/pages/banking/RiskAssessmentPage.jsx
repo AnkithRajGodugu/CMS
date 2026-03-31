@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import { ShieldAlert, ShieldCheck, Shield, AlertTriangle, PieChart as PieIcon } from 'lucide-react';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import api from '../../services/api';
@@ -89,7 +89,7 @@ const RiskAssessmentPage = () => {
       )}
 
       {loading ? (
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {Array.from({ length: 4 }).map((_, i) => (
             <div key={i} className="bg-white rounded-2xl h-32 animate-pulse border border-slate-100" />
           ))}
@@ -97,7 +97,7 @@ const RiskAssessmentPage = () => {
       ) : risk ? (
         <>
           {/* ── KPI Cards ── */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <BankingKPICard title="Total Accounts" value={risk.total} icon={PieIcon}      iconBg="from-blue-600 to-indigo-700" />
             {categories.map(c => (
               <BankingKPICard

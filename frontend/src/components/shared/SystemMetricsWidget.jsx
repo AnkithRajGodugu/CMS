@@ -30,7 +30,14 @@ const SystemMetricsWidget = () => {
     }, [user]);
 
     if (user?.role !== 'ADMIN') return null;
-    if (loading) return <div className="skeleton h-32 w-full rounded-2xl"></div>;
+    // Compact skeleton — 4 small cards instead of a full-width bar
+    if (loading) return (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+            {[...Array(4)].map((_, i) => (
+                <div key={i} className="skeleton h-20 rounded-xl" />
+            ))}
+        </div>
+    );
     if (!metrics) return null;
 
     return (
@@ -41,14 +48,14 @@ const SystemMetricsWidget = () => {
                     <h2 className="card-title text-xl">System Performance (Live)</h2>
                 </div>
                 
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     {/* API Requests */}
                     <div className="stat bg-base-200/50 rounded-xl p-4 border border-base-300">
                         <div className="stat-figure text-primary">
                             <FaBolt className="text-2xl" />
                         </div>
-                        <div className="stat-title text-sm font-semibold">Total Requests</div>
-                        <div className="stat-value text-2xl">{metrics.totalRequests?.toLocaleString()}</div>
+                        <div className="stat-title text-xs font-semibold leading-tight">Total Requests</div>
+                        <div className="stat-value text-xl md:text-2xl">{metrics.totalRequests?.toLocaleString()}</div>
                         <div className="stat-desc text-xs mt-1">
                             <span className={metrics.slowRequestPercentage === "0.00%" ? "text-success" : "text-warning"}>
                                 {metrics.slowRequestPercentage} slow
@@ -61,8 +68,8 @@ const SystemMetricsWidget = () => {
                         <div className="stat-figure text-secondary">
                             <FaServer className="text-2xl" />
                         </div>
-                        <div className="stat-title text-sm font-semibold">Tracked Endpoints</div>
-                        <div className="stat-value text-2xl">{metrics.totalEndpoints}</div>
+                        <div className="stat-title text-xs font-semibold leading-tight">Tracked Endpoints</div>
+                        <div className="stat-value text-xl md:text-2xl">{metrics.totalEndpoints}</div>
                         <div className="stat-desc text-xs mt-1">Actively monitored</div>
                     </div>
 
@@ -71,8 +78,8 @@ const SystemMetricsWidget = () => {
                         <div className="stat-figure text-accent">
                             <FaDatabase className="text-2xl" />
                         </div>
-                        <div className="stat-title text-sm font-semibold">DB Queries</div>
-                        <div className="stat-value text-2xl">{metrics.totalQueries?.toLocaleString()}</div>
+                        <div className="stat-title text-xs font-semibold leading-tight">DB Queries</div>
+                        <div className="stat-value text-xl md:text-2xl">{metrics.totalQueries?.toLocaleString()}</div>
                         <div className="stat-desc text-xs mt-1">
                             <span className={metrics.slowQueryPercentage === "0.00%" ? "text-success" : "text-warning"}>
                                 {metrics.slowQueryPercentage} slow
@@ -85,8 +92,8 @@ const SystemMetricsWidget = () => {
                         <div className="stat-figure text-error">
                             <FaExclamationTriangle className="text-2xl opacity-80" />
                         </div>
-                        <div className="stat-title text-sm font-semibold">Slow Queries</div>
-                        <div className="stat-value text-2xl">{metrics.totalSlowQueries?.toLocaleString() || 0}</div>
+                        <div className="stat-title text-xs font-semibold leading-tight">Slow Queries</div>
+                        <div className="stat-value text-xl md:text-2xl">{metrics.totalSlowQueries?.toLocaleString() || 0}</div>
                         <div className="stat-desc text-xs mt-1">Exceeding 500ms</div>
                     </div>
                 </div>

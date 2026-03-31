@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+﻿import React, { useState, useMemo } from 'react';
 import { 
   ChevronUp, 
   ChevronDown, 
@@ -106,13 +106,13 @@ const DataTable = ({
     <div className={`space-y-4 ${className}`}>
       {/* Search Bar */}
       {searchable && (
-        <div className="flex items-center gap-2">
-          <div className="relative flex-1 max-w-md">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+          <div className="relative flex-1 w-full max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-base-content/50" />
             <input
               type="text"
               placeholder="Search..."
-              value={serverSide ? '' : searchTerm} // Search usually separate in serverSide
+              value={serverSide ? '' : searchTerm}
               onChange={(e) => {
                 if (serverSide) {
                   onSearchChange?.(e.target.value);
@@ -121,18 +121,45 @@ const DataTable = ({
                   setInternalPage(1);
                 }
               }}
-              className="input input-bordered w-full pl-10"
+              className="input input-bordered w-full pl-10 input-sm md:input-md"
               aria-label="Search table"
             />
           </div>
-          <div className="text-sm text-base-content/60">
-            {serverSide ? totalItems : sortedData.length} { (serverSide ? totalItems : sortedData.length) === 1 ? 'result' : 'results'}
+          <div className="text-xs md:text-sm text-base-content/60 whitespace-nowrap">
+            {serverSide ? totalItems : sortedData.length}{' '}
+            {(serverSide ? totalItems : sortedData.length) === 1 ? 'result' : 'results'}
           </div>
         </div>
       )}
 
-      {/* Table */}
-      <div className="overflow-x-auto bg-base-100 rounded-lg shadow">
+      {/* ── Mobile Card View (< md) ─────────────────────────────────────── */}
+      <div className="md:hidden space-y-3">
+        {loading ? (
+          <div className="flex justify-center py-10">
+            <span className="loading loading-spinner loading-lg text-primary" />
+          </div>
+        ) : paginatedData.length === 0 ? (
+          <div className="text-center py-10 text-base-content/50 text-sm">
+            No data available
+          </div>
+        ) : (
+          paginatedData.map((row, rowIndex) => (
+            <div key={rowIndex} className="table-card-row bg-base-100 shadow-sm border border-base-200">
+              {columns.map((column) => (
+                <div key={column.key} className="flex items-start justify-between gap-2 py-1 border-b border-base-200/50 last:border-0">
+                  <span className="table-card-row-label pt-0.5">{column.label}</span>
+                  <span className="text-sm font-medium text-right max-w-[60%]">
+                    {column.render ? column.render(row[column.key], row) : row[column.key]}
+                  </span>
+                </div>
+              ))}
+            </div>
+          ))
+        )}
+      </div>
+
+      {/* ── Desktop Table View (≥ md) ──────────────────────────────────── */}
+      <div className="hidden md:block overflow-x-auto bg-base-100 rounded-lg shadow">
         <table className="table table-zebra w-full">
           <thead>
             <tr>
@@ -154,7 +181,7 @@ const DataTable = ({
             {loading ? (
               <tr>
                 <td colSpan={columns.length} className="text-center py-10">
-                  <span className="loading loading-spinner loading-lg text-primary"></span>
+                  <span className="loading loading-spinner loading-lg text-primary" />
                 </td>
               </tr>
             ) : paginatedData.length === 0 ? (
@@ -183,13 +210,13 @@ const DataTable = ({
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-between">
-          <div className="text-sm text-base-content/60">
+        <div className="flex items-center justify-between gap-2">
+          <div className="text-xs md:text-sm text-base-content/60">
             Page {currentPage} of {totalPages}
           </div>
           <div className="join">
             <button
-              className="join-item btn btn-sm"
+              className="join-item btn btn-sm touch-target"
               onClick={() => handlePageChange(currentPage - 1)}
               disabled={currentPage === 1}
               aria-label="Previous page"
@@ -198,7 +225,6 @@ const DataTable = ({
             </button>
             {[...Array(totalPages)].map((_, i) => {
               const page = i + 1;
-              // Show first, last, current, and adjacent pages
               if (
                 page === 1 ||
                 page === totalPages ||
@@ -219,7 +245,7 @@ const DataTable = ({
               return null;
             })}
             <button
-              className="join-item btn btn-sm"
+              className="join-item btn btn-sm touch-target"
               onClick={() => handlePageChange(currentPage + 1)}
               disabled={currentPage === totalPages}
               aria-label="Next page"

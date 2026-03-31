@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 
 const BankingLogo = ({ size = 40, className = '', animated = false }) => {
   return (

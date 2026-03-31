@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { Link } from 'react-router-dom';
 import { useTheme } from '../../context/SectorThemeProvider';
 import { useSector } from '../../hooks/useSector';

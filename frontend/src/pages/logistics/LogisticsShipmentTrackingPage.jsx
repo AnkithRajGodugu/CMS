@@ -95,7 +95,7 @@ function ShipmentModal({ shipment, onClose, onStatusUpdate }) {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div className="bg-transparent rounded-xl p-4">
             <p className="text-xs text-gray-500 uppercase font-bold mb-1">Weight</p>
             <p className="font-bold text-[#1F2937]">{shipment.weight} kg</p>
@@ -153,7 +153,7 @@ function CreateShipmentModal({ onClose, onCreate }) {
           <label className={labelCls}>Tracking ID</label>
           <input type="text" required className={cx(inputCls, 'font-mono')} value={form.trackingId} onChange={e => setForm({...form, trackingId: e.target.value})} />
         </div>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className={labelCls}>Origin</label>
             <input type="text" required placeholder="City" className={inputCls} value={form.origin} onChange={e => setForm({...form, origin: e.target.value})} />
@@ -163,7 +163,7 @@ function CreateShipmentModal({ onClose, onCreate }) {
             <input type="text" required placeholder="City" className={inputCls} value={form.destination} onChange={e => setForm({...form, destination: e.target.value})} />
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className={labelCls}>Weight (kg)</label>
             <input type="number" step="0.1" min="0.1" required className={inputCls} value={form.weight} onChange={e => setForm({...form, weight: parseFloat(e.target.value)})} />
@@ -260,7 +260,7 @@ const LogisticsShipmentTrackingPage = () => {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {stats.map(({ label, count, Icon, color }) => (
             <div key={label} className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 flex items-center gap-4">
               <div className={cx('p-2.5 rounded-xl border shrink-0', color.split(' ').slice(1).join(' '))}>

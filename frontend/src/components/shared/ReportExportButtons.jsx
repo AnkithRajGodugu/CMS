@@ -39,26 +39,26 @@ const ReportExportButtons = ({ sectorCode }) => {
   };
 
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex flex-wrap gap-1.5">
       <button 
         onClick={() => handleExport('excel')}
-        className="btn btn-outline btn-success btn-sm gap-2"
+        className="btn btn-outline btn-success btn-xs sm:btn-sm gap-1 sm:gap-2"
         title="Export to Excel"
       >
-        <FileSpreadsheet size={16} />
-        Excel Export
+        <FileSpreadsheet size={14} />
+        <span className="hidden sm:inline">Excel</span>
       </button>
       
       <button 
         onClick={() => handleExport('pdf')}
-        className="btn btn-outline btn-error btn-sm gap-2"
+        className="btn btn-outline btn-error btn-xs sm:btn-sm gap-1 sm:gap-2"
         title="Export to PDF"
       >
-        <FileText size={16} />
-        PDF Export
+        <FileText size={14} />
+        <span className="hidden sm:inline">PDF</span>
       </button>
 
-      <div className="divider divider-horizontal mx-0"></div>
+      <div className="hidden sm:flex divider divider-horizontal mx-0" />
 
       <BulkImportButton onComplete={() => window.location.reload()} />
     </div>

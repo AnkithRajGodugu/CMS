@@ -293,7 +293,7 @@ const ContentCalendarPage = () => {
               <input type="text" required placeholder="e.g. Summer Brand Campaign Reel" className={inputCls}
                 value={scheduleForm.title} onChange={e => setScheduleForm({ ...scheduleForm, title: e.target.value })} />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className={labelCls}>Type</label>
                 <select className={inputCls} value={scheduleForm.type} onChange={e => setScheduleForm({ ...scheduleForm, type: e.target.value })}>

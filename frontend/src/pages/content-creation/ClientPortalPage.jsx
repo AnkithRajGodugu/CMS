@@ -157,7 +157,7 @@ const ClientPortalPage = () => {
                 <h2 className="text-2xl font-black text-[#1F2937]">{selectedProject.projectName}</h2>
                 <p className="text-xs text-gray-500 font-mono mt-1">Project #{selectedProject.id}</p>
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {[
                   { label: 'Client',   value: selectedProject.clientName || '—',   Icon: User },
                   { label: 'Deadline', value: selectedProject.deadline ? new Date(selectedProject.deadline).toLocaleDateString() : '—', Icon: Calendar },

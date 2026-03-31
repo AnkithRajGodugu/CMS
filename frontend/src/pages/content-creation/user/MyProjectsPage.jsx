@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../../hooks/useAuth';
 import api from '../../../services/api';
 import { FaProjectDiagram, FaPlus, FaCalendarAlt, FaDollarSign, FaUserTie, FaFilter, FaTimes, FaChartBar } from 'react-icons/fa';
@@ -206,7 +206,7 @@ const MyProjectsPage = () => {
                   placeholder="e.g. Acme Corporation"
                   value={newProject.clientName} onChange={e => setNewProject({...newProject, clientName: e.target.value})} />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="form-control">
                   <label className="label">Start Date</label>
                   <input type="date" className="input input-bordered" required
@@ -248,7 +248,7 @@ const MyProjectsPage = () => {
                   <span className="text-xs font-mono opacity-40">#{detailProject.id}</span>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="bg-base-200 rounded-xl p-4">
                   <p className="text-xs opacity-50 uppercase font-bold mb-1 flex items-center gap-1"><FaUserTie /> Client</p>
                   <p className="font-bold">{detailProject.clientName || '—'}</p>

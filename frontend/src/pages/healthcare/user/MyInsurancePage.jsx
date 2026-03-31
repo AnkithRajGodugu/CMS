@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { getMyInsurance } from '../../../services/healthcareService';
 import { useAuth } from '../../../hooks/useAuth';
 
@@ -57,7 +57,7 @@ const MyInsurancePage = () => {
                 </svg>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4 mt-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
               <div>
                 <p className="text-xs opacity-70 uppercase tracking-wider">Member ID</p>
                 <p className="font-mono mt-1">MBR-{String(user?.id ?? '0000').padStart(6, '0')}</p>

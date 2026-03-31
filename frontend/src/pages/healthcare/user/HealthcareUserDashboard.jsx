@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { getUserHealthcareDashboardStats, getMyAppointments } from '../../../services/healthcareService';
 
@@ -118,7 +118,7 @@ const HealthcareUserDashboard = () => {
                         <div className="card bg-base-100 shadow-xl border border-base-200">
                             <div className="card-body">
                                 <h2 className="card-title text-lg mb-2">My Overview</h2>
-                                <div className="grid grid-cols-2 gap-4 mt-2">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
                                     <div className="bg-base-200/50 p-4 rounded-xl text-center">
                                         <div className="text-2xl font-bold text-primary">{stats?.totalAppointments || 0}</div>
                                         <div className="text-xs uppercase opacity-70">Total Visists</div>

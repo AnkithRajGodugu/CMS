@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { useTheme } from '../../context/SectorThemeProvider';
 import BankingLogo from './BankingLogo';
 import HealthcareLogo from './HealthcareLogo';

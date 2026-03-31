@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import {
   CalendarDays, CheckCircle2, Clock, Siren, Filter, XCircle
 } from 'lucide-react';
@@ -100,7 +100,7 @@ const AppointmentSchedulingPage = () => {
       </div>
 
       {/* ── KPI ── */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <HealthcareKPICard title="Total"     value={loading ? '—' : stats.total}     icon={CalendarDays}  accentColor="border-teal-500"    bgAccent="bg-teal-50"    iconColor="text-teal-600" loading={loading} />
         <HealthcareKPICard title="Confirmed" value={loading ? '—' : stats.confirmed} icon={CheckCircle2}  accentColor="border-emerald-500" bgAccent="bg-emerald-50" iconColor="text-emerald-600" loading={loading} />
         <HealthcareKPICard title="Pending"   value={loading ? '—' : stats.pending}   icon={Clock}         accentColor="border-amber-500"   bgAccent="bg-amber-50"   iconColor="text-amber-600" loading={loading} />

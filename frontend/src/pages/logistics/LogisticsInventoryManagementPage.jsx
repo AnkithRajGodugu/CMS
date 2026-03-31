@@ -80,7 +80,7 @@ function InventoryItemModal({ item, mode, onClose, onUpdated }) {
           </div>
         ) : (
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className={labelCls}>Current Quantity</label>
                 <input type="number" min="0" className={inputCls} value={quantity} onChange={e => setQuantity(parseInt(e.target.value))} />
@@ -144,7 +144,7 @@ function AddItemModal({ onClose, onAdded }) {
           <label className={labelCls}>Product Name</label>
           <input type="text" required placeholder="e.g. Steel Bolts (box/100)" className={inputCls} value={form.productName} onChange={e => setForm({...form, productName: e.target.value})} />
         </div>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className={labelCls}>Initial Qty</label>
             <input type="number" min="0" required className={inputCls} value={form.quantity} onChange={e => setForm({...form, quantity: parseInt(e.target.value)})} />
@@ -239,7 +239,7 @@ const LogisticsInventoryManagementPage = () => {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {statsData.map(({ label, value, color, Icon }) => (
             <div key={label} className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 flex items-center gap-4">
               <div className={cx('p-2.5 rounded-xl border shrink-0', color.split(' ').slice(1).join(' '))}><Icon className={cx('w-5 h-5', color.split(' ')[0])} /></div>

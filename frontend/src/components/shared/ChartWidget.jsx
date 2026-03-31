@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -35,7 +35,8 @@ ChartJS.register(
  * @param {Object} options - Chart options (optional)
  * @param {String} title - Chart title
  * @param {String} subtitle - Chart subtitle
- * @param {String} height - Chart height (default: '300px')
+ * @param {String} height - Chart height for md+ screens (default: '300px')
+ * @param {String} heightClass - Tailwind responsive height class (overrides height)
  */
 const ChartWidget = ({ 
   type = 'line',
@@ -44,6 +45,7 @@ const ChartWidget = ({
   title,
   subtitle,
   height = '300px',
+  heightClass = 'h-48 md:h-64 lg:h-72',
   className = ''
 }) => {
   
@@ -56,20 +58,16 @@ const ChartWidget = ({
         position: 'bottom',
         labels: {
           usePointStyle: true,
-          padding: 15,
+          padding: 10,
+          font: { size: 11 },
         }
       },
       tooltip: {
-        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-        padding: 12,
+        backgroundColor: 'rgba(0, 0, 0, 0.85)',
+        padding: 10,
         cornerRadius: 8,
-        titleFont: {
-          size: 14,
-          weight: 'bold'
-        },
-        bodyFont: {
-          size: 13
-        }
+        titleFont: { size: 13, weight: 'bold' },
+        bodyFont: { size: 12 },
       }
     },
     scales: type !== 'pie' && type !== 'doughnut' ? {
@@ -117,22 +115,23 @@ const ChartWidget = ({
 
   return (
     <div className={`card bg-base-100 shadow-lg ${className}`}>
-      <div className="card-body">
+      <div className="card-body p-4 md:p-6">
         {(title || subtitle) && (
-          <div className="mb-4">
+          <div className="mb-3">
             {title && (
-              <h3 className="text-lg font-bold text-base-content">
+              <h3 className="text-base md:text-lg font-bold text-base-content">
                 {title}
               </h3>
             )}
             {subtitle && (
-              <p className="text-sm text-base-content/60 mt-1">
+              <p className="text-xs md:text-sm text-base-content/60 mt-0.5">
                 {subtitle}
               </p>
             )}
           </div>
         )}
-        <div style={{ height }}>
+        {/* Use CSS-based responsive height when heightClass provided, else inline style */}
+        <div className={heightClass}>
           {renderChart()}
         </div>
       </div>

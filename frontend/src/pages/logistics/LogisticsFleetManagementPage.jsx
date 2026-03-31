@@ -120,7 +120,7 @@ function AddVehicleModal({ onClose, onAdded }) {
         <button onClick={onClose} className="p-2 rounded-xl text-gray-500 hover:text-[#1F2937] hover:bg-gray-100 transition-all"><X className="w-5 h-5" /></button>
       </div>
       <form onSubmit={handleSubmit} className="p-6 space-y-4">
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className={labelCls}>Plate Number</label>
             <input type="text" required placeholder="MH-01-AB-1234" className={cx(inputCls, 'font-mono')} value={form.plateNumber} onChange={e => setForm({...form, plateNumber: e.target.value})} />
@@ -130,7 +130,7 @@ function AddVehicleModal({ onClose, onAdded }) {
             <input type="text" required placeholder="Tata ACE" className={inputCls} value={form.model} onChange={e => setForm({...form, model: e.target.value})} />
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className={labelCls}>Capacity (Tons)</label>
             <input type="number" step="0.1" min="0" required className={inputCls} value={form.capacity} onChange={e => setForm({...form, capacity: parseFloat(e.target.value)})} />
@@ -224,7 +224,7 @@ const LogisticsFleetManagementPage = () => {
         </div>
 
         {/* KPIs */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {kpis.map(({ label, value, filter, Icon, color }) => (
             <button key={label} onClick={() => setFilterStatus(filter)}
               className={cx('bg-white rounded-2xl border border-gray-200 shadow-sm p-5 flex items-center gap-4 text-left transition-all hover:border-gray-300', filterStatus === filter && 'ring-2 ring-amber-400/40 border-amber-200')}>

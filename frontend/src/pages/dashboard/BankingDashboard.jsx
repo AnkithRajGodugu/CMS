@@ -111,7 +111,7 @@ const BankingDashboard = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       
       {/* Success Toast */}
       {toastMessage && (
@@ -122,20 +122,20 @@ const BankingDashboard = () => {
         </div>
       )}
 
-      <div className="space-y-6">
+      <div className="space-y-5">
 
         
-        <div className="flex justify-between items-center">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
           <div>
-            <h1 className="text-3xl font-bold">Banking Dashboard</h1>
-            <p className="text-base-content/70">
+            <h1 className="text-2xl md:text-3xl font-bold">Banking Dashboard</h1>
+            <p className="text-base-content/70 text-sm md:text-base">
               Real-time banking analytics overview
             </p>
           </div>
 
-          <div className="flex space-x-2">
+          <div className="flex flex-wrap gap-2">
             <ReportExportButtons sectorCode="BANKING" />
-            <button className="btn btn-primary" onClick={() => document.getElementById('new_account_modal').showModal()}>New Account</button>
+            <button className="btn btn-primary btn-sm md:btn-md" onClick={() => document.getElementById('new_account_modal').showModal()}>New Account</button>
           </div>
         </div>
 
@@ -188,7 +188,7 @@ const BankingDashboard = () => {
         {/* Quick Actions */}
         <div className="mb-8 mt-8">
           <h2 className="text-2xl font-bold mb-4">Quick Actions</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
             <Link to="/dashboard/banking/accounts">
               <div className="card bg-base-100 shadow-xl hover:shadow-2xl transition-all cursor-pointer">
                 <div className="card-body items-center text-center">
@@ -230,73 +230,44 @@ const BankingDashboard = () => {
 
             <h3 className="card-title">Recent Transactions</h3>
 
-            {loadingTransactions ? (
+          {loadingTransactions ? (
               <div className="flex justify-center p-6">
                 <span className="loading loading-spinner loading-md"></span>
               </div>
+            ) : transactions.length === 0 ? (
+              <p className="text-center text-base-content/50 py-6">No transactions found</p>
             ) : (
-              <div className="overflow-x-auto">
-
-                <table className="table table-zebra">
-
-                  <thead>
-                    <tr>
-                      <th>Customer</th>
-                      <th>Amount</th>
-                      <th>Type</th>
-                      <th>Status</th>
-                    </tr>
-                  </thead>
-
-                  <tbody>
-
-                    {transactions.length === 0 ? (
-                      <tr>
-                        <td colSpan="4" className="text-center">
-                          No transactions found
-                        </td>
-                      </tr>
-                    ) : (
-                      transactions.map((transaction) => (
+              <>
+                {/* Mobile: card list */}
+                <div className="md:hidden space-y-3">
+                  {transactions.map((t) => (
+                    <div key={t.id} className="table-card-row bg-base-200/40 border border-base-200">
+                      <div className="flex justify-between"><span className="table-card-row-label">Customer</span><span className="text-sm font-medium">{t.customerName || 'Unknown'}</span></div>
+                      <div className="flex justify-between"><span className="table-card-row-label">Amount</span><span className="text-sm font-semibold">${t.amount}</span></div>
+                      <div className="flex justify-between"><span className="table-card-row-label">Type</span><span className="text-sm">{t.type}</span></div>
+                      <div className="flex justify-between items-center"><span className="table-card-row-label">Status</span>
+                        <span className={`badge badge-sm ${t.status==='COMPLETED'?'badge-success':t.status==='PENDING'?'badge-warning':'badge-error'}`}>{t.status}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                {/* Desktop: table */}
+                <div className="hidden md:block overflow-x-auto">
+                  <table className="table table-zebra">
+                    <thead><tr><th>Customer</th><th>Amount</th><th>Type</th><th>Status</th></tr></thead>
+                    <tbody>
+                      {transactions.map((transaction) => (
                         <tr key={transaction.id}>
-
-                          <td>
-                            {transaction.customerName || 'Unknown'}
-                          </td>
-
-                          <td className="font-semibold">
-                            ${transaction.amount}
-                          </td>
-
-                          <td>
-                            {transaction.type}
-                          </td>
-
-                          <td>
-
-                            <span
-                              className={`badge ${
-                                transaction.status === 'COMPLETED'
-                                  ? 'badge-success'
-                                  : transaction.status === 'PENDING'
-                                  ? 'badge-warning'
-                                  : 'badge-error'
-                              }`}
-                            >
-                              {transaction.status}
-                            </span>
-
-                          </td>
-
+                          <td>{transaction.customerName || 'Unknown'}</td>
+                          <td className="font-semibold">${transaction.amount}</td>
+                          <td>{transaction.type}</td>
+                          <td><span className={`badge ${transaction.status==='COMPLETED'?'badge-success':transaction.status==='PENDING'?'badge-warning':'badge-error'}`}>{transaction.status}</span></td>
                         </tr>
-                      ))
-                    )}
-
-                  </tbody>
-
-                </table>
-
-              </div>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </>
             )}
 
           </div>
@@ -315,7 +286,7 @@ const BankingDashboard = () => {
                 <label className="label">Account Number</label>
                 <input type="text" name="accountNumber" required className="input input-bordered w-full" placeholder="e.g. ACC-12345" />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="form-control">
                   <label className="label">Account Type</label>
                   <select name="accountType" className="select select-bordered" required defaultValue="SAVINGS">

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+﻿import { useState, useEffect, useCallback } from 'react';
 import api from '../../../services/api';
 
 const BankingStatementsPage = () => {
@@ -55,7 +55,7 @@ const BankingStatementsPage = () => {
 
       {/* Summary */}
       {!loading && transactions.length > 0 && (
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="card bg-base-100 border border-base-200 shadow-sm p-4 text-center">
             <p className="text-sm text-base-content/60">Total Transactions</p>
             <p className="text-3xl font-extrabold">{transactions.length}</p>

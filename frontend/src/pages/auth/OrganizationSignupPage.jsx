@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
@@ -107,7 +107,7 @@ const OrganizationSignupPage = () => {
                             <Field label="Admin Username" name="username" placeholder="admin_acme" />
                             <Field label="Email Address" name="email" type="email" placeholder="admin@acme.com" />
 
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <Field label="Password" name="password" type="password" placeholder="••••••••" />
                                 <Field label="Confirm Password" name="confirmPassword" type="password" placeholder="••••••••" />
                             </div>

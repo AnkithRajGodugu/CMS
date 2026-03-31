@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+﻿import { useEffect, useState, useCallback } from 'react';
 import {
   Users, CreditCard, CheckCircle, AlertTriangle, XCircle,
   Search, ChevronLeft, ChevronRight, X
@@ -97,7 +97,7 @@ const AccountManagementPage = () => {
       </div>
 
       {/* ── KPI Cards ── */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <BankingKPICard title="Total Accounts"  value={loading ? '—' : kpis.total}     icon={Users}         iconBg="from-blue-600 to-indigo-700" />
         <BankingKPICard title="Active"          value={loading ? '—' : kpis.active}    icon={CheckCircle}   iconBg="from-emerald-500 to-teal-600" />
         <BankingKPICard title="Suspended"       value={loading ? '—' : kpis.suspended} icon={AlertTriangle} iconBg="from-amber-500 to-orange-500" />

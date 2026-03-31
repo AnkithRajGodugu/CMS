@@ -203,7 +203,7 @@ const LogisticsWarehouseManagementPage = () => {
 
         {/* Summary bar */}
         {!loading && (
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {[
               { label: 'Total Warehouses',  value: warehouses.length,                                                    color: 'text-amber-600', Icon: Warehouse },
               { label: 'Total SKUs',        value: inventory.length,                                                     color: 'text-emerald-600', Icon: PackageOpen },
@@ -246,7 +246,7 @@ const LogisticsWarehouseManagementPage = () => {
                   </div>
                 </div>
                 <div className="p-5 space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <p className="text-[10px] uppercase font-bold text-gray-500 mb-1">SKU Count</p>
                       <p className={cx('text-2xl font-bold flex items-center gap-1.5', color.text)}><PackageOpen className="w-4 h-4" />{stats.count}</p>

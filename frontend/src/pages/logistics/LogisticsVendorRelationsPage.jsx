@@ -55,11 +55,11 @@ function VendorModal({ vendor, onClose, onUpdated, onDeleted }) {
             <span className="text-[10px] text-gray-500">Score: {vendor.performanceScore}%</span>
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div><label className={labelCls}>Vendor Name</label><input type="text" className={inputCls} value={form.name} onChange={e => setForm({...form, name: e.target.value})} /></div>
           <div><label className={labelCls}>Category</label><input type="text" className={inputCls} value={form.category} onChange={e => setForm({...form, category: e.target.value})} /></div>
         </div>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className={labelCls}>Performance Score (%)</label>
             <input type="number" min="0" max="100" className={inputCls} value={form.performanceScore} onChange={e => setForm({...form, performanceScore: parseInt(e.target.value)})} />
@@ -75,7 +75,7 @@ function VendorModal({ vendor, onClose, onUpdated, onDeleted }) {
           </div>
         </div>
         <div><label className={labelCls}>Contract Renewal Date</label><input type="date" className={inputCls} value={form.contractRenewalDate || ''} onChange={e => setForm({...form, contractRenewalDate: e.target.value})} /></div>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div><label className={labelCls}>Email</label><input type="email" className={inputCls} value={form.contactEmail || ''} onChange={e => setForm({...form, contactEmail: e.target.value})} /></div>
           <div><label className={labelCls}>Phone</label><input type="text" className={inputCls} value={form.contactPhone || ''} onChange={e => setForm({...form, contactPhone: e.target.value})} /></div>
         </div>
@@ -125,11 +125,11 @@ function AddVendorModal({ onClose, onAdded }) {
         <button onClick={onClose} className="p-2 rounded-xl text-gray-500 hover:bg-gray-100 transition-all"><X className="w-5 h-5" /></button>
       </div>
       <form onSubmit={handleSubmit} className="p-6 space-y-4">
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div><label className={labelCls}>Vendor Name</label><input type="text" required className={inputCls} value={form.name} onChange={e => setForm({...form, name: e.target.value})} /></div>
           <div><label className={labelCls}>Category</label><input type="text" required placeholder="Freight, Last-Mile..." className={inputCls} value={form.category} onChange={e => setForm({...form, category: e.target.value})} /></div>
         </div>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div><label className={labelCls}>Performance Score (%)</label><input type="number" min="0" max="100" required className={inputCls} value={form.performanceScore} onChange={e => setForm({...form, performanceScore: parseInt(e.target.value)})} /></div>
           <div>
             <label className={labelCls}>Contract Status</label>
@@ -139,7 +139,7 @@ function AddVendorModal({ onClose, onAdded }) {
           </div>
         </div>
         <div><label className={labelCls}>Renewal Date</label><input type="date" className={inputCls} value={form.contractRenewalDate} onChange={e => setForm({...form, contractRenewalDate: e.target.value})} /></div>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div><label className={labelCls}>Email</label><input type="email" className={inputCls} value={form.contactEmail} onChange={e => setForm({...form, contactEmail: e.target.value})} /></div>
           <div><label className={labelCls}>Phone</label><input type="text" className={inputCls} value={form.contactPhone} onChange={e => setForm({...form, contactPhone: e.target.value})} /></div>
         </div>

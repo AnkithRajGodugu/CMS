@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 
 /**
  * HealthcareKPICard - Clean medical-grade KPI stat card

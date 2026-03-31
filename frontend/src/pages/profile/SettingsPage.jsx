@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import api from '../../services/api';
 
@@ -173,7 +173,7 @@ const SettingsPage = () => {
             </div>
 
             <form onSubmit={handleProfileSave} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="form-control">
                   <label className="label"><span className="label-text">First Name</span></label>
                   <input id="settings-first-name" className="input input-bordered" value={firstName}

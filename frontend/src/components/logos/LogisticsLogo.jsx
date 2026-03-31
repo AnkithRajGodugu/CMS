@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 
 const LogisticsLogo = ({ size = 40, className = '', animated = false }) => {
   return (

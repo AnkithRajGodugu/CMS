@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import {
   DollarSign, CheckCircle2, Clock, XCircle, BarChart2, Filter, Eye
 } from 'lucide-react';
@@ -94,7 +94,7 @@ const InsuranceManagementPage = () => {
       </div>
 
       {/* ── KPI Cards ── */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <HealthcareKPICard title="Approved Claims" value={loading ? '—' : fmtUSD(stats.approved)} icon={CheckCircle2} accentColor="border-emerald-500" bgAccent="bg-emerald-50" iconColor="text-emerald-600" loading={loading} />
         <HealthcareKPICard title="Pending Claims"  value={loading ? '—' : fmtUSD(stats.pending)}  icon={Clock}        accentColor="border-amber-500"   bgAccent="bg-amber-50"   iconColor="text-amber-600" loading={loading} />
         <HealthcareKPICard title="Denied Claims"   value={loading ? '—' : fmtUSD(stats.denied)}   icon={XCircle}      accentColor="border-red-500"     bgAccent="bg-red-50"     iconColor="text-red-600" loading={loading} />

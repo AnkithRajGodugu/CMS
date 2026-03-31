@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { login as authLogin } from '../../utils/auth';
@@ -266,7 +266,7 @@ const LoginPage = () => {
                             <div className="bg-base-200 rounded-lg p-3">
                                 <p className="text-xs font-bold uppercase tracking-wider opacity-60 mb-2">Quick Login (Auto-fill)</p>
 
-                                <div className="grid grid-cols-2 gap-2 mb-2">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2">
                                     <button onClick={() => fillCredentials('bank_user1', 'admin123')} type="button" className="btn btn-xs btn-outline btn-info">Bank User</button>
                                     <button onClick={() => fillCredentials('bank_admin', 'admin123')} type="button" className="btn btn-xs btn-info">Bank Admin</button>
 

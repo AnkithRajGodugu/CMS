@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+﻿import { Link } from 'react-router-dom';
 const SectorsOverviewPage = () => {
   const sectors = [
     {
@@ -96,7 +96,7 @@ const SectorsOverviewPage = () => {
                   
                   <p className="text-base-content/70 mb-6">{sector.description}</p>
                   
-                  <div className="grid grid-cols-2 gap-2 mb-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-6">
                     {sector.features.map((feature, index) => (
                       <div key={index} className="flex items-center text-sm">
                         <svg className="w-4 h-4 text-success mr-2" fill="currentColor" viewBox="0 0 20 20">
