@@ -118,6 +118,8 @@ public class LogisticsController {
         List<ShipmentEvent> events = shipmentEventRepository.findByShipmentIdOrderByTimestampDesc(shipment.getId());
         Map<String, Object> result = new HashMap<>();
         result.put("status", shipment.getStatus());
+        result.put("origin", shipment.getOrigin());
+        result.put("destination", shipment.getDestination());
         result.put("events", events);
         return ApiResponse.success(result);
     }

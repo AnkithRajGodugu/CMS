@@ -8,9 +8,9 @@ import {
 } from 'lucide-react';
 
 const cx = (...c) => c.filter(Boolean).join(' ');
-const inputCls   = "w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm text-[#1F2937] placeholder-gray-400 focus:outline-none focus:border-violet-400 transition-all shadow-sm";
+const inputCls   = "w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm text-[#1F2937] placeholder-gray-400 focus:outline-none focus:border-amber-400 transition-all shadow-sm";
 const labelCls   = "block text-xs font-bold uppercase tracking-widest text-gray-500 mb-2";
-const selectCls  = "w-full bg-[#F7F9FC] border border-gray-200 rounded-xl px-4 py-3 text-sm text-[#1F2937] focus:outline-none appearance-none cursor-pointer";
+const selectCls  = "w-full bg-transparent border border-gray-200 rounded-xl px-4 py-3 text-sm text-[#1F2937] focus:outline-none appearance-none cursor-pointer";
 
 const perfColor     = s => s >= 90 ? 'text-emerald-700 bg-emerald-50 border-emerald-200' : s >= 75 ? 'text-amber-700 bg-amber-50 border-amber-200' : 'text-red-700 bg-red-50 border-red-200';
 const perfBar       = s => s >= 90 ? 'from-emerald-400 to-emerald-600' : s >= 75 ? 'from-amber-400 to-amber-600' : 'from-red-400 to-red-600';
@@ -63,7 +63,7 @@ function VendorModal({ vendor, onClose, onUpdated, onDeleted }) {
           <div>
             <label className={labelCls}>Performance Score (%)</label>
             <input type="number" min="0" max="100" className={inputCls} value={form.performanceScore} onChange={e => setForm({...form, performanceScore: parseInt(e.target.value)})} />
-            <div className="mt-2 bg-[#F7F9FC] h-1.5 rounded-full overflow-hidden">
+            <div className="mt-2 bg-transparent h-1.5 rounded-full overflow-hidden">
               <div className={cx('h-full rounded-full bg-gradient-to-r', perfBar(form.performanceScore))} style={{ width: `${form.performanceScore}%` }} />
             </div>
           </div>
@@ -119,7 +119,7 @@ function AddVendorModal({ onClose, onAdded }) {
     <ModalShell>
       <div className="flex items-center justify-between p-6 border-b border-gray-100">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-[#99a8ff]/10 rounded-xl border border-violet-300"><Plus className="w-5 h-5 text-violet-600" /></div>
+          <div className="p-2 bg-amber-500/10 rounded-xl border border-amber-200"><Plus className="w-5 h-5 text-amber-600" /></div>
           <h3 className="font-bold text-[#1F2937] text-lg">Add Vendor</h3>
         </div>
         <button onClick={onClose} className="p-2 rounded-xl text-gray-500 hover:bg-gray-100 transition-all"><X className="w-5 h-5" /></button>
@@ -145,7 +145,7 @@ function AddVendorModal({ onClose, onAdded }) {
         </div>
         <div className="flex gap-3 pt-2">
           <button type="button" onClick={onClose} className="flex-1 py-3 rounded-xl text-sm font-semibold text-gray-500 bg-gray-100">Cancel</button>
-          <button type="submit" disabled={saving} className="flex-1 py-3 rounded-xl text-sm font-bold text-[#000] bg-gradient-to-br from-[#99a8ff] to-[#4765f9] flex items-center justify-center gap-2">
+          <button type="submit" disabled={saving} className="flex-1 py-3 rounded-xl text-sm font-bold text-[#000] bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center gap-2">
             {saving && <span className="w-4 h-4 rounded-full border-2 border-black/20 border-t-black animate-spin" />} Add Vendor
           </button>
         </div>
@@ -171,7 +171,7 @@ const LogisticsVendorRelationsPage = () => {
   const handleDeleted = (id) => setVendors(prev => prev.filter(v => v.id !== id));
 
   if (!user || sector?.code?.toLowerCase() !== 'logistics') {
-    return <div className="min-h-screen flex items-center justify-center bg-[#F7F9FC]"><div className="flex flex-col items-center gap-6 p-10 bg-white rounded-3xl border border-gray-200 max-w-md"><AlertTriangle className="w-16 h-16 text-amber-600" /><h2 className="text-2xl font-bold text-[#1F2937]">Logistics Access Only</h2></div></div>;
+    return <div className="min-h-screen flex items-center justify-center bg-transparent"><div className="flex flex-col items-center gap-6 p-10 bg-white rounded-3xl border border-gray-200 max-w-md"><AlertTriangle className="w-16 h-16 text-amber-600" /><h2 className="text-2xl font-bold text-[#1F2937]">Logistics Access Only</h2></div></div>;
   }
 
   const activeCount   = vendors.filter(v => v.contractStatus === 'ACTIVE').length;
@@ -179,7 +179,7 @@ const LogisticsVendorRelationsPage = () => {
   const avgPerf       = vendors.length > 0 ? Math.round(vendors.reduce((s, v) => s + (v.performanceScore || 0), 0) / vendors.length) : 0;
 
   return (
-    <div className="min-h-screen bg-[#F7F9FC] text-[#1F2937] font-sans p-8">
+    <div className="min-h-screen bg-transparent text-[#1F2937] font-sans p-8">
       
       <div className="max-w-7xl mx-auto space-y-8">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pt-4">
@@ -192,7 +192,7 @@ const LogisticsVendorRelationsPage = () => {
             <h1 className="text-5xl font-extrabold tracking-tighter text-[#1F2937] mb-2">Vendor Relations</h1>
             <p className="text-gray-500 max-w-lg">Manage supplier contracts, track performance, and monitor renewal timelines.</p>
           </div>
-          <button onClick={() => setIsAddOpen(true)} className="flex items-center gap-2 px-8 py-3.5 rounded-xl font-bold text-sm text-[#000] bg-gradient-to-br from-[#99a8ff] to-[#4765f9] shadow-xl shadow-[#99a8ff]/10 hover:shadow-[#99a8ff]/25 active:scale-95 transition-all whitespace-nowrap">
+          <button onClick={() => setIsAddOpen(true)} className="flex items-center gap-2 px-8 py-3.5 rounded-xl font-bold text-sm text-[#000] bg-gradient-to-br from-amber-400 to-amber-600 shadow-xl shadow-amber-500/10 hover:shadow-amber-500/25 active:scale-95 transition-all whitespace-nowrap">
             <Plus className="w-4 h-4" /> Add Vendor
           </button>
         </div>
@@ -217,7 +217,7 @@ const LogisticsVendorRelationsPage = () => {
             <span className="text-xs px-2.5 py-1 rounded-full bg-gray-100 text-gray-500">{vendors.length} vendor{vendors.length !== 1 ? 's' : ''}</span>
           </div>
           {loading ? (
-            <div className="flex justify-center py-16"><div className="w-8 h-8 rounded-full border-2 border-violet-300 border-t-[#99a8ff] animate-spin" /></div>
+            <div className="flex justify-center py-16"><div className="w-8 h-8 rounded-full border-2 border-amber-200 border-t-amber-500 animate-spin" /></div>
           ) : vendors.length === 0 ? (
             <div className="py-16 text-center text-gray-400 italic">No vendors registered yet.</div>
           ) : (
@@ -228,10 +228,10 @@ const LogisticsVendorRelationsPage = () => {
                   {vendors.map(v => (
                     <tr key={v.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
                       <td className="px-6 py-4"><div className="flex items-center gap-2 font-bold text-[#1F2937]"><Building2 className="w-4 h-4 text-amber-600 shrink-0" />{v.name}</div></td>
-                      <td className="px-6 py-4"><span className="text-[10px] font-bold uppercase px-2.5 py-1 rounded-full border text-violet-700 bg-violet-50 border-violet-200">{v.category}</span></td>
+                      <td className="px-6 py-4"><span className="text-[10px] font-bold uppercase px-2.5 py-1 rounded-full border text-amber-700 bg-amber-50 border-amber-200">{v.category}</span></td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-2">
-                          <div className="w-20 h-1.5 bg-[#F7F9FC] rounded-full overflow-hidden"><div className={cx('h-full rounded-full bg-gradient-to-r', perfBar(v.performanceScore))} style={{ width: `${v.performanceScore}%` }} /></div>
+                          <div className="w-20 h-1.5 bg-transparent rounded-full overflow-hidden"><div className={cx('h-full rounded-full bg-gradient-to-r', perfBar(v.performanceScore))} style={{ width: `${v.performanceScore}%` }} /></div>
                           <span className={cx('text-[10px] font-bold uppercase px-2 py-0.5 rounded-full border', perfColor(v.performanceScore))}>{v.performanceScore}%</span>
                         </div>
                       </td>

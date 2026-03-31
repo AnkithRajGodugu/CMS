@@ -10,9 +10,9 @@ import {
 const cx = (...c) => c.filter(Boolean).join(' ');
 
 const ZONE_COLORS = [
-  { gradient: 'from-[#4765f9] to-[#99a8ff]', text: 'text-violet-600', bg: 'bg-[#99a8ff]/5' },
+  { gradient: 'from-amber-600 to-amber-400', text: 'text-amber-600', bg: 'bg-amber-500/5' },
   { gradient: 'from-emerald-500 to-teal-500', text: 'text-emerald-600', bg: 'bg-emerald-500/5' },
-  { gradient: 'from-violet-500 to-purple-500', text: 'text-violet-600', bg: 'bg-violet-500/5' },
+  { gradient: 'from-amber-500 to-amber-500', text: 'text-amber-600', bg: 'bg-amber-500/5' },
   { gradient: 'from-amber-500 to-orange-500',  text: 'text-amber-600',  bg: 'bg-amber-500/5' },
   { gradient: 'from-rose-500 to-pink-500',    text: 'text-rose-600',   bg: 'bg-rose-500/5' },
 ];
@@ -37,13 +37,13 @@ function WarehouseLayoutModal({ location, items, onClose }) {
     <ModalShell wide>
       <div className="flex items-center justify-between p-6 border-b border-gray-100">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-[#99a8ff]/10 rounded-xl border border-violet-300"><Layers className="w-5 h-5 text-violet-600" /></div>
+          <div className="p-2 bg-amber-500/10 rounded-xl border border-amber-200"><Layers className="w-5 h-5 text-amber-600" /></div>
           <h3 className="font-bold text-[#1F2937] text-lg">{location} — Floor Plan</h3>
         </div>
         <button onClick={onClose} className="p-2 rounded-xl text-gray-500 hover:bg-gray-100 transition-all"><X className="w-5 h-5" /></button>
       </div>
       <div className="p-6 space-y-5">
-        <div className="bg-[#F7F9FC] rounded-xl p-4">
+        <div className="bg-transparent rounded-xl p-4">
           <div className="flex justify-between text-sm font-bold mb-2">
             <span className="text-gray-500">Capacity Utilization</span>
             <span className={utilColor}>{utilization}%</span>
@@ -83,7 +83,7 @@ function WarehouseLayoutModal({ location, items, onClose }) {
         </div>
         <div className="flex gap-3">
           <button onClick={onClose} className="flex-1 py-3 rounded-xl text-sm font-semibold text-gray-500 bg-gray-100">Close</button>
-          <button onClick={() => { toast.info('Warehouse report exported!'); onClose(); }} className="flex-1 py-3 rounded-xl text-sm font-bold text-[#000] bg-gradient-to-br from-[#99a8ff] to-[#4765f9] flex items-center justify-center gap-2">
+          <button onClick={() => { toast.info('Warehouse report exported!'); onClose(); }} className="flex-1 py-3 rounded-xl text-sm font-bold text-[#000] bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center gap-2">
             <FileDown className="w-4 h-4" /> Export Report
           </button>
         </div>
@@ -103,7 +103,7 @@ function WarehouseLogsModal({ location, items, onClose }) {
     <ModalShell>
       <div className="flex items-center justify-between p-6 border-b border-gray-100">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-violet-500/10 rounded-xl border border-violet-500/20"><History className="w-5 h-5 text-violet-600" /></div>
+          <div className="p-2 bg-amber-500/10 rounded-xl border border-amber-500/20"><History className="w-5 h-5 text-amber-600" /></div>
           <h3 className="font-bold text-[#1F2937] text-lg">{location} — Activity Logs</h3>
         </div>
         <button onClick={onClose} className="p-2 rounded-xl text-gray-500 hover:bg-gray-100 transition-all"><X className="w-5 h-5" /></button>
@@ -112,7 +112,7 @@ function WarehouseLogsModal({ location, items, onClose }) {
         {logs.length === 0 ? (
           <p className="text-center py-8 text-gray-400 italic">No activity logs available.</p>
         ) : logs.map((log, i) => (
-          <div key={i} className="flex items-center justify-between p-3 bg-[#F7F9FC] rounded-xl hover:bg-gray-50 transition-colors">
+          <div key={i} className="flex items-center justify-between p-3 bg-transparent rounded-xl hover:bg-gray-50 transition-colors">
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2 text-sm">
                 <span className={cx('text-[10px] font-bold uppercase px-2 py-0.5 rounded-full border', log.action === 'Dispatched' ? 'text-red-700 bg-red-50 border-red-200' : 'text-emerald-700 bg-emerald-50 border-emerald-200')}>{log.action}</span>
@@ -157,7 +157,7 @@ const LogisticsWarehouseManagementPage = () => {
 
   if (!user || sector?.code?.toLowerCase() !== 'logistics') {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#F7F9FC]">
+      <div className="min-h-screen flex items-center justify-center bg-transparent">
         <div className="flex flex-col items-center gap-6 p-10 bg-white rounded-3xl border border-gray-200 max-w-md">
           <AlertTriangle className="w-16 h-16 text-amber-600" />
           <h2 className="text-2xl font-bold text-[#1F2937]">Logistics Access Only</h2>
@@ -180,7 +180,7 @@ const LogisticsWarehouseManagementPage = () => {
   const filteredWarehouses = warehouses.filter(loc => loc.toLowerCase().includes(searchTerm.toLowerCase()));
 
   return (
-    <div className="min-h-screen bg-[#F7F9FC] text-[#1F2937] font-sans p-8">
+    <div className="min-h-screen bg-transparent text-[#1F2937] font-sans p-8">
       
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
@@ -189,7 +189,7 @@ const LogisticsWarehouseManagementPage = () => {
             <div className="flex items-center gap-2 mb-3">
               <span className="text-xs font-bold uppercase tracking-widest text-gray-500 opacity-60">Logistics</span>
               <span className="text-gray-400">/</span>
-              <span className="text-xs font-bold uppercase tracking-widest text-violet-600">Warehouse Hub</span>
+              <span className="text-xs font-bold uppercase tracking-widest text-amber-600">Warehouse Hub</span>
             </div>
             <h1 className="text-5xl font-extrabold tracking-tighter text-[#1F2937] mb-2">Warehouse Hub</h1>
             <p className="text-gray-500 max-w-lg">Global site management, inventory distribution, and capacity monitoring.</p>
@@ -205,7 +205,7 @@ const LogisticsWarehouseManagementPage = () => {
         {!loading && (
           <div className="grid grid-cols-3 gap-4">
             {[
-              { label: 'Total Warehouses',  value: warehouses.length,                                                    color: 'text-violet-600', Icon: Warehouse },
+              { label: 'Total Warehouses',  value: warehouses.length,                                                    color: 'text-amber-600', Icon: Warehouse },
               { label: 'Total SKUs',        value: inventory.length,                                                     color: 'text-emerald-600', Icon: PackageOpen },
               { label: 'Low Stock Alerts',  value: inventory.filter(i => i.quantity <= i.reorderPoint).length,          color: 'text-red-600',    Icon: AlertTriangle },
             ].map(({ label, value, color, Icon }) => (
@@ -224,7 +224,7 @@ const LogisticsWarehouseManagementPage = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {loading ? (
             <div className="col-span-full py-20 text-center">
-              <div className="flex justify-center mb-4"><div className="w-10 h-10 rounded-full border-2 border-violet-300 border-t-[#99a8ff] animate-spin" /></div>
+              <div className="flex justify-center mb-4"><div className="w-10 h-10 rounded-full border-2 border-amber-200 border-t-amber-500 animate-spin" /></div>
               <p className="text-gray-400 italic text-sm">Scanning warehouse sensors…</p>
             </div>
           ) : filteredWarehouses.length === 0 ? (
@@ -267,12 +267,12 @@ const LogisticsWarehouseManagementPage = () => {
                       <span className="text-gray-500">Capacity Utilization</span>
                       <span className={uColor}>{stats.utilization}%</span>
                     </div>
-                    <div className="bg-[#F7F9FC] h-2 rounded-full overflow-hidden">
+                    <div className="bg-transparent h-2 rounded-full overflow-hidden">
                       <div className={cx('h-full rounded-full bg-gradient-to-r transition-all duration-700', barColor)} style={{ width: `${stats.utilization}%` }} />
                     </div>
                   </div>
                   <div className="flex gap-2 pt-1">
-                    <button onClick={() => setLogsModal({ location: loc, items: stats.items })} className="flex-1 py-2 rounded-xl text-xs font-bold text-gray-500 bg-[#F7F9FC] hover:text-[#1F2937] transition-all flex items-center justify-center gap-1.5">
+                    <button onClick={() => setLogsModal({ location: loc, items: stats.items })} className="flex-1 py-2 rounded-xl text-xs font-bold text-gray-500 bg-transparent hover:text-[#1F2937] transition-all flex items-center justify-center gap-1.5">
                       <History className="w-3.5 h-3.5" /> Logs
                     </button>
                     <button onClick={() => setLayoutModal({ location: loc, items: stats.items })} className={cx('flex-1 py-2 rounded-xl text-xs font-bold text-white bg-gradient-to-r flex items-center justify-center gap-1.5', color.gradient)}>

@@ -34,7 +34,7 @@ const Sidebar = () => {
 
     return (
         <aside
-            className={`bg-base-100 border-r min-h-[calc(100vh-4rem)] flex flex-col transition-all duration-300 ${collapsed ? 'w-16' : 'w-64'}`}
+            className={`bg-base-100 border-r h-full flex flex-col transition-all duration-300 ${collapsed ? 'w-16' : 'w-64'}`}
             style={{
                 borderColor: currentTheme?.primary ? `${currentTheme.primary}40` : 'var(--color-border)',
                 borderRightWidth: '1px',
@@ -64,7 +64,7 @@ const Sidebar = () => {
             </div>
 
             {/* Nav Items */}
-            <ul className="menu gap-0.5 px-2 flex-1">
+            <ul className="menu gap-0.5 px-2 flex-1 overflow-y-auto overflow-x-hidden">
                 {navItems.map(item => (
                     <li key={item.path}>
                         <NavLink

@@ -8,9 +8,9 @@ import {
 } from 'lucide-react';
 
 const cx = (...c) => c.filter(Boolean).join(' ');
-const inputCls   = "w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm text-[#1F2937] placeholder-gray-400 focus:outline-none focus:border-violet-400 transition-all shadow-sm";
+const inputCls   = "w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm text-[#1F2937] placeholder-gray-400 focus:outline-none focus:border-amber-400 transition-all shadow-sm";
 const labelCls   = "block text-xs font-bold uppercase tracking-widest text-gray-500 mb-2";
-const selectCls  = "w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm text-[#1F2937] focus:outline-none focus:border-violet-400 transition-all appearance-none cursor-pointer shadow-sm";
+const selectCls  = "w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm text-[#1F2937] focus:outline-none focus:border-amber-400 transition-all appearance-none cursor-pointer shadow-sm";
 
 const STATUS_OPTIONS = ['AVAILABLE', 'IN_USE', 'MAINTENANCE', 'RETIRED'];
 const STATUS_META = {
@@ -114,7 +114,7 @@ function AddVehicleModal({ onClose, onAdded }) {
     <ModalShell>
       <div className="flex items-center justify-between p-6 border-b border-gray-100">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-[#99a8ff]/10 rounded-xl border border-violet-300"><Truck className="w-5 h-5 text-violet-600" /></div>
+          <div className="p-2 bg-amber-500/10 rounded-xl border border-amber-200"><Truck className="w-5 h-5 text-amber-600" /></div>
           <h3 className="font-bold text-[#1F2937] text-lg">Register Vehicle</h3>
         </div>
         <button onClick={onClose} className="p-2 rounded-xl text-gray-500 hover:text-[#1F2937] hover:bg-gray-100 transition-all"><X className="w-5 h-5" /></button>
@@ -148,7 +148,7 @@ function AddVehicleModal({ onClose, onAdded }) {
         </div>
         <div className="flex gap-3 pt-2">
           <button type="button" onClick={onClose} className="flex-1 py-3 rounded-xl text-sm font-semibold text-gray-500 bg-gray-100 hover:text-[#1F2937] transition-all">Cancel</button>
-          <button type="submit" disabled={saving} className="flex-1 py-3 rounded-xl text-sm font-bold text-[#000] bg-gradient-to-br from-[#99a8ff] to-[#4765f9] hover:shadow-lg active:scale-95 transition-all flex items-center justify-center gap-2">
+          <button type="submit" disabled={saving} className="flex-1 py-3 rounded-xl text-sm font-bold text-[#000] bg-gradient-to-br from-amber-400 to-amber-600 hover:shadow-lg active:scale-95 transition-all flex items-center justify-center gap-2">
             {saving && <span className="w-4 h-4 rounded-full border-2 border-black/20 border-t-black animate-spin" />}
             Register
           </button>
@@ -182,7 +182,7 @@ const LogisticsFleetManagementPage = () => {
 
   if (!user || sector?.code?.toLowerCase() !== 'logistics') {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#F7F9FC]">
+      <div className="min-h-screen flex items-center justify-center bg-transparent">
         <div className="flex flex-col items-center gap-6 p-10 bg-white rounded-3xl border border-gray-200 max-w-md">
           <AlertTriangle className="w-16 h-16 text-amber-600" />
           <h2 className="text-2xl font-bold text-[#1F2937]">Logistics Access Only</h2>
@@ -197,14 +197,14 @@ const LogisticsFleetManagementPage = () => {
   const maintenance = vehicles.filter(v => v.status === 'MAINTENANCE').length;
 
   const kpis = [
-    { label: 'Total Fleet',  value: vehicles.length, filter: 'ALL',         Icon: Truck,         color: 'text-violet-700 bg-violet-50 border-violet-200' },
+    { label: 'Total Fleet',  value: vehicles.length, filter: 'ALL',         Icon: Truck,         color: 'text-amber-700 bg-amber-50 border-amber-200' },
     { label: 'Available',    value: available,        filter: 'AVAILABLE',   Icon: CheckCircle2,  color: 'text-emerald-700 bg-emerald-50 border-emerald-200' },
     { label: 'In Service',   value: inUse,            filter: 'IN_USE',      Icon: Truck,         color: 'text-sky-700 bg-sky-50 border-sky-200' },
     { label: 'Maintenance',  value: maintenance,      filter: 'MAINTENANCE', Icon: Wrench,        color: 'text-amber-700 bg-amber-50 border-amber-200' },
   ];
 
   return (
-    <div className="min-h-screen bg-[#F7F9FC] text-[#1F2937] font-sans p-8">
+    <div className="min-h-screen bg-transparent text-[#1F2937] font-sans p-8">
       
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
@@ -218,7 +218,7 @@ const LogisticsFleetManagementPage = () => {
             <h1 className="text-5xl font-extrabold tracking-tighter text-[#1F2937] mb-2">Fleet Management</h1>
             <p className="text-gray-500 max-w-lg">Monitor vehicle status, service schedules, and driver assignments.</p>
           </div>
-          <button onClick={() => setIsAddOpen(true)} className="flex items-center gap-2 px-8 py-3.5 rounded-xl font-bold text-sm text-[#000] bg-gradient-to-br from-[#99a8ff] to-[#4765f9] shadow-xl shadow-[#99a8ff]/10 hover:shadow-[#99a8ff]/25 active:scale-95 transition-all whitespace-nowrap">
+          <button onClick={() => setIsAddOpen(true)} className="flex items-center gap-2 px-8 py-3.5 rounded-xl font-bold text-sm text-[#000] bg-gradient-to-br from-amber-400 to-amber-600 shadow-xl shadow-amber-500/10 hover:shadow-amber-500/25 active:scale-95 transition-all whitespace-nowrap">
             <Plus className="w-4 h-4" /> Add Vehicle
           </button>
         </div>
@@ -227,7 +227,7 @@ const LogisticsFleetManagementPage = () => {
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {kpis.map(({ label, value, filter, Icon, color }) => (
             <button key={label} onClick={() => setFilterStatus(filter)}
-              className={cx('bg-white rounded-2xl border border-gray-200 shadow-sm p-5 flex items-center gap-4 text-left transition-all hover:border-gray-300', filterStatus === filter && 'ring-2 ring-violet-400/40 border-violet-300')}>
+              className={cx('bg-white rounded-2xl border border-gray-200 shadow-sm p-5 flex items-center gap-4 text-left transition-all hover:border-gray-300', filterStatus === filter && 'ring-2 ring-amber-400/40 border-amber-200')}>
               <div className={cx('p-2.5 rounded-xl border shrink-0', color.split(' ').slice(1).join(' '))}><Icon className={cx('w-5 h-5', color.split(' ')[0])} /></div>
               <div>
                 <p className="text-2xl font-extrabold text-[#1F2937]">{loading ? '—' : value}</p>
@@ -254,7 +254,7 @@ const LogisticsFleetManagementPage = () => {
               </thead>
               <tbody>
                 {loading ? (
-                  <tr><td colSpan="7" className="text-center py-16"><div className="flex justify-center"><div className="w-8 h-8 rounded-full border-2 border-violet-300 border-t-[#99a8ff] animate-spin" /></div></td></tr>
+                  <tr><td colSpan="7" className="text-center py-16"><div className="flex justify-center"><div className="w-8 h-8 rounded-full border-2 border-amber-200 border-t-amber-500 animate-spin" /></div></td></tr>
                 ) : filtered.length === 0 ? (
                   <tr><td colSpan="7" className="text-center py-16 text-gray-400 italic">No vehicles match the selected filter.</td></tr>
                 ) : filtered.map(v => (

@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 
 const cx = (...c) => c.filter(Boolean).join(' ');
-const inputCls  = "w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm text-[#1F2937] placeholder-gray-400 focus:outline-none focus:border-violet-400 transition-all shadow-sm";
+const inputCls  = "w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm text-[#1F2937] placeholder-gray-400 focus:outline-none focus:border-amber-400 transition-all shadow-sm";
 const labelCls  = "block text-xs font-bold uppercase tracking-widest text-gray-500 mb-2";
 
 const STATUS_META = {
@@ -59,15 +59,15 @@ function ShipmentModal({ shipment, onClose, onStatusUpdate }) {
       </div>
       <div className="p-6 space-y-5">
         {/* Tracking banner */}
-        <div className="bg-gradient-to-r from-[#4765f9]/30 to-[#99a8ff]/10 rounded-2xl p-5 border border-violet-300">
-          <p className="font-mono font-bold text-violet-600 text-lg mb-1">#{shipment.trackingId || `SHP-${shipment.id}`}</p>
+        <div className="bg-gradient-to-r from-amber-600/30 to-amber-400/10 rounded-2xl p-5 border border-amber-200">
+          <p className="font-mono font-bold text-amber-600 text-lg mb-1">#{shipment.trackingId || `SHP-${shipment.id}`}</p>
           <p className="text-sm text-gray-500">{shipment.origin} → {shipment.destination}</p>
           <div className="mt-3">
             <div className="flex justify-between text-xs text-gray-500 mb-1.5">
               <span>Delivery Progress</span>
-              <span className="text-violet-600 font-bold">{sm.pct}%</span>
+              <span className="text-amber-600 font-bold">{sm.pct}%</span>
             </div>
-            <div className="h-2 bg-[#F7F9FC] rounded-full overflow-hidden">
+            <div className="h-2 bg-transparent rounded-full overflow-hidden">
               <div className={cx('h-full rounded-full bg-gradient-to-r transition-all duration-700', sm.bar)} style={{ width: `${sm.pct}%` }} />
             </div>
           </div>
@@ -96,11 +96,11 @@ function ShipmentModal({ shipment, onClose, onStatusUpdate }) {
         </div>
 
         <div className="grid grid-cols-2 gap-3">
-          <div className="bg-[#F7F9FC] rounded-xl p-4">
+          <div className="bg-transparent rounded-xl p-4">
             <p className="text-xs text-gray-500 uppercase font-bold mb-1">Weight</p>
             <p className="font-bold text-[#1F2937]">{shipment.weight} kg</p>
           </div>
-          <div className="bg-[#F7F9FC] rounded-xl p-4">
+          <div className="bg-transparent rounded-xl p-4">
             <p className="text-xs text-gray-500 uppercase font-bold mb-1">Est. Delivery</p>
             <p className="font-bold text-[#1F2937] text-sm">{shipment.estimatedDelivery ? new Date(shipment.estimatedDelivery).toLocaleDateString() : 'TBD'}</p>
           </div>
@@ -114,7 +114,7 @@ function ShipmentModal({ shipment, onClose, onStatusUpdate }) {
         </div>
         <div className="flex gap-3">
           <button onClick={onClose} className="flex-1 py-3 rounded-xl text-sm font-semibold text-gray-500 bg-gray-100 hover:text-[#1F2937] transition-all">Cancel</button>
-          <button onClick={handleSave} disabled={saving} className="flex-1 py-3 rounded-xl text-sm font-bold text-[#000] bg-gradient-to-br from-[#99a8ff] to-[#4765f9] hover:shadow-lg active:scale-95 transition-all flex items-center justify-center gap-2">
+          <button onClick={handleSave} disabled={saving} className="flex-1 py-3 rounded-xl text-sm font-bold text-[#000] bg-gradient-to-br from-amber-400 to-amber-600 hover:shadow-lg active:scale-95 transition-all flex items-center justify-center gap-2">
             {saving ? <span className="w-4 h-4 rounded-full border-2 border-black/20 border-t-black animate-spin" /> : <Save className="w-4 h-4" />}
             Save Changes
           </button>
@@ -143,7 +143,7 @@ function CreateShipmentModal({ onClose, onCreate }) {
     <ModalShell>
       <div className="flex items-center justify-between p-6 border-b border-gray-100">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-[#99a8ff]/10 rounded-xl border border-violet-300"><Truck className="w-5 h-5 text-violet-600" /></div>
+          <div className="p-2 bg-amber-500/10 rounded-xl border border-amber-200"><Truck className="w-5 h-5 text-amber-600" /></div>
           <h3 className="font-bold text-[#1F2937] text-lg">New Shipment</h3>
         </div>
         <button onClick={onClose} className="p-2 rounded-xl text-gray-500 hover:text-[#1F2937] hover:bg-gray-100 transition-all"><X className="w-5 h-5" /></button>
@@ -175,7 +175,7 @@ function CreateShipmentModal({ onClose, onCreate }) {
         </div>
         <div className="flex gap-3 pt-2">
           <button type="button" onClick={onClose} className="flex-1 py-3 rounded-xl text-sm font-semibold text-gray-500 bg-gray-100 hover:text-[#1F2937] transition-all">Cancel</button>
-          <button type="submit" disabled={saving} className="flex-1 py-3 rounded-xl text-sm font-bold text-[#000] bg-gradient-to-br from-[#99a8ff] to-[#4765f9] hover:shadow-lg active:scale-95 transition-all flex items-center justify-center gap-2">
+          <button type="submit" disabled={saving} className="flex-1 py-3 rounded-xl text-sm font-bold text-[#000] bg-gradient-to-br from-amber-400 to-amber-600 hover:shadow-lg active:scale-95 transition-all flex items-center justify-center gap-2">
             {saving && <span className="w-4 h-4 rounded-full border-2 border-black/20 border-t-black animate-spin" />}
             Create & Track
           </button>
@@ -210,7 +210,7 @@ const LogisticsShipmentTrackingPage = () => {
 
   if (!user || sector?.code?.toLowerCase() !== 'logistics') {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#F7F9FC]">
+      <div className="min-h-screen flex items-center justify-center bg-transparent">
         <div className="flex flex-col items-center gap-6 text-center p-10 bg-white rounded-3xl border border-gray-200 max-w-md">
           <AlertTriangle className="w-16 h-16 text-amber-600" />
           <h2 className="text-2xl font-bold text-[#1F2937]">Logistics Access Only</h2>
@@ -233,14 +233,14 @@ const LogisticsShipmentTrackingPage = () => {
   );
 
   const stats = [
-    { label: 'Total',      count: shipments.length,                                    Icon: Truck,        color: 'text-violet-700 bg-violet-50 border-violet-200' },
+    { label: 'Total',      count: shipments.length,                                    Icon: Truck,        color: 'text-amber-700 bg-amber-50 border-amber-200' },
     { label: 'In Transit', count: shipments.filter(s=>s.status==='IN_TRANSIT').length, Icon: Navigation,   color: 'text-sky-700 bg-sky-50 border-sky-200' },
     { label: 'Delivered',  count: shipments.filter(s=>s.status==='DELIVERED').length,  Icon: CheckCircle2, color: 'text-emerald-700 bg-emerald-50 border-emerald-200' },
     { label: 'Delayed',    count: shipments.filter(s=>s.status==='DELAYED').length,    Icon: AlertTriangle, color: 'text-red-700 bg-red-50 border-red-200' },
   ];
 
   return (
-    <div className="min-h-screen bg-[#F7F9FC] text-[#1F2937] font-sans p-8">
+    <div className="min-h-screen bg-transparent text-[#1F2937] font-sans p-8">
       
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
@@ -249,12 +249,12 @@ const LogisticsShipmentTrackingPage = () => {
             <div className="flex items-center gap-2 mb-3">
               <span className="text-xs font-bold uppercase tracking-widest text-gray-500 opacity-60">Logistics</span>
               <span className="text-gray-400">/</span>
-              <span className="text-xs font-bold uppercase tracking-widest text-violet-600">Shipment Tracking</span>
+              <span className="text-xs font-bold uppercase tracking-widest text-amber-600">Shipment Tracking</span>
             </div>
             <h1 className="text-5xl font-extrabold tracking-tighter text-[#1F2937] mb-2">Shipment Tracking</h1>
             <p className="text-gray-500 max-w-lg">Real-time logistics monitoring — click any shipment to update status.</p>
           </div>
-          <button onClick={() => setIsCreateOpen(true)} className="flex items-center gap-2 px-8 py-3.5 rounded-xl font-bold text-sm text-[#000] bg-gradient-to-br from-[#99a8ff] to-[#4765f9] shadow-xl shadow-[#99a8ff]/10 hover:shadow-[#99a8ff]/25 active:scale-95 transition-all whitespace-nowrap">
+          <button onClick={() => setIsCreateOpen(true)} className="flex items-center gap-2 px-8 py-3.5 rounded-xl font-bold text-sm text-[#000] bg-gradient-to-br from-amber-400 to-amber-600 shadow-xl shadow-amber-500/10 hover:shadow-amber-500/25 active:scale-95 transition-all whitespace-nowrap">
             <Plus className="w-4 h-4" /> New Shipment
           </button>
         </div>
@@ -280,13 +280,13 @@ const LogisticsShipmentTrackingPage = () => {
             <div className="relative flex-1 max-w-sm">
               <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <input type="text" placeholder="Search ID, origin, destination..."
-                className="w-full bg-[#F7F9FC] rounded-xl pl-10 pr-4 py-2.5 text-sm text-[#1F2937] placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#99a8ff]/20 border border-gray-200"
+                className="w-full bg-transparent rounded-xl pl-10 pr-4 py-2.5 text-sm text-[#1F2937] placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-amber-500/20 border border-gray-200"
                 value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
             </div>
-            <div className="flex bg-[#F7F9FC] rounded-xl p-1 border border-gray-100">
+            <div className="flex bg-transparent rounded-xl p-1 border border-gray-100">
               {['ALL','ACTIVE','COMPLETED'].map(tab => (
                 <button key={tab} onClick={() => setActiveTab(tab)}
-                  className={cx('px-4 py-1.5 rounded-lg text-xs font-bold transition-all', activeTab === tab ? 'bg-[#99a8ff] text-[#000]' : 'text-gray-500 hover:text-[#1F2937]')}>
+                  className={cx('px-4 py-1.5 rounded-lg text-xs font-bold transition-all', activeTab === tab ? 'bg-amber-400 text-[#000]' : 'text-gray-500 hover:text-[#1F2937]')}>
                   {tab === 'ALL' ? 'All' : tab === 'ACTIVE' ? 'Active' : 'Completed'}
                 </button>
               ))}
@@ -303,7 +303,7 @@ const LogisticsShipmentTrackingPage = () => {
               </thead>
               <tbody>
                 {loading ? (
-                  <tr><td colSpan="6" className="text-center py-16"><div className="flex justify-center"><div className="w-8 h-8 rounded-full border-2 border-violet-300 border-t-[#99a8ff] animate-spin" /></div></td></tr>
+                  <tr><td colSpan="6" className="text-center py-16"><div className="flex justify-center"><div className="w-8 h-8 rounded-full border-2 border-amber-200 border-t-amber-500 animate-spin" /></div></td></tr>
                 ) : filtered.length === 0 ? (
                   <tr><td colSpan="6" className="text-center py-16 text-gray-400 italic">No shipments found.</td></tr>
                 ) : filtered.map(s => {
@@ -311,7 +311,7 @@ const LogisticsShipmentTrackingPage = () => {
                   return (
                     <tr key={s.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
                       <td className="px-6 py-4">
-                        <p className="font-mono font-bold text-violet-600">#{s.trackingId || `SHP-${s.id}`}</p>
+                        <p className="font-mono font-bold text-amber-600">#{s.trackingId || `SHP-${s.id}`}</p>
                         <p className="text-[10px] text-gray-400">ID: {s.id}</p>
                       </td>
                       <td className="px-6 py-4">
@@ -332,7 +332,7 @@ const LogisticsShipmentTrackingPage = () => {
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <button onClick={() => setSelectedShipment(s)} className="flex items-center gap-1.5 text-xs font-bold text-violet-600 hover:text-[#1F2937] transition-colors">
+                        <button onClick={() => setSelectedShipment(s)} className="flex items-center gap-1.5 text-xs font-bold text-amber-600 hover:text-[#1F2937] transition-colors">
                           <Edit className="w-3.5 h-3.5" /> Track
                         </button>
                       </td>

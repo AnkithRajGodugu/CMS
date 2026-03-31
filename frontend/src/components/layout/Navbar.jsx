@@ -95,16 +95,7 @@ const SafeNavbar = ({ hideSectorSwitcher = false }) => {
                 Dashboard
               </Link>
             </li>
-            {!hideSectorSwitcher && (
-              <li>
-                <Link 
-                  to="/sectors"
-                  className="hover:text-primary transition-colors"
-                >
-                  Sectors
-                </Link>
-              </li>
-            )}
+
 
             {isAdmin(user) && (
               <li>
@@ -204,52 +195,17 @@ const SafeNavbar = ({ hideSectorSwitcher = false }) => {
           {/* Live notifications bell */}
           {isAuthenticated && <NotificationsDropdown />}
 
-          {/* Theme Toggle Removed */}
-
-          {/* Sector switcher for desktop (hidden for regular users) */}
-          {isAuthenticated && !hideSectorSwitcher && (
-            <div className="dropdown dropdown-end hidden lg:block">
-              <div 
-                tabIndex={0} 
-                role="button" 
-                className="flex items-center gap-2 px-4 py-1.5 rounded-full border border-base-300 bg-base-100 hover:bg-base-200 transition-colors shadow-sm"
-              >
-                <DynamicLogo size={18} animated={false} />
-                <span className="text-sm font-semibold tracking-wide capitalize">{currentTheme?.name || 'Banking'}</span>
-                <svg className="w-4 h-4 opacity-50 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                </svg>
-              </div>
-              <ul tabIndex={0} className="dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
-                <li className="menu-title">
-                  <span>Switch Sector</span>
-                </li>
-                {getAllSectors().map(sector => (
-                  <li key={sector}>
-                    <button 
-                      onClick={() => changeSector(sector)}
-                      className="flex items-center gap-2 w-full text-left capitalize"
-                    >
-                      <DynamicLogo size={16} sector={sector} animated={false} />
-                      {sector}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
           {isAuthenticated ? (
-            <div className="dropdown dropdown-end">
-              <div tabIndex={0} role="button" className="btn btn-ghost btn-circle avatar">
+            <div className="dropdown dropdown-end ml-1">
+              <div tabIndex={0} role="button" className={`btn btn-ghost btn-circle avatar ${!user?.avatarUrl ? 'placeholder' : ''}`}>
                 <div 
-                  className={`w-10 rounded-full text-white flex items-center justify-center font-semibold overflow-hidden ${user?.avatarUrl ? 'bg-base-200' : ''}`}
+                  className={`w-10 rounded-full flex items-center justify-center font-bold text-lg text-white`}
                   style={{ backgroundColor: user?.avatarUrl ? 'transparent' : (currentTheme?.primary || '#1e40af') }}
                 >
                   {user?.avatarUrl ? (
-                    <img src={user.avatarUrl} alt="User Avatar" className="w-full h-full object-cover" />
+                    <img src={user.avatarUrl} alt="User" />
                   ) : (
-                    user?.username?.charAt(0).toUpperCase() || 'U'
+                    <span>{user?.username?.charAt(0).toUpperCase() || 'U'}</span>
                   )}
                 </div>
               </div>

@@ -36,12 +36,12 @@ const ServiceLevelAgreementPage = () => {
 
   if (!user || sector?.code?.toLowerCase() !== 'logistics') {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#F7F9FC]">
+      <div className="min-h-screen flex items-center justify-center bg-transparent">
         <div className="flex flex-col items-center gap-6 text-center p-10 bg-white rounded-3xl border border-gray-200 max-w-md">
           <AlertTriangle className="w-16 h-16 text-amber-600" />
           <h2 className="text-2xl font-bold text-[#1F2937]">Logistics Access Only</h2>
           <p className="text-gray-500">Please log in with your logistics credentials to view SLA compliance.</p>
-          <Link to="/login" className="px-6 py-2.5 rounded-xl font-bold text-sm text-[#000] bg-gradient-to-br from-[#99a8ff] to-[#4765f9]">Go to Login</Link>
+          <Link to="/login" className="px-6 py-2.5 rounded-xl font-bold text-sm text-[#000] bg-gradient-to-br from-amber-400 to-amber-600">Go to Login</Link>
         </div>
       </div>
     );
@@ -63,9 +63,9 @@ const ServiceLevelAgreementPage = () => {
   const delayedShipments = shipments.filter(s => s.status === 'DELAYED');
 
   return (
-    <div className="min-h-screen bg-[#F7F9FC] text-[#1F2937] font-sans p-8">
+    <div className="min-h-screen bg-transparent text-[#1F2937] font-sans p-8">
       <div className="fixed top-0 left-0 w-[600px] h-[400px] bg-[#4765f9]/5 blur-[150px] rounded-full pointer-events-none -z-10" />
-      <div className="fixed bottom-0 right-0 w-[400px] h-[400px] bg-[#99a8ff]/10 blur-[120px] rounded-full pointer-events-none -z-10 translate-x-1/2 translate-y-1/2" />
+      <div className="fixed bottom-0 right-0 w-[400px] h-[400px] bg-amber-500/10 blur-[120px] rounded-full pointer-events-none -z-10 translate-x-1/2 translate-y-1/2" />
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pt-4">
@@ -73,7 +73,7 @@ const ServiceLevelAgreementPage = () => {
             <div className="flex items-center gap-2 mb-3">
               <span className="text-xs font-bold uppercase tracking-widest text-gray-500 opacity-60">Logistics</span>
               <span className="text-gray-400">/</span>
-              <span className="text-xs font-bold uppercase tracking-widest text-violet-600">SLA</span>
+              <span className="text-xs font-bold uppercase tracking-widest text-amber-600">SLA</span>
             </div>
             <h1 className="text-5xl font-extrabold tracking-tighter text-[#1F2937] mb-2">Service Level Agreements</h1>
             <p className="text-gray-500 max-w-lg">Compliance monitoring, performance targets, and contractual obligation tracking.</p>
@@ -104,7 +104,7 @@ const ServiceLevelAgreementPage = () => {
           {/* Active SLA Clauses */}
           <div className="bg-white rounded-3xl border border-gray-200 shadow-sm p-6 space-y-5">
             <div className="flex items-center gap-3 border-b border-gray-100 pb-4">
-              <ShieldCheck className="w-5 h-5 text-violet-600" />
+              <ShieldCheck className="w-5 h-5 text-amber-600" />
               <h2 className="font-bold text-[#1F2937]">Active SLA Clauses</h2>
             </div>
             <div className="space-y-5">
@@ -113,8 +113,8 @@ const ServiceLevelAgreementPage = () => {
                   <div className="flex-1">
                     <p className="font-semibold text-[#1F2937] text-sm">{clause.name}</p>
                     <p className="text-[10px] text-gray-500 mt-0.5">{clause.desc}</p>
-                    <div className="h-1.5 bg-[#F7F9FC] rounded-full mt-2 overflow-hidden">
-                      <div className="h-full rounded-full bg-gradient-to-r from-[#4765f9] to-[#99a8ff] transition-all duration-700" style={{ width: `${clause.pct}%` }} />
+                    <div className="h-1.5 bg-transparent rounded-full mt-2 overflow-hidden">
+                      <div className="h-full rounded-full bg-gradient-to-r from-amber-600 to-amber-400 transition-all duration-700" style={{ width: `${clause.pct}%` }} />
                     </div>
                   </div>
                   <span className={cx('font-bold text-lg font-mono shrink-0', clause.color)}>{clause.pct}%</span>
@@ -140,7 +140,7 @@ const ServiceLevelAgreementPage = () => {
                 </thead>
                 <tbody>
                   {loading ? (
-                    <tr><td colSpan="5" className="text-center py-12"><div className="flex justify-center"><div className="w-7 h-7 rounded-full border-2 border-violet-300 border-t-[#99a8ff] animate-spin" /></div></td></tr>
+                    <tr><td colSpan="5" className="text-center py-12"><div className="flex justify-center"><div className="w-7 h-7 rounded-full border-2 border-amber-200 border-t-amber-500 animate-spin" /></div></td></tr>
                   ) : delayedShipments.length === 0 ? (
                     <tr>
                       <td colSpan="5" className="text-center py-12">
@@ -161,7 +161,7 @@ const ServiceLevelAgreementPage = () => {
               </table>
             </div>
             <div className="p-5 flex justify-end">
-              <button className="flex items-center gap-2 text-xs font-bold text-violet-600 hover:text-[#1F2937] transition-colors border border-gray-200 px-4 py-2 rounded-xl hover:border-gray-300">
+              <button className="flex items-center gap-2 text-xs font-bold text-amber-600 hover:text-[#1F2937] transition-colors border border-gray-200 px-4 py-2 rounded-xl hover:border-gray-300">
                 <FileText className="w-3.5 h-3.5" /> Full Report
               </button>
             </div>

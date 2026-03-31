@@ -1,10 +1,10 @@
-﻿import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import api from '../../services/api';
 import { toast } from 'sonner';
 import {
   Route, Plus, Map, Clock, AlertTriangle,
-  Road, X, TrendingUp, Navigation, Check
+  X, TrendingUp, Navigation, Check
 } from 'lucide-react';
 
 // Leaflet CSS must be loaded
@@ -20,7 +20,7 @@ L.Icon.Default.mergeOptions({
 });
 
 const cx = (...c) => c.filter(Boolean).join(' ');
-const inputCls  = "w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm text-[#1F2937] placeholder-gray-400 focus:outline-none focus:border-violet-400 transition-all shadow-sm";
+const inputCls  = "w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm text-[#1F2937] placeholder-gray-400 focus:outline-none focus:border-amber-400 transition-all shadow-sm";
 const labelCls  = "block text-xs font-bold uppercase tracking-widest text-gray-500 mb-2";
 
 /* ── City lat/lng lookup (India) ──────────────────────────────────────────── */
@@ -156,7 +156,7 @@ function RouteDetailPanel({ route, onClose, onOptimize }) {
             { label: 'Time',     value: `${route.estimatedTimeMinutes}m`, color: 'text-sky-600' },
             { label: 'Avg Spd', value: `${speedKmh}km/h`,          color: 'text-emerald-600' },
           ].map(s => (
-            <div key={s.label} className="bg-[#F7F9FC] rounded-xl py-2 px-1">
+            <div key={s.label} className="bg-transparent rounded-xl py-2 px-1">
               <p className={cx('font-bold text-xs', s.color)}>{s.value}</p>
               <p className="text-[10px] text-gray-400 mt-0.5">{s.label}</p>
             </div>
@@ -167,7 +167,7 @@ function RouteDetailPanel({ route, onClose, onOptimize }) {
             <span className="text-gray-500">Route Efficiency</span>
             <span className="text-[#1F2937]">{efficiency}%</span>
           </div>
-          <div className="bg-[#F7F9FC] h-2 rounded-full overflow-hidden">
+          <div className="bg-transparent h-2 rounded-full overflow-hidden">
             <div className={cx('h-full rounded-full transition-all duration-700', isOpt ? 'bg-gradient-to-r from-emerald-400 to-emerald-600' : 'bg-gradient-to-r from-amber-400 to-amber-600')} style={{ width: `${efficiency}%` }} />
           </div>
         </div>
@@ -227,7 +227,7 @@ const LogisticsRouteOptimizationPage = () => {
 
   if (!user || sector?.code?.toLowerCase() !== 'logistics') {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#F7F9FC]">
+      <div className="min-h-screen flex items-center justify-center bg-transparent">
         <div className="flex flex-col items-center gap-6 p-10 bg-white rounded-3xl border border-gray-200 max-w-md">
           <AlertTriangle className="w-16 h-16 text-amber-600" />
           <h2 className="text-2xl font-bold text-[#1F2937]">Logistics Access Only</h2>
@@ -242,7 +242,7 @@ const LogisticsRouteOptimizationPage = () => {
   const avgDist         = routes.length > 0 ? Math.round(routes.reduce((s, r) => s + (r.distanceKm || 0), 0) / routes.length) : 0;
 
   return (
-    <div className="min-h-screen bg-[#F7F9FC] text-[#1F2937] font-sans p-8">
+    <div className="min-h-screen bg-transparent text-[#1F2937] font-sans p-8">
       
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
@@ -256,7 +256,7 @@ const LogisticsRouteOptimizationPage = () => {
             <h1 className="text-5xl font-extrabold tracking-tighter text-[#1F2937] mb-2">Route Optimization</h1>
             <p className="text-gray-500">Live route network on OpenStreetMap · Click a route to inspect it.</p>
           </div>
-          <button onClick={() => setIsModalOpen(true)} className="flex items-center gap-2 px-8 py-3.5 rounded-xl font-bold text-sm text-[#000] bg-gradient-to-br from-[#99a8ff] to-[#4765f9] shadow-xl shadow-[#99a8ff]/10 hover:shadow-[#99a8ff]/25 active:scale-95 transition-all whitespace-nowrap">
+          <button onClick={() => setIsModalOpen(true)} className="flex items-center gap-2 px-8 py-3.5 rounded-xl font-bold text-sm text-[#000] bg-gradient-to-br from-amber-400 to-amber-600 shadow-xl shadow-amber-500/10 hover:shadow-amber-500/25 active:scale-95 transition-all whitespace-nowrap">
             <Plus className="w-4 h-4" /> New Route
           </button>
         </div>
@@ -264,7 +264,7 @@ const LogisticsRouteOptimizationPage = () => {
         {/* KPIs */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {[
-            { label: 'Total Routes',  value: routes.length,   Icon: Route,       color: 'text-violet-700 bg-violet-50 border-violet-200' },
+            { label: 'Total Routes',  value: routes.length,   Icon: Route,       color: 'text-amber-700 bg-amber-50 border-amber-200' },
             { label: 'Optimized',     value: optimizedCount,  Icon: Check,       color: 'text-emerald-700 bg-emerald-50 border-emerald-200' },
             { label: 'Pending',       value: pendingCount,    Icon: Clock,       color: 'text-amber-700 bg-amber-50 border-amber-200' },
             { label: 'Avg Distance',  value: `${avgDist} km`, Icon: Navigation,  color: 'text-sky-700 bg-sky-50 border-sky-200' },
@@ -282,15 +282,15 @@ const LogisticsRouteOptimizationPage = () => {
         {/* Main layout */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Map */}
-          <div className="lg:col-span-2 bg-white rounded-3xl border border-gray-200 shadow-sm overflow-hidden" style={{ minHeight: '520px' }}>
-            <div className="px-5 py-3.5 border-b border-gray-100 flex items-center gap-2 text-sm font-semibold text-gray-500">
+          <div className="lg:col-span-2 bg-white rounded-3xl border border-gray-200 shadow-sm overflow-hidden flex flex-col" style={{ minHeight: '520px' }}>
+            <div className="px-5 py-3.5 border-b border-gray-100 flex flex-shrink-0 items-center gap-2 text-sm font-semibold text-gray-500">
               <Navigation className="w-4 h-4 text-amber-600" /> Live Route Network
               <span className="ml-auto text-xs text-gray-400">Powered by OpenStreetMap</span>
             </div>
-            <div className="relative" style={{ height: '480px' }}>
+            <div className="relative flex-1" style={{ minHeight: '480px' }}>
               {loading ? (
-                <div className="absolute inset-0 flex items-center justify-center bg-[#F7F9FC]/60">
-                  <div className="w-10 h-10 rounded-full border-2 border-violet-300 border-t-[#99a8ff] animate-spin" />
+                <div className="absolute inset-0 flex items-center justify-center bg-transparent/60">
+                  <div className="w-10 h-10 rounded-full border-2 border-amber-200 border-t-amber-500 animate-spin" />
                 </div>
               ) : (
                 <LeafletMap routes={filteredRoutes} selectedRoute={selectedRoute} onRouteClick={r => setSelectedRoute(r.id === selectedRoute?.id ? null : r)} />
@@ -304,7 +304,7 @@ const LogisticsRouteOptimizationPage = () => {
             <div className="flex bg-white rounded-xl p-1 border border-gray-100">
               {['ALL', 'OPTIMIZED', 'PENDING'].map(f => (
                 <button key={f} onClick={() => setFilter(f)}
-                  className={cx('flex-1 py-2 rounded-lg text-xs font-bold transition-all', filter === f ? 'bg-[#99a8ff] text-[#000]' : 'text-gray-500 hover:text-[#1F2937]')}>
+                  className={cx('flex-1 py-2 rounded-lg text-xs font-bold transition-all', filter === f ? 'bg-amber-400 text-[#000]' : 'text-gray-500 hover:text-[#1F2937]')}>
                   {f === 'ALL' ? 'All' : f === 'OPTIMIZED' ? '✓ Done' : '⏳ Pending'}
                 </button>
               ))}
@@ -312,7 +312,7 @@ const LogisticsRouteOptimizationPage = () => {
 
             <div className="space-y-2 overflow-y-auto" style={{ maxHeight: '430px' }}>
               {loading ? (
-                <div className="flex justify-center py-8"><div className="w-7 h-7 rounded-full border-2 border-violet-300 border-t-[#99a8ff] animate-spin" /></div>
+                <div className="flex justify-center py-8"><div className="w-7 h-7 rounded-full border-2 border-amber-200 border-t-amber-500 animate-spin" /></div>
               ) : filteredRoutes.length === 0 ? (
                 <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-10 text-center text-gray-400 italic text-sm">No routes found. Create one!</div>
               ) : filteredRoutes.map(route => {
@@ -405,7 +405,7 @@ const LogisticsRouteOptimizationPage = () => {
               </div>
               <div className="flex gap-3 pt-2">
                 <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 py-3 rounded-xl text-sm font-semibold text-gray-500 bg-gray-100 hover:text-[#1F2937] transition-all">Cancel</button>
-                <button type="submit" className="flex-1 py-3 rounded-xl text-sm font-bold text-[#000] bg-gradient-to-br from-[#99a8ff] to-[#4765f9] hover:shadow-lg active:scale-95 transition-all">Create Route</button>
+                <button type="submit" className="flex-1 py-3 rounded-xl text-sm font-bold text-[#000] bg-gradient-to-br from-amber-400 to-amber-600 hover:shadow-lg active:scale-95 transition-all">Create Route</button>
               </div>
             </form>
           </div>

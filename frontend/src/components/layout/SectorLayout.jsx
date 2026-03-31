@@ -24,9 +24,7 @@ const SectorLayout = () => {
             {/* Drawer Side (Sidebar) */}
             <div className="drawer-side z-50">
                 <label htmlFor="mobile-sidebar-drawer" aria-label="close sidebar" className="drawer-overlay"></label> 
-                <div className="w-72 min-h-full bg-base-100/50">
-                    <Sidebar />
-                </div>
+                <Sidebar />
             </div>
         </div>
     );
