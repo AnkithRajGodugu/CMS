@@ -79,8 +79,8 @@ jobs:
       - name: Build (production)
         run: npm run build
         env:
-          VITE_API_URL: https://api.cms.ankithtech.xyz
-          VITE_WS_URL: wss://api.cms.ankithtech.xyz
+          VITE_API_URL: https://cms-backend-x5ag.onrender.com
+          VITE_WS_URL: wss://cms-backend-x5ag.onrender.com
 
   # ══════════════════════════════════════════════════════════
   # JOB 3 — Deploy Backend → Render
