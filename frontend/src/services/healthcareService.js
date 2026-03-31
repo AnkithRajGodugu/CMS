@@ -12,9 +12,9 @@ export const getMyAppointments = (page = 0, size = 20) =>
 export const getMyHealthRecords = () =>
   api.get('/sectors/healthcare/my-records');
 
-/** User - my insurance */
+/** User - my insurance claims */
 export const getMyInsurance = () =>
-  api.get('/healthcare/insurance/me');
+  api.get('/sectors/healthcare/insurance/my-claims');
 
 /** Admin - recent activity */
 export const getRecentHealthcareActivity = () =>

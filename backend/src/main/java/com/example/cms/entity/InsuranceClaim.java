@@ -13,7 +13,14 @@ public class InsuranceClaim {
 
     private String patientName;
     private Double amount;
-    
+    private String description;
+    private String claimType;
+
+    /** Optional link to a registered User account (nullable for legacy rows) */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
+
     @Enumerated(EnumType.STRING)
     private ClaimStatus status;
 
@@ -36,6 +43,12 @@ public class InsuranceClaim {
     public void setPatientName(String patientName) { this.patientName = patientName; }
     public Double getAmount() { return amount; }
     public void setAmount(Double amount) { this.amount = amount; }
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
+    public String getClaimType() { return claimType; }
+    public void setClaimType(String claimType) { this.claimType = claimType; }
+    public User getUser() { return user; }
+    public void setUser(User user) { this.user = user; }
     public ClaimStatus getStatus() { return status; }
     public void setStatus(ClaimStatus status) { this.status = status; }
     public LocalDateTime getSubmittedAt() { return submittedAt; }

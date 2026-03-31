@@ -27,13 +27,20 @@ function SkeletonRow({ cols }) {
 
 const InsuranceManagementPage = () => {
   const { sector } = useAuth();
+
+  // Derive sector from URL path as an authoritative fallback so the page
+  // always works when navigating directly to /dashboard/healthcare/insurance
+  const isHealthcareSector =
+    sector?.code?.toLowerCase() === 'healthcare' ||
+    window.location.pathname.toLowerCase().includes('/healthcare');
+
   const [claims, setClaims]   = useState([]);
   const [stats, setStats]     = useState({ approved: 0, pending: 0, denied: 0, successRate: 0 });
   const [loading, setLoading] = useState(true);
   const [filter, setFilter]   = useState('ALL');
 
   useEffect(() => {
-    if (sector?.code?.toLowerCase() === 'healthcare') {
+    if (isHealthcareSector) {
       Promise.all([getAllInsuranceClaims(), getInsuranceClaimStats()])
         .then(([claimsRes, statsRes]) => {
           setClaims(claimsRes.data ?? []);
@@ -47,10 +54,13 @@ const InsuranceManagementPage = () => {
         })
         .catch(err => console.error('Could not load insurance data:', err))
         .finally(() => setLoading(false));
+    } else {
+      setLoading(false);
     }
-  }, [sector]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isHealthcareSector]);
 
-  if (sector?.code?.toLowerCase() !== 'healthcare') {
+  if (!isHealthcareSector) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-slate-50 p-4">
         <div className="text-6xl mb-4">🏥</div>

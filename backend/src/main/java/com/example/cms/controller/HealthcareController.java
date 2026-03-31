@@ -114,6 +114,25 @@ public class HealthcareController {
         return ResponseEntity.ok(healthRecordRepository.findByUserOrderByRecordDateDesc(user));
     }
 
+    /** User: their own insurance claims (by user FK, with name-based fallback) */
+    @GetMapping("/insurance/my-claims")
+    public ResponseEntity<List<com.example.cms.entity.InsuranceClaim>> getMyInsuranceClaims() {
+        User user = getCurrentUser();
+        if (user == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+
+        // Primary: claims explicitly linked to this user account
+        List<com.example.cms.entity.InsuranceClaim> claims =
+                insuranceClaimRepository.findByUserOrderBySubmittedAtDesc(user);
+
+        // Fallback: legacy rows seeded with only patientName (no user FK)
+        if (claims.isEmpty()) {
+            claims = insuranceClaimRepository
+                    .findByPatientNameIgnoreCaseOrderBySubmittedAtDesc(user.getUsername());
+        }
+
+        return ResponseEntity.ok(claims);
+    }
+
     // Patient Management Endpoints
     @GetMapping("/patients")
     public ResponseEntity<Page<Patient>> getAllPatients(

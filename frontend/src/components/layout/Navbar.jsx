@@ -2,7 +2,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { useTheme } from '../../context/SectorThemeProvider';
-import { getHomeRoute, isAdmin, isManager, isSuperAdmin } from '../../utils/roleUtils';
+import { getHomeRoute, isAdmin, isManager, isSuperAdmin, isUser } from '../../utils/roleUtils';
 import DynamicLogo from '../logos/DynamicLogo';
 import NotificationsDropdown from '../NotificationsDropdown';
 
@@ -89,14 +89,20 @@ const SafeNavbar = ({ hideSectorSwitcher = false }) => {
             <li>
               <Link
                 to={getHomeRoute(user, currentTheme?.id || 'banking')}
-                className="hover:text-primary transition-colors"
+                className="hover:text-primary transition-colors font-semibold"
               >
-                Dashboard
+                {isUser(user)
+                  ? (() => {
+                      const icons = { banking: '🏦', healthcare: '🏥', logistics: '🚚', content: '✏️' };
+                      const sector = (currentTheme?.id || 'banking').toLowerCase();
+                      return `${icons[sector] || ''} ${sector.charAt(0).toUpperCase() + sector.slice(1)}`;
+                    })()
+                  : 'Dashboard'}
               </Link>
             </li>
 
 
-            {isAdmin(user) && (
+            {isSuperAdmin(user) && (
               <li>
                 <Link
                   to="/users"
@@ -106,7 +112,7 @@ const SafeNavbar = ({ hideSectorSwitcher = false }) => {
                 </Link>
               </li>
             )}
-            {isAdmin(user) && (
+            {isSuperAdmin(user) && (
               <li>
                 <Link
                   to="/admin/audit-logs"

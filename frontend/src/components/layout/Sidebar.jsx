@@ -1,62 +1,69 @@
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { useTheme } from '../../context/SectorThemeProvider';
 import { getSectorNavItems } from '../../utils/roleUtils';
 import { useState } from 'react';
 import * as FaIcons from 'react-icons/fa';
 
-// Sector accent colors for the sidebar header badge
-const SECTOR_COLORS = {
-    banking:    { bg: 'bg-blue-600',   text: 'text-white', label: '🏦 Banking' },
-    healthcare: { bg: 'bg-emerald-600',text: 'text-white', label: '🏥 Healthcare' },
-    logistics:  { bg: 'bg-amber-500',  text: 'text-white', label: '🚚 Logistics' },
-    content:    { bg: 'bg-purple-600', text: 'text-white', label: '✏️ Content' },
-};
-
 const SectorIcon = ({ iconName, className }) => {
     const Icon = FaIcons[iconName];
-    if (!Icon) return <span className="w-5 h-5 inline-block" />;
+    if (!Icon) return <span className="w-4 h-4 inline-block" />;
     return <Icon className={className} />;
 };
 
 const Sidebar = () => {
     const { user } = useAuth();
     const { currentTheme, currentSector } = useTheme();
-    const navItems = getSectorNavItems(currentSector, user?.role);
+    const location = useLocation();
     const [collapsed, setCollapsed] = useState(false);
+
+    // Derive sector from URL path so the sidebar always matches the current
+    // dashboard section, regardless of what's stored in the auth context.
+    // Admin routes: /dashboard/{sector}/...  User routes: /user/{sector}/...
+    const pathParts = location.pathname.split('/').filter(Boolean);
+    // pathParts[0] is 'dashboard' or 'user', pathParts[1] is the sector
+    const urlSector = pathParts[1] || null;
+    const activeSector = urlSector || currentSector;
+
+    const navItems = getSectorNavItems(activeSector, user?.role);
 
     const sectorKey = (typeof currentSector === 'string'
         ? currentSector
         : currentSector?.code || ''
     ).toLowerCase();
 
-    const sectorMeta = SECTOR_COLORS[sectorKey] || { bg: 'bg-base-300', text: 'text-base-content', label: 'Dashboard' };
+    const primaryColor = currentTheme?.primary || '#3b82f6';
+
+    // Derive a subtle sidebar accent from primary
+    const sidebarStyle = {
+        borderRight: `1px solid ${primaryColor}22`,
+    };
 
     return (
         <aside
-            className={`bg-base-100 border-r h-full flex flex-col transition-all duration-300 ${collapsed ? 'w-16' : 'w-64'}`}
-            style={{
-                borderColor: currentTheme?.primary ? `${currentTheme.primary}40` : 'var(--color-border)',
-                borderRightWidth: '1px',
-            }}
+            className={`h-full flex flex-col transition-all duration-300 ease-in-out relative
+                bg-base-100 ${collapsed ? 'w-[68px]' : 'w-64'}`}
+            style={sidebarStyle}
         >
-            {/* Sector Badge Header */}
-            {!collapsed && (
-                <div className={`${sectorMeta.bg} ${sectorMeta.text} px-4 py-3 text-sm font-semibold tracking-wide rounded-none`}>
-                    {sectorMeta.label}
-                </div>
-            )}
+            {/* Subtle top accent line */}
+            <div
+                className="absolute top-0 left-0 right-0 h-0.5 rounded-b-full opacity-60"
+                style={{ background: `linear-gradient(90deg, ${primaryColor}, ${primaryColor}44)` }}
+            />
 
             {/* Collapse Toggle */}
-            <div className={`flex ${collapsed ? 'justify-center' : 'justify-end'} p-2`}>
+            <div className={`flex ${collapsed ? 'justify-center' : 'justify-end'} px-3 pt-3 pb-1`}>
                 <button
                     onClick={() => setCollapsed(!collapsed)}
-                    className="btn btn-ghost btn-square btn-sm"
+                    className="btn btn-ghost btn-square btn-xs opacity-50 hover:opacity-100 transition-opacity"
                     title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
                 >
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                        strokeWidth={1.5} stroke="currentColor"
-                        className={`w-5 h-5 transition-transform ${collapsed ? 'rotate-180' : ''}`}>
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none" viewBox="0 0 24 24"
+                        strokeWidth={1.8} stroke="currentColor"
+                        className={`w-4 h-4 transition-transform duration-300 ${collapsed ? 'rotate-180' : ''}`}
+                    >
                         <path strokeLinecap="round" strokeLinejoin="round"
                             d="M18.75 19.5l-7.5-7.5 7.5-7.5m-6 15L5.25 12l7.5-7.5" />
                     </svg>
@@ -64,7 +71,7 @@ const Sidebar = () => {
             </div>
 
             {/* Nav Items */}
-            <ul className="menu gap-0.5 px-2 flex-1 overflow-y-auto overflow-x-hidden">
+            <ul className="flex flex-col gap-0.5 px-2 flex-1 overflow-y-auto overflow-x-hidden mt-1 pb-2">
                 {navItems.map(item => (
                     <li key={item.path}>
                         <NavLink
@@ -72,45 +79,88 @@ const Sidebar = () => {
                             end={item.path.split('/').length <= 3}
                             title={collapsed ? item.label : undefined}
                             className={({ isActive }) =>
-                                `rounded-lg flex items-center gap-3 px-3 py-2.5 text-sm transition-colors ${
+                                `group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-all duration-200 ${
                                     isActive
-                                        ? 'bg-primary/10 text-primary font-semibold border-l-4'
-                                        : 'hover:bg-base-200 text-base-content/80'
-                                }`
+                                        ? 'text-white font-semibold shadow-sm'
+                                        : 'text-base-content/70 hover:text-base-content hover:bg-base-200/80'
+                                } ${collapsed ? 'justify-center' : ''}`
                             }
                             style={({ isActive }) =>
-                                isActive ? { borderLeftColor: currentTheme?.primary || '#3b82f6' } : {}
+                                isActive
+                                    ? {
+                                        background: `linear-gradient(135deg, ${primaryColor}, ${primaryColor}cc)`,
+                                        boxShadow: `0 2px 12px ${primaryColor}44`,
+                                    }
+                                    : {}
                             }
                         >
                             {/* Icon */}
-                            <span className="flex-shrink-0 w-5 h-5 flex items-center justify-center">
+                            <span className="flex-shrink-0 w-4 h-4 flex items-center justify-center">
                                 <SectorIcon iconName={item.icon} className="w-4 h-4" />
                             </span>
+
                             {/* Label */}
                             {!collapsed && (
-                                <span className="whitespace-nowrap truncate">{item.label}</span>
+                                <span className="whitespace-nowrap truncate tracking-wide">
+                                    {item.label}
+                                </span>
+                            )}
+
+                            {/* Collapsed tooltip */}
+                            {collapsed && (
+                                <span className="
+                                    absolute left-full ml-3 z-50 px-2.5 py-1.5
+                                    bg-base-300 text-base-content text-xs font-medium
+                                    rounded-lg shadow-lg whitespace-nowrap
+                                    opacity-0 pointer-events-none
+                                    group-hover:opacity-100 transition-opacity duration-150
+                                ">
+                                    {item.label}
+                                </span>
                             )}
                         </NavLink>
                     </li>
                 ))}
             </ul>
 
+            {/* Divider */}
+            <div
+                className="mx-3 mb-2 h-px opacity-30"
+                style={{ background: `linear-gradient(90deg, transparent, ${primaryColor}88, transparent)` }}
+            />
+
             {/* Bottom User Info */}
-            {!collapsed && user && (
-                <div className="p-3 border-t border-base-200 mt-auto">
-                    <div className="flex items-center gap-2 min-w-0">
-                        <div className="avatar placeholder flex-shrink-0">
-                            <div className="bg-primary text-primary-content rounded-full w-8">
-                                <span className="text-xs font-bold">
-                                    {(user.username || user.name || 'U')[0].toUpperCase()}
-                                </span>
+            {user && (
+                <div className={`px-3 pb-4 ${collapsed ? 'flex justify-center' : ''}`}>
+                    {collapsed ? (
+                        /* Collapsed: just avatar */
+                        <div
+                            className="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-sm"
+                            style={{ background: `linear-gradient(135deg, ${primaryColor}, ${primaryColor}aa)` }}
+                            title={user.username || user.name}
+                        >
+                            {(user.username || user.name || 'U')[0].toUpperCase()}
+                        </div>
+                    ) : (
+                        /* Expanded: full user card */
+                        <div className="flex items-center gap-3 p-2.5 rounded-xl bg-base-200/60 hover:bg-base-200 transition-colors">
+                            <div
+                                className="w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center text-white text-xs font-bold shadow-sm"
+                                style={{ background: `linear-gradient(135deg, ${primaryColor}, ${primaryColor}aa)` }}
+                            >
+                                {(user.username || user.name || 'U')[0].toUpperCase()}
+                            </div>
+                            <div className="min-w-0 flex-1">
+                                <p className="text-xs font-semibold truncate leading-tight">
+                                    {user.username || user.name}
+                                </p>
+                                <p className="text-[10px] text-base-content/45 truncate capitalize mt-0.5">
+                                    {(user.role || '').toLowerCase().replace('role_', '')}
+                                    {sectorKey ? ` · ${sectorKey}` : ''}
+                                </p>
                             </div>
                         </div>
-                        <div className="min-w-0">
-                            <p className="text-xs font-semibold truncate">{user.username || user.name}</p>
-                            <p className="text-xs text-base-content/50 truncate capitalize">{(user.role || '').toLowerCase()}</p>
-                        </div>
-                    </div>
+                    )}
                 </div>
             )}
         </aside>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getAllInsuranceClaims } from '../../../services/healthcareService';
+import { getMyInsurance } from '../../../services/healthcareService';
 import { useAuth } from '../../../hooks/useAuth';
 
 const STATUS_BADGE = {
@@ -14,13 +14,13 @@ const MyInsurancePage = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getAllInsuranceClaims()
+    getMyInsurance()
       .then(res => {
-        const all = res.data ?? [];
-        // Show all for now (personal per-user insurance table is a future upgrade)
-        setClaims(all);
+        const data = res.data ?? [];
+        // Support both array and object with claims property
+        setClaims(Array.isArray(data) ? data : (data.claims ?? []));
       })
-      .catch(err => console.error('Failed to load claims:', err))
+      .catch(err => console.error('Failed to load insurance:', err))
       .finally(() => setLoading(false));
   }, []);
 
@@ -36,8 +36,8 @@ const MyInsurancePage = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Insurance &amp; Billing</h1>
-        <p className="text-base-content/60">View your coverage summary and all active claims.</p>
+        <h1 className="text-2xl font-bold">My Insurance & Billing</h1>
+        <p className="text-base-content/60">Your personal coverage summary and claim history.</p>
       </div>
 
       {/* Policy Card (static display — per-user policy is a future upgrade) */}
@@ -104,7 +104,7 @@ const MyInsurancePage = () => {
               <thead>
                 <tr>
                   <th>#</th>
-                  <th>Patient</th>
+                  <th>Description</th>
                   <th>Amount</th>
                   <th>Submitted</th>
                   <th>Status</th>
@@ -122,7 +122,7 @@ const MyInsurancePage = () => {
                 ) : claims.map(c => (
                   <tr key={c.id} className="hover">
                     <td className="font-mono text-xs">CLM-{String(c.id).padStart(4, '0')}</td>
-                    <td className="font-medium">{c.patientName}</td>
+                    <td className="font-medium">{c.description || c.claimType || 'General Claim'}</td>
                     <td className="font-bold">{fmtCur(c.amount)}</td>
                     <td>{fmtDate(c.submittedAt)}</td>
                     <td>

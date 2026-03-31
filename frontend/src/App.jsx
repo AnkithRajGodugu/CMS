@@ -96,9 +96,9 @@ function App() {
                                         <Route path="/organization-settings" element={<ProtectedRoute requiredRoles={['ADMIN', 'MANAGER']}><OrganizationSettingsPage /></ProtectedRoute>} />
 
                                         {/* ---------------- ADMIN-ONLY ROUTES ---------------- */}
-                                        <Route path="/admin/audit-logs" element={<ProtectedRoute requiredRoles={['ADMIN', 'SUPERADMIN']}><AuditLogsPage /></ProtectedRoute>} />
+                                        <Route path="/admin/audit-logs" element={<ProtectedRoute requiredRoles={['SUPERADMIN']}><AuditLogsPage /></ProtectedRoute>} />
                                         <Route path="/admin/webhooks" element={<ProtectedRoute requiredRoles={['ADMIN', 'MANAGER', 'SUPERADMIN']}><WebhooksPage /></ProtectedRoute>} />
-                                        <Route path="/users" element={<ProtectedRoute requiredRoles={['ADMIN', 'SUPERADMIN']}><UserManagementPage /></ProtectedRoute>} />
+                                        <Route path="/users" element={<ProtectedRoute requiredRoles={['SUPERADMIN']}><UserManagementPage /></ProtectedRoute>} />
                                     
                                         {/* 404 Catch-All within MainLayout */}
                                         <Route path="*" element={<NotFoundPage />} />
