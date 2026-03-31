@@ -62,7 +62,7 @@ export const getAuthHeaders = () => {
 
 export const login = async (username, password) => {
   try {
-    const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8082'}/api/auth/login`, {
+    const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8081'}/api/auth/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

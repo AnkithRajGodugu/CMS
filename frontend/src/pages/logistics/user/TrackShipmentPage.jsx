@@ -176,7 +176,7 @@ const TrackShipmentPage = () => {
                 clientRef.current.deactivate();
             }
             
-            const WS_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:8082'}/ws`;
+            const WS_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:8081'}/ws`;
             const token = getToken();
             const client = new Client({
                 webSocketFactory: () => new SockJS(`${WS_URL}?token=${token}`),

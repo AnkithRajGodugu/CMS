@@ -1,0 +1,2 @@
+ADMIN=$2b$10$ymSPnMfyEL.bhzet0YgjRe/HlamfMcTU0sT7FnlOjO1Z6lXCp3R4O
+BANK=$2b$10$ymSPnMfyEL.bhzet0YgjReS528VnOvrfeiNL3Yt3dIliogJjkIgqO

@@ -3,7 +3,7 @@ import { Download, FileSpreadsheet, FileText, FileUp } from 'lucide-react';
 import BulkImportButton from './BulkImportButton';
 import { toast } from 'sonner';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8082';
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8081';
 
 const ReportExportButtons = ({ sectorCode }) => {
   const handleExport = (type) => {

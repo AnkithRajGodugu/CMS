@@ -2,7 +2,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { useTheme } from '../../context/SectorThemeProvider';
-import { getHomeRoute, isAdmin, isManager } from '../../utils/roleUtils';
+import { getHomeRoute, isAdmin, isManager, isSuperAdmin } from '../../utils/roleUtils';
 import DynamicLogo from '../logos/DynamicLogo';
 import NotificationsDropdown from '../NotificationsDropdown';
 
@@ -194,6 +194,44 @@ const SafeNavbar = ({ hideSectorSwitcher = false }) => {
 
           {/* Live notifications bell */}
           {isAuthenticated && <NotificationsDropdown />}
+
+          {/* Sector switcher - visible only to super admins */}
+          {isAuthenticated && !hideSectorSwitcher && isSuperAdmin(user) && (
+            <div className="dropdown dropdown-end hidden lg:block">
+              <div 
+                tabIndex={0} 
+                role="button" 
+                className="flex items-center gap-2 px-4 py-1.5 rounded-full border border-base-300 bg-base-100 hover:bg-base-200 transition-colors shadow-sm cursor-pointer"
+              >
+                <DynamicLogo size={18} animated={false} />
+                <span className="text-sm font-semibold tracking-wide capitalize">{currentTheme?.name || 'Banking'}</span>
+                <svg className="w-4 h-4 opacity-50 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+              <ul tabIndex={0} className="dropdown-content mt-3 z-[1] p-2 shadow-xl bg-base-100 rounded-box w-56 border border-base-300">
+                <li className="px-3 py-2 text-xs font-bold uppercase tracking-widest text-base-content/50 border-b border-base-200 mb-1">
+                  Switch Sector Dashboard
+                </li>
+                {getAllSectors().map(s => (
+                  <li key={s}>
+                    <button 
+                      onClick={() => {
+                        changeSector(s);
+                        navigate(`/dashboard/${s}`);
+                        // Close dropdown by blurring active element
+                        document.activeElement?.blur();
+                      }}
+                      className={`flex items-center gap-3 w-full text-left px-3 py-2 rounded-lg capitalize transition-colors hover:bg-base-200 ${currentTheme?.name?.toLowerCase() === s ? 'bg-primary/10 text-primary font-semibold' : ''}`}
+                    >
+                      <DynamicLogo size={18} sector={s} animated={false} />
+                      <span className="text-sm font-medium">{s.charAt(0).toUpperCase() + s.slice(1)}</span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
 
           {isAuthenticated ? (
             <div className="dropdown dropdown-end ml-1">

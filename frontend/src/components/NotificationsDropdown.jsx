@@ -1,17 +1,40 @@
 import { useEffect, useRef, useState } from 'react';
+import api from '../services/api';
+import { useAuth } from '../hooks/useAuth';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8082';
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8081';
 
 const NotificationsDropdown = () => {
+  const { user } = useAuth();
   const [notifications, setNotifications] = useState([]);
   const [open, setOpen] = useState(false);
   const [connected, setConnected] = useState(false);
   const stompRef = useRef(null);
 
   useEffect(() => {
-    connectWS();
-    return () => stompRef.current?.disconnect?.();
-  }, []);
+    if (user) {
+        fetchInitial();
+        connectWS();
+    }
+    return () => stompRef.current?.deactivate?.();
+  }, [user]);
+
+  const fetchInitial = async () => {
+    try {
+      const res = await api.get('/notifications?unreadOnly=false&size=20');
+      if (res.data?.success) {
+         setNotifications(res.data.notifications.map(n => ({
+            id: n.id,
+            type: n.type,
+            title: n.title,
+            payload: n.message,
+            timestamp: n.createdAt,
+            read: n.read,
+            link: n.link
+         })));
+      }
+    } catch (e) { console.error('Could not load notifications'); }
+  };
 
   const connectWS = async () => {
     try {
@@ -25,14 +48,21 @@ const NotificationsDropdown = () => {
         webSocketFactory: () => new SockJS(wsUrl),
         onConnect: () => {
           setConnected(true);
-          client.subscribe('/topic/notifications', (msg) => {
+          
+          const handleMsg = (msg) => {
             try {
               const body = JSON.parse(msg.body);
               push(body);
             } catch (_) {
               push({ type: 'INFO', payload: msg.body });
             }
-          });
+          };
+
+          client.subscribe('/user/queue/notifications', handleMsg);
+          client.subscribe('/topic/notifications', handleMsg);
+          if (user?.sector) {
+              client.subscribe(`/topic/${user.sector.toLowerCase()}/updates`, handleMsg);
+          }
         },
         onDisconnect: () => setConnected(false),
         reconnectDelay: 5000,
@@ -46,14 +76,29 @@ const NotificationsDropdown = () => {
   };
 
   const push = (notification) => {
-    setNotifications((prev) => [
-      { ...notification, id: Date.now(), read: false },
-      ...prev.slice(0, 49),
-    ]);
+    setNotifications((prev) => {
+      const newDnt = { 
+         ...notification, 
+         id: notification.id || Date.now(),
+         title: notification.title || notification.type, 
+         payload: notification.message || notification.payload,
+         read: false 
+      };
+      // Prevent exact duplicates
+      if (prev.find(p => p.id === newDnt.id)) return prev;
+      return [newDnt, ...prev.slice(0, 49)];
+    });
   };
 
-  const markAllRead = () =>
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+  const markAllRead = async () => {
+    try {
+        await api.post('/notifications/read-all');
+        setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+    } catch (e) {
+        // Fallback local UI update if network fails
+        setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+    }
+  };
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
@@ -127,16 +172,19 @@ const NotificationsDropdown = () => {
                 className={`px-3 py-2 rounded-lg mb-1 text-sm ${n.read ? 'opacity-60' : 'bg-primary/5 border-l-2 border-primary'}`}
               >
                 <div className="flex justify-between items-center">
-                  <span className="font-medium capitalize">{n.type || 'Event'}</span>
-                  <span className="text-xs text-base-content/50">
+                  <span className="font-semibold text-primary capitalize">{n.title || n.type || 'Event'}</span>
+                  <span className="text-[10px] text-base-content/50 uppercase font-bold tracking-wider">
                     {n.timestamp
-                      ? new Date(n.timestamp).toLocaleTimeString()
+                      ? new Date(n.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
                       : ''}
                   </span>
                 </div>
-                <p className="text-base-content/70 mt-0.5 line-clamp-2">
+                <p className="text-base-content/70 mt-0.5 text-xs leading-relaxed">
                   {typeof n.payload === 'string' ? n.payload : JSON.stringify(n.payload)}
                 </p>
+                {n.link && (
+                    <a href={n.link} className="text-xs text-primary underline mt-1 block">View details</a>
+                )}
               </div>
             ))
           )}

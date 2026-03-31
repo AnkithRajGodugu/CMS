@@ -14,6 +14,9 @@ export const ROLES = {
 /** Normalizes the role string by removing Spring Security's ROLE_ prefix */
 export const normalizeRole = (role) => (role || '').replace(/^ROLE_/, '').toUpperCase();
 
+/** True if the user is a platform super admin */
+export const isSuperAdmin = (user) => normalizeRole(user?.role) === ROLES.SUPERADMIN;
+
 /** True if the user holds a platform/sector admin level role */
 export const isAdmin = (user) => {
     const r = normalizeRole(user?.role);
