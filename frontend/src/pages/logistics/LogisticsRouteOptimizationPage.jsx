@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+﻿import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import api from '../../services/api';
 import { toast } from 'sonner';
@@ -20,8 +20,8 @@ L.Icon.Default.mergeOptions({
 });
 
 const cx = (...c) => c.filter(Boolean).join(' ');
-const inputCls  = "w-full bg-[#0c0e12] border border-[#46484d]/20 rounded-xl px-4 py-3 text-sm text-[#f6f6fc] placeholder-[#46484d] focus:outline-none focus:border-[#99a8ff]/50 transition-all";
-const labelCls  = "block text-xs font-bold uppercase tracking-widest text-[#aaabb0] mb-2";
+const inputCls  = "w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm text-[#1F2937] placeholder-gray-400 focus:outline-none focus:border-violet-400 transition-all shadow-sm";
+const labelCls  = "block text-xs font-bold uppercase tracking-widest text-gray-500 mb-2";
 
 /* ── City lat/lng lookup (India) ──────────────────────────────────────────── */
 const CITY_LATLNG = {
@@ -132,7 +132,7 @@ function RouteDetailPanel({ route, onClose, onOptimize }) {
   const isOpt      = route.status === 'OPTIMIZED';
 
   return (
-    <div className="absolute top-4 right-4 z-[999] w-72 bg-[#111318] rounded-2xl border border-[#46484d]/20 shadow-2xl overflow-hidden">
+    <div className="absolute top-4 right-4 z-[999] w-72 bg-white rounded-2xl border border-gray-200 shadow-2xl overflow-hidden">
       <div className={cx('p-4 text-white', isOpt ? 'bg-gradient-to-r from-emerald-600/70 to-teal-700/70' : 'bg-gradient-to-r from-amber-600/70 to-orange-700/70')}>
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-2 min-w-0">
@@ -152,22 +152,22 @@ function RouteDetailPanel({ route, onClose, onOptimize }) {
       <div className="p-4 space-y-3">
         <div className="grid grid-cols-3 gap-2 text-center">
           {[
-            { label: 'Distance', value: `${route.distanceKm} km`,  color: 'text-amber-400' },
-            { label: 'Time',     value: `${route.estimatedTimeMinutes}m`, color: 'text-sky-400' },
-            { label: 'Avg Spd', value: `${speedKmh}km/h`,          color: 'text-emerald-400' },
+            { label: 'Distance', value: `${route.distanceKm} km`,  color: 'text-amber-600' },
+            { label: 'Time',     value: `${route.estimatedTimeMinutes}m`, color: 'text-sky-600' },
+            { label: 'Avg Spd', value: `${speedKmh}km/h`,          color: 'text-emerald-600' },
           ].map(s => (
-            <div key={s.label} className="bg-[#0c0e12] rounded-xl py-2 px-1">
+            <div key={s.label} className="bg-[#F7F9FC] rounded-xl py-2 px-1">
               <p className={cx('font-bold text-xs', s.color)}>{s.value}</p>
-              <p className="text-[10px] text-[#46484d] mt-0.5">{s.label}</p>
+              <p className="text-[10px] text-gray-400 mt-0.5">{s.label}</p>
             </div>
           ))}
         </div>
         <div>
           <div className="flex justify-between text-xs font-semibold mb-1">
-            <span className="text-[#aaabb0]">Route Efficiency</span>
-            <span className="text-[#f6f6fc]">{efficiency}%</span>
+            <span className="text-gray-500">Route Efficiency</span>
+            <span className="text-[#1F2937]">{efficiency}%</span>
           </div>
-          <div className="bg-[#0c0e12] h-2 rounded-full overflow-hidden">
+          <div className="bg-[#F7F9FC] h-2 rounded-full overflow-hidden">
             <div className={cx('h-full rounded-full transition-all duration-700', isOpt ? 'bg-gradient-to-r from-emerald-400 to-emerald-600' : 'bg-gradient-to-r from-amber-400 to-amber-600')} style={{ width: `${efficiency}%` }} />
           </div>
         </div>
@@ -176,7 +176,7 @@ function RouteDetailPanel({ route, onClose, onOptimize }) {
             <TrendingUp className="w-3.5 h-3.5" /> Mark as Optimized
           </button>
         ) : (
-          <div className="flex items-center gap-2 text-emerald-400 text-xs font-semibold bg-emerald-500/5 border border-emerald-500/20 rounded-xl p-2.5">
+          <div className="flex items-center gap-2 text-emerald-600 text-xs font-semibold bg-emerald-500/5 border border-emerald-500/20 rounded-xl p-2.5">
             <Check className="w-3.5 h-3.5" /> Route is fully optimized
           </div>
         )}
@@ -227,10 +227,10 @@ const LogisticsRouteOptimizationPage = () => {
 
   if (!user || sector?.code?.toLowerCase() !== 'logistics') {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0c0e12]">
-        <div className="flex flex-col items-center gap-6 p-10 bg-[#111318] rounded-3xl border border-[#46484d]/20 max-w-md">
-          <AlertTriangle className="w-16 h-16 text-amber-400" />
-          <h2 className="text-2xl font-bold text-[#f6f6fc]">Logistics Access Only</h2>
+      <div className="min-h-screen flex items-center justify-center bg-[#F7F9FC]">
+        <div className="flex flex-col items-center gap-6 p-10 bg-white rounded-3xl border border-gray-200 max-w-md">
+          <AlertTriangle className="w-16 h-16 text-amber-600" />
+          <h2 className="text-2xl font-bold text-[#1F2937]">Logistics Access Only</h2>
         </div>
       </div>
     );
@@ -242,19 +242,19 @@ const LogisticsRouteOptimizationPage = () => {
   const avgDist         = routes.length > 0 ? Math.round(routes.reduce((s, r) => s + (r.distanceKm || 0), 0) / routes.length) : 0;
 
   return (
-    <div className="min-h-screen bg-[#0c0e12] text-[#f6f6fc] font-sans p-8">
-      <div className="fixed bottom-0 right-0 w-[500px] h-[500px] bg-[#99a8ff]/10 blur-[120px] rounded-full pointer-events-none -z-10 translate-x-1/2 translate-y-1/2" />
+    <div className="min-h-screen bg-[#F7F9FC] text-[#1F2937] font-sans p-8">
+      
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pt-4">
           <div>
             <div className="flex items-center gap-2 mb-3">
-              <span className="text-xs font-bold uppercase tracking-widest text-[#aaabb0] opacity-60">Logistics</span>
-              <span className="text-[#46484d]">/</span>
-              <span className="text-xs font-bold uppercase tracking-widest text-amber-400">Route Optimization</span>
+              <span className="text-xs font-bold uppercase tracking-widest text-gray-500 opacity-60">Logistics</span>
+              <span className="text-gray-400">/</span>
+              <span className="text-xs font-bold uppercase tracking-widest text-amber-600">Route Optimization</span>
             </div>
-            <h1 className="text-5xl font-extrabold tracking-tighter text-[#f6f6fc] mb-2">Route Optimization</h1>
-            <p className="text-[#aaabb0]">Live route network on OpenStreetMap · Click a route to inspect it.</p>
+            <h1 className="text-5xl font-extrabold tracking-tighter text-[#1F2937] mb-2">Route Optimization</h1>
+            <p className="text-gray-500">Live route network on OpenStreetMap · Click a route to inspect it.</p>
           </div>
           <button onClick={() => setIsModalOpen(true)} className="flex items-center gap-2 px-8 py-3.5 rounded-xl font-bold text-sm text-[#000] bg-gradient-to-br from-[#99a8ff] to-[#4765f9] shadow-xl shadow-[#99a8ff]/10 hover:shadow-[#99a8ff]/25 active:scale-95 transition-all whitespace-nowrap">
             <Plus className="w-4 h-4" /> New Route
@@ -264,16 +264,16 @@ const LogisticsRouteOptimizationPage = () => {
         {/* KPIs */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {[
-            { label: 'Total Routes',  value: routes.length,   Icon: Route,       color: 'text-[#99a8ff] bg-[#99a8ff]/10 border-[#99a8ff]/20' },
-            { label: 'Optimized',     value: optimizedCount,  Icon: Check,       color: 'text-emerald-300 bg-emerald-500/10 border-emerald-500/20' },
-            { label: 'Pending',       value: pendingCount,    Icon: Clock,       color: 'text-amber-300 bg-amber-500/10 border-amber-500/20' },
-            { label: 'Avg Distance',  value: `${avgDist} km`, Icon: Navigation,  color: 'text-sky-300 bg-sky-500/10 border-sky-500/20' },
+            { label: 'Total Routes',  value: routes.length,   Icon: Route,       color: 'text-violet-700 bg-violet-50 border-violet-200' },
+            { label: 'Optimized',     value: optimizedCount,  Icon: Check,       color: 'text-emerald-700 bg-emerald-50 border-emerald-200' },
+            { label: 'Pending',       value: pendingCount,    Icon: Clock,       color: 'text-amber-700 bg-amber-50 border-amber-200' },
+            { label: 'Avg Distance',  value: `${avgDist} km`, Icon: Navigation,  color: 'text-sky-700 bg-sky-50 border-sky-200' },
           ].map(({ label, value, Icon, color }) => (
-            <div key={label} className="bg-[#111318] rounded-2xl border border-[#46484d]/10 p-5 flex items-center gap-4">
+            <div key={label} className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 flex items-center gap-4">
               <div className={cx('p-2.5 rounded-xl border shrink-0', color.split(' ').slice(1).join(' '))}><Icon className={cx('w-5 h-5', color.split(' ')[0])} /></div>
               <div>
-                <p className="text-2xl font-extrabold text-[#f6f6fc]">{loading ? '—' : value}</p>
-                <p className="text-xs text-[#aaabb0] font-medium">{label}</p>
+                <p className="text-2xl font-extrabold text-[#1F2937]">{loading ? '—' : value}</p>
+                <p className="text-xs text-gray-500 font-medium">{label}</p>
               </div>
             </div>
           ))}
@@ -282,15 +282,15 @@ const LogisticsRouteOptimizationPage = () => {
         {/* Main layout */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Map */}
-          <div className="lg:col-span-2 bg-[#111318] rounded-3xl border border-[#46484d]/10 overflow-hidden" style={{ minHeight: '520px' }}>
-            <div className="px-5 py-3.5 border-b border-[#46484d]/10 flex items-center gap-2 text-sm font-semibold text-[#aaabb0]">
-              <Navigation className="w-4 h-4 text-amber-400" /> Live Route Network
-              <span className="ml-auto text-xs text-[#46484d]">Powered by OpenStreetMap</span>
+          <div className="lg:col-span-2 bg-white rounded-3xl border border-gray-200 shadow-sm overflow-hidden" style={{ minHeight: '520px' }}>
+            <div className="px-5 py-3.5 border-b border-gray-100 flex items-center gap-2 text-sm font-semibold text-gray-500">
+              <Navigation className="w-4 h-4 text-amber-600" /> Live Route Network
+              <span className="ml-auto text-xs text-gray-400">Powered by OpenStreetMap</span>
             </div>
             <div className="relative" style={{ height: '480px' }}>
               {loading ? (
-                <div className="absolute inset-0 flex items-center justify-center bg-[#0c0e12]/60">
-                  <div className="w-10 h-10 rounded-full border-2 border-[#99a8ff]/20 border-t-[#99a8ff] animate-spin" />
+                <div className="absolute inset-0 flex items-center justify-center bg-[#F7F9FC]/60">
+                  <div className="w-10 h-10 rounded-full border-2 border-violet-300 border-t-[#99a8ff] animate-spin" />
                 </div>
               ) : (
                 <LeafletMap routes={filteredRoutes} selectedRoute={selectedRoute} onRouteClick={r => setSelectedRoute(r.id === selectedRoute?.id ? null : r)} />
@@ -301,10 +301,10 @@ const LogisticsRouteOptimizationPage = () => {
 
           {/* Route list */}
           <div className="space-y-4">
-            <div className="flex bg-[#111318] rounded-xl p-1 border border-[#46484d]/10">
+            <div className="flex bg-white rounded-xl p-1 border border-gray-100">
               {['ALL', 'OPTIMIZED', 'PENDING'].map(f => (
                 <button key={f} onClick={() => setFilter(f)}
-                  className={cx('flex-1 py-2 rounded-lg text-xs font-bold transition-all', filter === f ? 'bg-[#99a8ff] text-[#000]' : 'text-[#aaabb0] hover:text-[#f6f6fc]')}>
+                  className={cx('flex-1 py-2 rounded-lg text-xs font-bold transition-all', filter === f ? 'bg-[#99a8ff] text-[#000]' : 'text-gray-500 hover:text-[#1F2937]')}>
                   {f === 'ALL' ? 'All' : f === 'OPTIMIZED' ? '✓ Done' : '⏳ Pending'}
                 </button>
               ))}
@@ -312,32 +312,32 @@ const LogisticsRouteOptimizationPage = () => {
 
             <div className="space-y-2 overflow-y-auto" style={{ maxHeight: '430px' }}>
               {loading ? (
-                <div className="flex justify-center py-8"><div className="w-7 h-7 rounded-full border-2 border-[#99a8ff]/20 border-t-[#99a8ff] animate-spin" /></div>
+                <div className="flex justify-center py-8"><div className="w-7 h-7 rounded-full border-2 border-violet-300 border-t-[#99a8ff] animate-spin" /></div>
               ) : filteredRoutes.length === 0 ? (
-                <div className="bg-[#111318] rounded-2xl border border-[#46484d]/10 p-10 text-center text-[#46484d] italic text-sm">No routes found. Create one!</div>
+                <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-10 text-center text-gray-400 italic text-sm">No routes found. Create one!</div>
               ) : filteredRoutes.map(route => {
                 const isSelected = selectedRoute?.id === route.id;
                 const isOpt      = route.status === 'OPTIMIZED';
                 return (
                   <button key={route.id} onClick={() => setSelectedRoute(isSelected ? null : route)}
-                    className={cx('w-full text-left bg-[#111318] rounded-2xl border border-l-4 p-4 transition-all hover:border-[#46484d]/30',
-                      isSelected ? 'border-amber-500 shadow-lg shadow-amber-500/10 scale-[1.01]' : isOpt ? 'border-emerald-500' : 'border-[#46484d]/10')}>
+                    className={cx('w-full text-left bg-white rounded-2xl border border-l-4 p-4 transition-all hover:border-gray-300',
+                      isSelected ? 'border-amber-500 shadow-lg shadow-amber-500/10 scale-[1.01]' : isOpt ? 'border-emerald-500' : 'border-gray-100')}>
                     <div className="flex items-start justify-between gap-2 mb-2">
                       <div className="flex items-center gap-2 min-w-0">
-                        <div className={cx('p-1.5 rounded-lg shrink-0', isOpt ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-400')}>
+                        <div className={cx('p-1.5 rounded-lg shrink-0', isOpt ? 'bg-emerald-500/10 text-emerald-600' : 'bg-amber-500/10 text-amber-600')}>
                           <Map className="w-3.5 h-3.5" />
                         </div>
                         <div className="min-w-0">
-                          <p className="font-bold text-sm text-[#f6f6fc] truncate">{route.startLocation}</p>
-                          <p className="text-[#46484d] text-xs">↓</p>
-                          <p className="font-bold text-sm text-[#f6f6fc] truncate">{route.endLocation}</p>
+                          <p className="font-bold text-sm text-[#1F2937] truncate">{route.startLocation}</p>
+                          <p className="text-gray-400 text-xs">↓</p>
+                          <p className="font-bold text-sm text-[#1F2937] truncate">{route.endLocation}</p>
                         </div>
                       </div>
-                      <span className={cx('text-[10px] font-bold uppercase px-2 py-0.5 rounded-full border shrink-0', isOpt ? 'text-emerald-300 bg-emerald-500/10 border-emerald-500/20' : 'text-amber-300 bg-amber-500/10 border-amber-500/20')}>
+                      <span className={cx('text-[10px] font-bold uppercase px-2 py-0.5 rounded-full border shrink-0', isOpt ? 'text-emerald-700 bg-emerald-50 border-emerald-200' : 'text-amber-700 bg-amber-50 border-amber-200')}>
                         {isOpt ? '✓' : '⏳'} {route.status}
                       </span>
                     </div>
-                    <div className="flex gap-4 text-xs text-[#aaabb0] pt-2 border-t border-[#46484d]/10">
+                    <div className="flex gap-4 text-xs text-gray-500 pt-2 border-t border-gray-100">
                       <span>{route.distanceKm} km</span>
                       <span>{route.estimatedTimeMinutes} min</span>
                     </div>
@@ -347,15 +347,15 @@ const LogisticsRouteOptimizationPage = () => {
             </div>
 
             {/* Traffic Insights */}
-            <div className="bg-[#111318] rounded-2xl border border-amber-500/20 p-4">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-amber-400 mb-3">Traffic Insights</p>
+            <div className="bg-white rounded-2xl border border-amber-500/20 p-4">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-amber-600 mb-3">Traffic Insights</p>
               <div className="space-y-2">
                 {[
                   { dot: 'bg-emerald-400', text: 'NH-48 corridor 15% faster today' },
                   { dot: 'bg-amber-400',   text: 'Construction on Bridge X-2' },
                   { dot: 'bg-sky-400',     text: 'AI suggests 12PM departures for Node B' },
                 ].map((item, i) => (
-                  <div key={i} className="flex items-center gap-2.5 text-sm text-[#aaabb0]">
+                  <div key={i} className="flex items-center gap-2.5 text-sm text-gray-500">
                     <div className={cx('w-2 h-2 rounded-full shrink-0', item.dot)} />
                     <span>{item.text}</span>
                   </div>
@@ -369,13 +369,13 @@ const LogisticsRouteOptimizationPage = () => {
       {/* New Route Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-[#111318] rounded-3xl border border-[#46484d]/20 w-full max-w-md shadow-2xl">
-            <div className="flex items-center justify-between p-6 border-b border-[#46484d]/10">
+          <div className="bg-white rounded-3xl border border-gray-200 w-full max-w-md shadow-2xl">
+            <div className="flex items-center justify-between p-6 border-b border-gray-100">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-amber-500/10 rounded-xl border border-amber-500/20"><Route className="w-5 h-5 text-amber-400" /></div>
-                <h3 className="font-bold text-[#f6f6fc] text-lg">Create New Route</h3>
+                <div className="p-2 bg-amber-50 rounded-xl border border-amber-200"><Route className="w-5 h-5 text-amber-600" /></div>
+                <h3 className="font-bold text-[#1F2937] text-lg">Create New Route</h3>
               </div>
-              <button onClick={() => setIsModalOpen(false)} className="p-2 rounded-xl text-[#aaabb0] hover:text-[#f6f6fc] hover:bg-[#23262c] transition-all"><X className="w-5 h-5" /></button>
+              <button onClick={() => setIsModalOpen(false)} className="p-2 rounded-xl text-gray-500 hover:text-[#1F2937] hover:bg-gray-100 transition-all"><X className="w-5 h-5" /></button>
             </div>
             <form onSubmit={handleCreateRoute} className="p-6 space-y-4">
               <div className="grid grid-cols-2 gap-4">
@@ -404,7 +404,7 @@ const LogisticsRouteOptimizationPage = () => {
                 </div>
               </div>
               <div className="flex gap-3 pt-2">
-                <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 py-3 rounded-xl text-sm font-semibold text-[#aaabb0] bg-[#23262c] hover:text-[#f6f6fc] transition-all">Cancel</button>
+                <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 py-3 rounded-xl text-sm font-semibold text-gray-500 bg-gray-100 hover:text-[#1F2937] transition-all">Cancel</button>
                 <button type="submit" className="flex-1 py-3 rounded-xl text-sm font-bold text-[#000] bg-gradient-to-br from-[#99a8ff] to-[#4765f9] hover:shadow-lg active:scale-95 transition-all">Create Route</button>
               </div>
             </form>

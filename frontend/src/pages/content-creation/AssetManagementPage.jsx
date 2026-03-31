@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { Link } from 'react-router-dom';
 import api from '../../services/api';
@@ -13,10 +13,10 @@ const cx = (...classes) => classes.filter(Boolean).join(' ');
 
 /* ─── type badge colour map ─────────────────────────────────────────── */
 const TYPE_META = {
-  IMAGE:    { label: 'Image',    color: 'text-violet-300 bg-violet-500/10 border-violet-500/20', Icon: Image },
-  VIDEO:    { label: 'Video',    color: 'text-red-300    bg-red-500/10    border-red-500/20',    Icon: Video },
-  PDF:      { label: 'PDF',      color: 'text-amber-300  bg-amber-500/10  border-amber-500/20',  Icon: FileText },
-  DOCUMENT: { label: 'Doc',      color: 'text-sky-300    bg-sky-500/10    border-sky-500/20',    Icon: FileText },
+  IMAGE:    { label: 'Image',    color: 'text-violet-700 bg-violet-50 border-violet-200', Icon: Image },
+  VIDEO:    { label: 'Video',    color: 'text-red-600    bg-red-500/10    border-red-500/20',    Icon: Video },
+  PDF:      { label: 'PDF',      color: 'text-amber-600  bg-amber-500/10  border-amber-500/20',  Icon: FileText },
+  DOCUMENT: { label: 'Doc',      color: 'text-sky-600    bg-sky-500/10    border-sky-500/20',    Icon: FileText },
 };
 
 /* ─── Filter pill ────────────────────────────────────────────────────── */
@@ -26,8 +26,8 @@ const FilterPill = ({ label, active, onClick }) => (
     className={cx(
       'px-5 py-2 rounded-xl text-sm font-semibold transition-all duration-200',
       active
-        ? 'bg-[#23262c] text-[#99a8ff] shadow-inner shadow-[#99a8ff]/10'
-        : 'text-[#aaabb0] hover:text-[#f6f6fc] hover:bg-[#1d2025]'
+        ? 'bg-gray-100 text-violet-600 shadow-inner shadow-[#99a8ff]/10'
+        : 'text-gray-500 hover:text-[#1F2937] hover:bg-[#1d2025]'
     )}
   >
     {label}
@@ -42,14 +42,14 @@ const AssetCard = ({ asset, onDownload, onDetails, featured = false }) => {
 
   if (featured) {
     return (
-      <div className="lg:col-span-2 group relative overflow-hidden bg-[#171a1f] rounded-3xl border border-[#46484d]/10 hover:border-[#99a8ff]/30 transition-all duration-500">
-        <div className="aspect-[21/9] w-full overflow-hidden bg-[#111318] flex items-center justify-center">
+      <div className="lg:col-span-2 group relative overflow-hidden bg-gray-50 rounded-3xl border border-gray-100 hover:border-[#99a8ff]/30 transition-all duration-500">
+        <div className="aspect-[21/9] w-full overflow-hidden bg-white flex items-center justify-center">
           {isImg ? (
             <img src={asset.url} alt={asset.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
           ) : (
             <div className="flex flex-col items-center gap-3 opacity-20">
-              <Icon className="w-16 h-16 text-[#99a8ff]" />
-              <span className="text-xs font-bold uppercase tracking-widest text-[#aaabb0]">{asset.type}</span>
+              <Icon className="w-16 h-16 text-violet-600" />
+              <span className="text-xs font-bold uppercase tracking-widest text-gray-500">{asset.type}</span>
             </div>
           )}
         </div>
@@ -59,16 +59,16 @@ const AssetCard = ({ asset, onDownload, onDetails, featured = false }) => {
             <div className="flex items-center gap-3 mb-3">
               <span className={cx('px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-full border', meta.color)}>{meta.label}</span>
               {asset.project && (
-                <span className="text-[#aaabb0] text-xs font-medium flex items-center gap-1">
+                <span className="text-gray-500 text-xs font-medium flex items-center gap-1">
                   <FolderOpen className="w-3 h-3" /> {asset.project.projectName}
                 </span>
               )}
             </div>
-            <h3 className="font-bold text-2xl tracking-tight text-[#f6f6fc]">{asset.title}</h3>
+            <h3 className="font-bold text-2xl tracking-tight text-[#1F2937]">{asset.title}</h3>
           </div>
           <button
             onClick={() => onDownload(asset)}
-            className="p-4 bg-[#23262c]/80 backdrop-blur-md rounded-2xl border border-[#46484d]/20 text-[#f6f6fc] hover:bg-[#99a8ff] hover:text-[#000] transition-all"
+            className="p-4 bg-gray-100/80 backdrop-blur-md rounded-2xl border border-gray-200 text-[#1F2937] hover:bg-[#99a8ff] hover:text-[#000] transition-all"
           >
             <Download className="w-5 h-5" />
           </button>
@@ -78,13 +78,13 @@ const AssetCard = ({ asset, onDownload, onDetails, featured = false }) => {
   }
 
   return (
-    <div className="group bg-[#111318] p-5 rounded-3xl border border-[#46484d]/10 hover:bg-[#1d2025] hover:border-[#99a8ff]/20 transition-all duration-300 flex flex-col">
-      <div className="aspect-square w-full rounded-2xl overflow-hidden mb-5 bg-[#0c0e12] flex items-center justify-center relative">
+    <div className="group bg-white p-5 rounded-3xl border border-gray-100 hover:bg-[#1d2025] hover:border-violet-300 transition-all duration-300 flex flex-col">
+      <div className="aspect-square w-full rounded-2xl overflow-hidden mb-5 bg-[#F7F9FC] flex items-center justify-center relative">
         {isImg ? (
           <img src={asset.url} alt={asset.title} className="w-full h-full object-cover group-hover:scale-105 transition-all duration-500" />
         ) : (
           <>
-            <Icon className="w-10 h-10 text-[#99a8ff]/20" />
+            <Icon className="w-10 h-10 text-violet-600/20" />
             <div className="absolute inset-0 bg-gradient-to-br from-[#99a8ff]/5 to-transparent pointer-events-none" />
           </>
         )}
@@ -106,18 +106,18 @@ const AssetCard = ({ asset, onDownload, onDetails, featured = false }) => {
       </div>
       <div className="flex-1">
         <div className="flex justify-between items-start mb-2">
-          <h3 className="font-bold text-[#f6f6fc] text-base leading-snug truncate pr-2">{asset.title}</h3>
+          <h3 className="font-bold text-[#1F2937] text-base leading-snug truncate pr-2">{asset.title}</h3>
           <span className={cx('px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest rounded-md border shrink-0', meta.color)}>{meta.label}</span>
         </div>
         {asset.project && (
-          <p className="text-[#aaabb0] text-xs flex items-center gap-1.5 mb-2">
+          <p className="text-gray-500 text-xs flex items-center gap-1.5 mb-2">
             <FolderOpen className="w-3 h-3" /> {asset.project.projectName}
           </p>
         )}
       </div>
-      <div className="flex items-center justify-between mt-4 pt-4 border-t border-[#46484d]/10">
-        <span className="text-xs text-[#aaabb0] font-medium">ID #{asset.id}</span>
-        <button onClick={() => onDownload(asset)} className="text-[#99a8ff] hover:text-[#879aff] transition-colors">
+      <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
+        <span className="text-xs text-gray-500 font-medium">ID #{asset.id}</span>
+        <button onClick={() => onDownload(asset)} className="text-violet-600 hover:text-[#879aff] transition-colors">
           <Download className="w-4 h-4" />
         </button>
       </div>
@@ -136,19 +136,19 @@ const UploadModal = ({ onClose, onSubmit, projects }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-      <div className="bg-[#111318] rounded-3xl border border-[#46484d]/20 w-full max-w-lg shadow-2xl shadow-black/50">
+      <div className="bg-white rounded-3xl border border-gray-200 w-full max-w-lg shadow-2xl shadow-black/50">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-[#46484d]/10">
+        <div className="flex items-center justify-between p-6 border-b border-gray-100">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-[#99a8ff]/10 rounded-xl border border-[#99a8ff]/20">
-              <Upload className="w-5 h-5 text-[#99a8ff]" />
+            <div className="p-2 bg-[#99a8ff]/10 rounded-xl border border-violet-300">
+              <Upload className="w-5 h-5 text-violet-600" />
             </div>
             <div>
-              <h3 className="font-bold text-[#f6f6fc] text-lg">Register Digital Asset</h3>
-              <p className="text-[#aaabb0] text-xs">Add a new asset to the library</p>
+              <h3 className="font-bold text-[#1F2937] text-lg">Register Digital Asset</h3>
+              <p className="text-gray-500 text-xs">Add a new asset to the library</p>
             </div>
           </div>
-          <button onClick={onClose} className="p-2 rounded-xl text-[#aaabb0] hover:text-[#f6f6fc] hover:bg-[#23262c] transition-all">
+          <button onClick={onClose} className="p-2 rounded-xl text-gray-500 hover:text-[#1F2937] hover:bg-gray-100 transition-all">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -156,23 +156,23 @@ const UploadModal = ({ onClose, onSubmit, projects }) => {
         {/* Form */}
         <form onSubmit={handleSubmit} className="p-6 space-y-5">
           <div>
-            <label className="block text-xs font-bold uppercase tracking-widest text-[#aaabb0] mb-2">Asset Title</label>
+            <label className="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">Asset Title</label>
             <input
               type="text" required
               placeholder="e.g. Q4 Brand Campaign"
               value={form.title}
               onChange={e => setForm({ ...form, title: e.target.value })}
-              className="w-full bg-[#0c0e12] border border-[#46484d]/20 rounded-xl px-4 py-3 text-sm text-[#f6f6fc] placeholder-[#46484d] focus:outline-none focus:border-[#99a8ff]/50 focus:ring-1 focus:ring-[#99a8ff]/20 transition-all"
+              className="w-full bg-[#F7F9FC] border border-gray-200 rounded-xl px-4 py-3 text-sm text-[#1F2937] placeholder-gray-400 focus:outline-none focus:border-violet-400 focus:ring-1 focus:ring-[#99a8ff]/20 transition-all"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-bold uppercase tracking-widest text-[#aaabb0] mb-2">Type</label>
+              <label className="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">Type</label>
               <select
                 value={form.type}
                 onChange={e => setForm({ ...form, type: e.target.value })}
-                className="w-full bg-[#0c0e12] border border-[#46484d]/20 rounded-xl px-4 py-3 text-sm text-[#f6f6fc] focus:outline-none focus:border-[#99a8ff]/50 transition-all appearance-none"
+                className="w-full bg-[#F7F9FC] border border-gray-200 rounded-xl px-4 py-3 text-sm text-[#1F2937] focus:outline-none focus:border-violet-400 transition-all appearance-none"
               >
                 <option value="IMAGE">Image</option>
                 <option value="VIDEO">Video</option>
@@ -181,11 +181,11 @@ const UploadModal = ({ onClose, onSubmit, projects }) => {
               </select>
             </div>
             <div>
-              <label className="block text-xs font-bold uppercase tracking-widest text-[#aaabb0] mb-2">Link Project</label>
+              <label className="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">Link Project</label>
               <select
                 value={form.projectId}
                 onChange={e => setForm({ ...form, projectId: e.target.value })}
-                className="w-full bg-[#0c0e12] border border-[#46484d]/20 rounded-xl px-4 py-3 text-sm text-[#f6f6fc] focus:outline-none focus:border-[#99a8ff]/50 transition-all appearance-none"
+                className="w-full bg-[#F7F9FC] border border-gray-200 rounded-xl px-4 py-3 text-sm text-[#1F2937] focus:outline-none focus:border-violet-400 transition-all appearance-none"
               >
                 <option value="">No Project</option>
                 {projects.map(p => <option key={p.id} value={p.id}>{p.projectName}</option>)}
@@ -194,20 +194,20 @@ const UploadModal = ({ onClose, onSubmit, projects }) => {
           </div>
 
           <div>
-            <label className="block text-xs font-bold uppercase tracking-widest text-[#aaabb0] mb-2">URL / Path</label>
+            <label className="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">URL / Path</label>
             <input
               type="text" required
               placeholder="https://storage.provider.com/..."
               value={form.url}
               onChange={e => setForm({ ...form, url: e.target.value })}
-              className="w-full bg-[#0c0e12] border border-[#46484d]/20 rounded-xl px-4 py-3 text-sm text-[#f6f6fc] placeholder-[#46484d] focus:outline-none focus:border-[#99a8ff]/50 focus:ring-1 focus:ring-[#99a8ff]/20 transition-all"
+              className="w-full bg-[#F7F9FC] border border-gray-200 rounded-xl px-4 py-3 text-sm text-[#1F2937] placeholder-gray-400 focus:outline-none focus:border-violet-400 focus:ring-1 focus:ring-[#99a8ff]/20 transition-all"
             />
           </div>
 
           <div className="flex gap-3 pt-2">
             <button
               type="button" onClick={onClose}
-              className="flex-1 py-3 rounded-xl text-sm font-semibold text-[#aaabb0] bg-[#23262c] hover:text-[#f6f6fc] hover:bg-[#2c3038] transition-all"
+              className="flex-1 py-3 rounded-xl text-sm font-semibold text-gray-500 bg-gray-100 hover:text-[#1F2937] hover:bg-[#2c3038] transition-all"
             >
               Cancel
             </button>
@@ -229,10 +229,10 @@ const DetailsModal = ({ asset, onClose, onDownload, onCopyUrl }) => {
   const meta = TYPE_META[asset.type] || TYPE_META.DOCUMENT;
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-      <div className="bg-[#111318] rounded-3xl border border-[#46484d]/20 w-full max-w-md shadow-2xl shadow-black/50">
-        <div className="flex items-center justify-between p-6 border-b border-[#46484d]/10">
-          <h3 className="font-bold text-[#f6f6fc] text-lg">Asset Details</h3>
-          <button onClick={onClose} className="p-2 rounded-xl text-[#aaabb0] hover:text-[#f6f6fc] hover:bg-[#23262c] transition-all">
+      <div className="bg-white rounded-3xl border border-gray-200 w-full max-w-md shadow-2xl shadow-black/50">
+        <div className="flex items-center justify-between p-6 border-b border-gray-100">
+          <h3 className="font-bold text-[#1F2937] text-lg">Asset Details</h3>
+          <button onClick={onClose} className="p-2 rounded-xl text-gray-500 hover:text-[#1F2937] hover:bg-gray-100 transition-all">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -241,31 +241,31 @@ const DetailsModal = ({ asset, onClose, onDownload, onCopyUrl }) => {
             <img src={asset.url} alt={asset.title} className="w-full h-48 object-cover rounded-2xl" />
           )}
           <div className="grid grid-cols-2 gap-3">
-            <div className="bg-[#0c0e12] rounded-xl p-4">
-              <p className="text-[10px] text-[#aaabb0] uppercase tracking-widest font-bold mb-1">Asset ID</p>
-              <p className="font-mono font-bold text-[#f6f6fc]">#{asset.id}</p>
+            <div className="bg-[#F7F9FC] rounded-xl p-4">
+              <p className="text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-1">Asset ID</p>
+              <p className="font-mono font-bold text-[#1F2937]">#{asset.id}</p>
             </div>
-            <div className="bg-[#0c0e12] rounded-xl p-4">
-              <p className="text-[10px] text-[#aaabb0] uppercase tracking-widest font-bold mb-1">Type</p>
+            <div className="bg-[#F7F9FC] rounded-xl p-4">
+              <p className="text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-1">Type</p>
               <span className={cx('text-xs font-bold uppercase', meta.color.split(' ')[0])}>{meta.label}</span>
             </div>
           </div>
-          <div className="bg-[#0c0e12] rounded-xl p-4">
-            <p className="text-[10px] text-[#aaabb0] uppercase tracking-widest font-bold mb-1">Title</p>
-            <p className="font-bold text-[#f6f6fc]">{asset.title}</p>
+          <div className="bg-[#F7F9FC] rounded-xl p-4">
+            <p className="text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-1">Title</p>
+            <p className="font-bold text-[#1F2937]">{asset.title}</p>
           </div>
           {asset.project && (
             <div className="bg-[#99a8ff]/5 rounded-xl p-4 border border-[#99a8ff]/10">
-              <p className="text-[10px] text-[#aaabb0] uppercase tracking-widest font-bold mb-1">Linked Project</p>
-              <p className="font-bold text-[#99a8ff]">{asset.project.projectName}</p>
+              <p className="text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-1">Linked Project</p>
+              <p className="font-bold text-violet-600">{asset.project.projectName}</p>
             </div>
           )}
           {asset.url && (
-            <div className="bg-[#0c0e12] rounded-xl p-4">
-              <p className="text-[10px] text-[#aaabb0] uppercase tracking-widest font-bold mb-2">URL</p>
+            <div className="bg-[#F7F9FC] rounded-xl p-4">
+              <p className="text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-2">URL</p>
               <div className="flex items-center gap-2">
-                <p className="font-mono text-xs text-[#aaabb0] truncate flex-1">{asset.url}</p>
-                <button onClick={() => onCopyUrl(asset.url)} className="p-1.5 rounded-lg bg-[#23262c] text-[#aaabb0] hover:text-[#f6f6fc] transition-colors shrink-0">
+                <p className="font-mono text-xs text-gray-500 truncate flex-1">{asset.url}</p>
+                <button onClick={() => onCopyUrl(asset.url)} className="p-1.5 rounded-lg bg-gray-100 text-gray-500 hover:text-[#1F2937] transition-colors shrink-0">
                   <Copy className="w-3 h-3" />
                 </button>
               </div>
@@ -273,7 +273,7 @@ const DetailsModal = ({ asset, onClose, onDownload, onCopyUrl }) => {
           )}
         </div>
         <div className="flex gap-3 p-6 pt-0">
-          <button onClick={onClose} className="flex-1 py-3 rounded-xl text-sm font-semibold text-[#aaabb0] bg-[#23262c] hover:text-[#f6f6fc] transition-all">Close</button>
+          <button onClick={onClose} className="flex-1 py-3 rounded-xl text-sm font-semibold text-gray-500 bg-gray-100 hover:text-[#1F2937] transition-all">Close</button>
           <button
             onClick={() => onDownload(asset)}
             className="flex-1 py-3 rounded-xl text-sm font-bold text-[#000] bg-gradient-to-br from-[#99a8ff] to-[#4765f9] hover:shadow-lg hover:shadow-[#99a8ff]/20 active:scale-95 transition-all flex items-center justify-center gap-2"
@@ -362,11 +362,11 @@ const AssetManagementPage = () => {
   /* ── access guard ── */
   if (!user || sector?.code?.toLowerCase() !== 'content') {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0c0e12]">
-        <div className="flex flex-col items-center gap-6 text-center p-10 bg-[#111318] rounded-3xl border border-[#46484d]/20 max-w-md">
-          <AlertTriangle className="w-16 h-16 text-amber-400" />
-          <h2 className="text-2xl font-bold text-[#f6f6fc]">Content Sector Access Only</h2>
-          <p className="text-[#aaabb0]">Please log in with your content creator credentials to manage digital assets.</p>
+      <div className="min-h-screen flex items-center justify-center bg-[#F7F9FC]">
+        <div className="flex flex-col items-center gap-6 text-center p-10 bg-white rounded-3xl border border-gray-200 max-w-md">
+          <AlertTriangle className="w-16 h-16 text-amber-600" />
+          <h2 className="text-2xl font-bold text-[#1F2937]">Content Sector Access Only</h2>
+          <p className="text-gray-500">Please log in with your content creator credentials to manage digital assets.</p>
           <Link to="/login" className="px-8 py-3 rounded-xl font-bold text-sm text-[#000] bg-gradient-to-br from-[#99a8ff] to-[#4765f9] hover:shadow-lg hover:shadow-[#99a8ff]/20 transition-all">
             Go to Login
           </Link>
@@ -376,9 +376,9 @@ const AssetManagementPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#0c0e12] text-[#f6f6fc] font-sans">
+    <div className="min-h-screen bg-[#F7F9FC] text-[#1F2937] font-sans">
       {/* Ambient glow decorations */}
-      <div className="fixed bottom-0 right-0 w-[500px] h-[500px] bg-[#99a8ff]/10 blur-[120px] rounded-full pointer-events-none -z-10 translate-x-1/2 translate-y-1/2" />
+      
       <div className="fixed top-0 left-0 w-[300px] h-[300px] bg-[#929bfa]/5 blur-[100px] rounded-full pointer-events-none -z-10 -translate-x-1/2 -translate-y-1/2" />
 
       <main className="p-8 max-w-7xl mx-auto">
@@ -386,12 +386,12 @@ const AssetManagementPage = () => {
         <section className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 pt-4">
           <div>
             <div className="flex items-center gap-2 mb-3">
-              <span className="text-xs font-bold uppercase tracking-widest text-[#aaabb0] opacity-60">Content Creation</span>
-              <span className="text-[#46484d]">/</span>
-              <span className="text-xs font-bold uppercase tracking-widest text-[#99a8ff]">Asset Library</span>
+              <span className="text-xs font-bold uppercase tracking-widest text-gray-500 opacity-60">Content Creation</span>
+              <span className="text-gray-400">/</span>
+              <span className="text-xs font-bold uppercase tracking-widest text-violet-600">Asset Library</span>
             </div>
-            <h1 className="text-5xl font-extrabold tracking-tighter text-[#f6f6fc] mb-3">Asset Library</h1>
-            <p className="text-[#aaabb0] max-w-lg">
+            <h1 className="text-5xl font-extrabold tracking-tighter text-[#1F2937] mb-3">Asset Library</h1>
+            <p className="text-gray-500 max-w-lg">
               Manage your creative production assets from a single observatory. Organize, filter, and deploy your digital inventory.
             </p>
           </div>
@@ -407,17 +407,17 @@ const AssetManagementPage = () => {
         <section className="flex flex-col sm:flex-row gap-4 mb-10">
           {/* Search */}
           <div className="relative flex-1 max-w-sm">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#aaabb0]" />
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
             <input
               type="text"
               placeholder="Search assets…"
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              className="w-full bg-[#000] border border-[#46484d]/20 rounded-full py-2.5 pl-10 pr-4 text-sm text-[#f6f6fc] placeholder-[#46484d] focus:outline-none focus:border-[#99a8ff]/40 focus:ring-1 focus:ring-[#99a8ff]/10 transition-all"
+              className="w-full bg-[#000] border border-gray-200 rounded-full py-2.5 pl-10 pr-4 text-sm text-[#1F2937] placeholder-gray-400 focus:outline-none focus:border-[#99a8ff]/40 focus:ring-1 focus:ring-[#99a8ff]/10 transition-all"
             />
           </div>
           {/* Filter pills */}
-          <div className="inline-flex p-1.5 bg-[#000] rounded-2xl border border-[#46484d]/10 gap-1">
+          <div className="inline-flex p-1.5 bg-[#000] rounded-2xl border border-gray-100 gap-1">
             {['ALL', 'IMAGE', 'VIDEO', 'PDF', 'DOCUMENT'].map(t => (
               <FilterPill
                 key={t}
@@ -433,16 +433,16 @@ const AssetManagementPage = () => {
         <section className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-10">
           {['ALL', 'IMAGE', 'VIDEO', 'PDF'].map(type => {
             const count = type === 'ALL' ? assets.length : assets.filter(a => a.type === type).length;
-            const meta  = TYPE_META[type] || { label: 'Total', color: 'text-[#99a8ff] bg-[#99a8ff]/10 border-[#99a8ff]/20', Icon: Layers };
+            const meta  = TYPE_META[type] || { label: 'Total', color: 'text-violet-700 bg-violet-50 border-violet-200', Icon: Layers };
             const Icon  = meta.Icon || Layers;
             return (
-              <div key={type} className="bg-[#111318] rounded-2xl p-4 border border-[#46484d]/10 flex items-center gap-4">
+              <div key={type} className="bg-white rounded-2xl p-4 border border-gray-100 flex items-center gap-4">
                 <div className={cx('p-2.5 rounded-xl', meta.color.split(' ').slice(1).join(' '))}>
                   <Icon className={cx('w-5 h-5', meta.color.split(' ')[0])} />
                 </div>
                 <div>
-                  <p className="text-2xl font-extrabold text-[#f6f6fc]">{count}</p>
-                  <p className="text-xs text-[#aaabb0] font-medium">{type === 'ALL' ? 'Total Assets' : meta.label + 's'}</p>
+                  <p className="text-2xl font-extrabold text-[#1F2937]">{count}</p>
+                  <p className="text-xs text-gray-500 font-medium">{type === 'ALL' ? 'Total Assets' : meta.label + 's'}</p>
                 </div>
               </div>
             );
@@ -452,14 +452,14 @@ const AssetManagementPage = () => {
         {/* ── Content ── */}
         {loading ? (
           <div className="flex flex-col items-center justify-center py-40 gap-4">
-            <div className="w-10 h-10 rounded-full border-2 border-[#99a8ff]/20 border-t-[#99a8ff] animate-spin" />
-            <p className="text-[#aaabb0] text-sm">Loading asset library…</p>
+            <div className="w-10 h-10 rounded-full border-2 border-violet-300 border-t-[#99a8ff] animate-spin" />
+            <p className="text-gray-500 text-sm">Loading asset library…</p>
           </div>
         ) : filteredAssets.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-40 gap-4 bg-[#111318] rounded-3xl border border-dashed border-[#46484d]/20">
-            <Layers className="w-16 h-16 text-[#46484d]" />
-            <p className="text-xl text-[#aaabb0] font-semibold">No assets found</p>
-            <p className="text-[#46484d] text-sm">Upload your first asset to get started</p>
+          <div className="flex flex-col items-center justify-center py-40 gap-4 bg-white rounded-3xl border border-dashed border-gray-200">
+            <Layers className="w-16 h-16 text-gray-400" />
+            <p className="text-xl text-gray-500 font-semibold">No assets found</p>
+            <p className="text-gray-400 text-sm">Upload your first asset to get started</p>
             <button
               onClick={() => setIsModalOpen(true)}
               className="mt-2 flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold text-[#000] bg-gradient-to-br from-[#99a8ff] to-[#4765f9] active:scale-95 transition-all"
