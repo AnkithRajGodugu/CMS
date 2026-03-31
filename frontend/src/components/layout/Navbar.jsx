@@ -59,36 +59,35 @@ const SafeNavbar = ({ hideSectorSwitcher = false }) => {
     { name: 'Settings', path: '/settings', keywords: 'password settings config account editing' },
   ];
 
-  const searchResults = searchablePages.filter(page => 
-    page.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+  const searchResults = searchablePages.filter(page =>
+    page.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     page.keywords.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
-    <div 
+    <div
       className="navbar bg-base-100 shadow-lg transition-all duration-300 z-50 relative"
       style={{ borderBottom: `2px solid ${currentTheme?.primary || '#1e40af'}` }}
     >
       <div className="navbar-start">
         {/* Mobile Sidebar Toggle */}
         <div className="lg:hidden mr-2">
-            <label htmlFor="mobile-sidebar-drawer" className="btn btn-ghost btn-circle">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h7" />
-                </svg>
-            </label>
+          <label htmlFor="mobile-sidebar-drawer" className="btn btn-ghost btn-circle">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h7" />
+            </svg>
+          </label>
         </div>
-        <Link to="/" className="btn btn-ghost text-xl flex items-center gap-2">
-          <DynamicLogo size={28} animated={true} />
-          <span className="gradient-text hidden sm:inline">CMS Platform</span>
+        <Link to="/" className="flex items-center p-1">
+          <img src="/favicon/favicon.svg" alt="CMS Logo" className="h-full w-auto max-h-12" />
         </Link>
       </div>
-      
+
       <div className="navbar-center hidden lg:flex">
         {isAuthenticated && (
           <ul className="menu menu-horizontal px-1">
             <li>
-              <Link 
+              <Link
                 to={getHomeRoute(user, currentTheme?.id || 'banking')}
                 className="hover:text-primary transition-colors"
               >
@@ -99,7 +98,7 @@ const SafeNavbar = ({ hideSectorSwitcher = false }) => {
 
             {isAdmin(user) && (
               <li>
-                <Link 
+                <Link
                   to="/users"
                   className="hover:text-primary transition-colors"
                 >
@@ -130,27 +129,27 @@ const SafeNavbar = ({ hideSectorSwitcher = false }) => {
           </ul>
         )}
       </div>
-      
+
       <div className="navbar-end">
         <div className="flex items-center gap-2">
 
           {/* Global Search Bar */}
           {isAuthenticated && (
             <div className="hidden md:flex relative mr-1 group z-[100]" ref={searchRef}>
-              <input 
+              <input
                 id="global-search-input"
-                type="text" 
+                type="text"
                 autoComplete="off"
-                placeholder="Search everywhere..." 
+                placeholder="Search everywhere..."
                 value={searchQuery}
                 onChange={(e) => {
                   setSearchQuery(e.target.value);
                   setIsSearchOpen(e.target.value.length > 0);
                 }}
-                onFocus={() => { if(searchQuery.length > 0) setIsSearchOpen(true); }}
+                onFocus={() => { if (searchQuery.length > 0) setIsSearchOpen(true); }}
                 className="input input-sm input-bordered w-48 focus:w-64 transition-all duration-300 rounded-full bg-base-200/50 pr-8 border-transparent focus:border-primary/50"
               />
-              
+
               {!searchQuery && (
                 <div className="absolute right-2 top-1.5 opacity-50 group-hover:opacity-100 transition-opacity flex items-center gap-1 cursor-pointer pointer-events-none">
                   <kbd className="kbd kbd-xs bg-base-300 shadow-none border-none">Ctrl</kbd>
@@ -164,11 +163,11 @@ const SafeNavbar = ({ hideSectorSwitcher = false }) => {
                   <li className="px-3 py-2 text-xs font-bold uppercase tracking-wider text-base-content/50 border-b border-base-200 mb-1">
                     Quick Navigation
                   </li>
-                  
+
                   {searchResults.length > 0 ? (
                     searchResults.map((result, idx) => (
                       <li key={idx}>
-                        <button 
+                        <button
                           className="w-full text-left px-3 py-2.5 hover:bg-base-200 rounded-lg text-sm font-medium transition-colors flex flex-col gap-0.5"
                           onClick={() => {
                             navigate(result.path);
@@ -198,7 +197,7 @@ const SafeNavbar = ({ hideSectorSwitcher = false }) => {
           {isAuthenticated ? (
             <div className="dropdown dropdown-end ml-1">
               <div tabIndex={0} role="button" className={`btn btn-ghost btn-circle avatar ${!user?.avatarUrl ? 'placeholder' : ''}`}>
-                <div 
+                <div
                   className={`w-10 rounded-full flex items-center justify-center font-bold text-lg text-white`}
                   style={{ backgroundColor: user?.avatarUrl ? 'transparent' : (currentTheme?.primary || '#1e40af') }}
                 >
@@ -221,7 +220,7 @@ const SafeNavbar = ({ hideSectorSwitcher = false }) => {
                 )}
                 <li><hr className="my-2" /></li>
                 <li>
-                  <button 
+                  <button
                     onClick={logout}
                     className="text-error hover:bg-error hover:text-error-content"
                   >
@@ -235,8 +234,8 @@ const SafeNavbar = ({ hideSectorSwitcher = false }) => {
               <Link to="/login" className="btn btn-ghost">
                 Login
               </Link>
-              <Link 
-                to="/signup" 
+              <Link
+                to="/signup"
                 className="btn text-white"
                 style={{ backgroundColor: currentTheme?.primary || '#1e40af' }}
               >
