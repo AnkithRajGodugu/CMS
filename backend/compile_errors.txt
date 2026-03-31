@@ -1,0 +1,641 @@
+﻿[INFO] Scanning for projects...
+[INFO] 
+[INFO] --------------------------< com.example:cms >---------------------------
+[INFO] Building cms 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ cms ---
+[INFO] Copying 3 resources from src\main\resources to target\classes
+[INFO] Copying 23 resources from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ cms ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 135 source files with javac [debug parameters release 17] to target\classes
+[INFO] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuditService.java: C:\Users\DELL\Desktop\cms\backend\src\main\java\com\example\cms\service\AuditService.java uses unchecked or unsafe operations.
+[INFO] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuditService.java: Recompile with -Xlint:unchecked for details.
+[INFO] -------------------------------------------------------------
+[ERROR] COMPILATION ERROR : 
+[INFO] -------------------------------------------------------------
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/config/DataInitializer.java:[81,53] cannot find symbol
+  symbol:   method getRoutePath()
+  location: variable banking of type com.example.cms.entity.Sector
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/config/DataInitializer.java:[82,24] cannot find symbol
+  symbol:   method setRoutePath(java.lang.String)
+  location: variable banking of type com.example.cms.entity.Sector
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/config/DataInitializer.java:[86,59] cannot find symbol
+  symbol:   method getRoutePath()
+  location: variable healthcare of type com.example.cms.entity.Sector
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/config/DataInitializer.java:[87,27] cannot find symbol
+  symbol:   method setRoutePath(java.lang.String)
+  location: variable healthcare of type com.example.cms.entity.Sector
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/config/DataInitializer.java:[91,57] cannot find symbol
+  symbol:   method getRoutePath()
+  location: variable logistics of type com.example.cms.entity.Sector
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/config/DataInitializer.java:[92,26] cannot find symbol
+  symbol:   method setRoutePath(java.lang.String)
+  location: variable logistics of type com.example.cms.entity.Sector
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/config/DataInitializer.java:[96,53] cannot find symbol
+  symbol:   method getRoutePath()
+  location: variable content of type com.example.cms.entity.Sector
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/config/DataInitializer.java:[97,24] cannot find symbol
+  symbol:   method setRoutePath(java.lang.String)
+  location: variable content of type com.example.cms.entity.Sector
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/config/DataInitializer.java:[114,112] cannot find symbol
+  symbol:   method getId()
+  location: variable bankingSector of type com.example.cms.entity.Sector
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/config/DataInitializer.java:[115,122] cannot find symbol
+  symbol:   method getId()
+  location: variable healthcareSector of type com.example.cms.entity.Sector
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/config/DataInitializer.java:[116,126] cannot find symbol
+  symbol:   method getId()
+  location: variable logisticsSector of type com.example.cms.entity.Sector
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/config/DataInitializer.java:[117,118] cannot find symbol
+  symbol:   method getId()
+  location: variable contentSector of type com.example.cms.entity.Sector
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/config/DataInitializer.java:[120,118] cannot find symbol
+  symbol:   method getId()
+  location: variable bankingSector of type com.example.cms.entity.Sector
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/config/DataInitializer.java:[121,125] cannot find symbol
+  symbol:   method getId()
+  location: variable healthcareSector of type com.example.cms.entity.Sector
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/config/DataInitializer.java:[122,130] cannot find symbol
+  symbol:   method getId()
+  location: variable logisticsSector of type com.example.cms.entity.Sector
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/config/DataInitializer.java:[123,124] cannot find symbol
+  symbol:   method getId()
+  location: variable contentSector of type com.example.cms.entity.Sector
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/config/DataInitializer.java:[212,38] cannot find symbol
+  symbol:   method builder()
+  location: class com.example.cms.entity.Shipment
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/config/DataInitializer.java:[223,38] cannot find symbol
+  symbol:   method builder()
+  location: class com.example.cms.entity.Shipment
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/config/DataInitializer.java:[240,33] cannot find symbol
+  symbol:   method builder()
+  location: class com.example.cms.entity.Vehicle
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/config/DataInitializer.java:[249,33] cannot find symbol
+  symbol:   method builder()
+  location: class com.example.cms.entity.Vehicle
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/config/DataInitializer.java:[258,33] cannot find symbol
+  symbol:   method builder()
+  location: class com.example.cms.entity.Vehicle
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/config/DataInitializer.java:[271,47] cannot find symbol
+  symbol:   method builder()
+  location: class com.example.cms.entity.InventoryItem
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/config/DataInitializer.java:[279,47] cannot find symbol
+  symbol:   method builder()
+  location: class com.example.cms.entity.InventoryItem
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/config/DataInitializer.java:[294,36] cannot find symbol
+  symbol:   method builder()
+  location: class com.example.cms.entity.Project
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/config/DataInitializer.java:[305,36] cannot find symbol
+  symbol:   method builder()
+  location: class com.example.cms.entity.Project
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/config/DataInitializer.java:[321,51] cannot find symbol
+  symbol:   method builder()
+  location: class com.example.cms.entity.ContentAsset
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/config/DataInitializer.java:[330,51] cannot find symbol
+  symbol:   method builder()
+  location: class com.example.cms.entity.ContentAsset
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/config/DataInitializer.java:[353,25] constructor Sector in class com.example.cms.entity.Sector cannot be applied to given types;
+  required: java.lang.String,java.lang.String
+  found:    no arguments
+  reason: actual and formal argument lists differ in length
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/config/DataInitializer.java:[354,15] cannot find symbol
+  symbol:   method setName(java.lang.String)
+  location: variable sector of type com.example.cms.entity.Sector
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/config/DataInitializer.java:[355,15] cannot find symbol
+  symbol:   method setDescription(java.lang.String)
+  location: variable sector of type com.example.cms.entity.Sector
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/config/DataInitializer.java:[356,15] cannot find symbol
+  symbol:   method setCode(java.lang.String)
+  location: variable sector of type com.example.cms.entity.Sector
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/config/DataInitializer.java:[357,15] cannot find symbol
+  symbol:   method setRoutePath(java.lang.String)
+  location: variable sector of type com.example.cms.entity.Sector
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/config/DataInitializer.java:[358,15] cannot find symbol
+  symbol:   method setConfiguration(com.fasterxml.jackson.databind.node.ObjectNode)
+  location: variable sector of type com.example.cms.entity.Sector
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/config/DataInitializer.java:[359,15] cannot find symbol
+  symbol:   method setEnabled(boolean)
+  location: variable sector of type com.example.cms.entity.Sector
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/config/DataInitializer.java:[360,15] cannot find symbol
+  symbol:   method setDisplayOrder(int)
+  location: variable sector of type com.example.cms.entity.Sector
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[60,54] cannot find symbol
+  symbol:   method getEmail()
+  location: variable u of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[73,69] cannot find symbol
+  symbol:   method getPassword()
+  location: variable user of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[74,13] cannot find symbol
+  symbol:   variable log
+  location: class com.example.cms.service.AuthService
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[75,21] cannot find symbol
+  symbol:   method getUsername()
+  location: variable user of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[75,51] cannot find symbol
+  symbol:   method getPassword()
+  location: variable user of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[95,9] cannot find symbol
+  symbol:   variable log
+  location: class com.example.cms.service.AuthService
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[110,33] cannot find symbol
+  symbol:   method builder()
+  location: class com.example.cms.dto.LoginResponse
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[118,18] cannot find symbol
+  symbol:   method isEmailVerified()
+  location: variable user of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[119,33] cannot find symbol
+  symbol:   method builder()
+  location: class com.example.cms.dto.LoginResponse
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[126,13] cannot find symbol
+  symbol:   method setLastLogin(java.time.LocalDateTime)
+  location: variable user of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[130,17] cannot find symbol
+  symbol:   method getSector()
+  location: variable user of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[130,45] cannot find symbol
+  symbol:   method getRole()
+  location: variable user of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[133,25] cannot find symbol
+  symbol:   method getId()
+  location: variable user of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[143,29] cannot find symbol
+  symbol:   method getSector()
+  location: variable user of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[144,52] cannot find symbol
+  symbol:   method getName()
+  location: variable sector of type com.example.cms.entity.Sector
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[148,21] cannot find symbol
+  symbol:   method getUsername()
+  location: variable user of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[149,21] cannot find symbol
+  symbol:   method getRole()
+  location: variable user of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[153,64] cannot find symbol
+  symbol:   method getUsername()
+  location: variable user of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[156,21] cannot find symbol
+  symbol:   method getId()
+  location: variable user of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[165,50] cannot find symbol
+  symbol:   method builder()
+  location: class com.example.cms.dto.LoginResponse.SectorInfo
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[166,31] cannot find symbol
+  symbol:   method getId()
+  location: variable sector of type com.example.cms.entity.Sector
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[167,33] cannot find symbol
+  symbol:   method getCode()
+  location: variable sector of type com.example.cms.entity.Sector
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[168,33] cannot find symbol
+  symbol:   method getName()
+  location: variable sector of type com.example.cms.entity.Sector
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[169,38] cannot find symbol
+  symbol:   method getRoutePath()
+  location: variable sector of type com.example.cms.entity.Sector
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[173,50] cannot find symbol
+  symbol:   method builder()
+  location: class com.example.cms.dto.LoginResponse.SectorInfo
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[181,29] cannot find symbol
+  symbol:   method builder()
+  location: class com.example.cms.dto.LoginResponse
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[185,45] cannot find symbol
+  symbol:   method builder()
+  location: class com.example.cms.dto.LoginResponse.UserInfo
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[186,33] cannot find symbol
+  symbol:   method getId()
+  location: variable user of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[187,39] cannot find symbol
+  symbol:   method getUsername()
+  location: variable user of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[188,36] cannot find symbol
+  symbol:   method getEmail()
+  location: variable user of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[189,35] cannot find symbol
+  symbol:   method getRole()
+  location: variable user of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[190,39] cannot find symbol
+  symbol:   method getUserType()
+  location: variable user of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[190,68] cannot find symbol
+  symbol:   method getUserType()
+  location: variable user of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[191,45] cannot find symbol
+  symbol:   method getOrganization()
+  location: variable user of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[191,78] cannot find symbol
+  symbol:   method getOrganization()
+  location: variable user of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[208,21] constructor User in class com.example.cms.entity.User cannot be applied to given types;
+  required: java.lang.String,java.lang.String,com.example.cms.entity.User.Role
+  found:    no arguments
+  reason: actual and formal argument lists differ in length
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[209,13] cannot find symbol
+  symbol:   method setUsername(java.lang.String)
+  location: variable user of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[210,13] cannot find symbol
+  symbol:   method setEmail(java.lang.String)
+  location: variable user of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[211,13] cannot find symbol
+  symbol:   method setPassword(java.lang.String)
+  location: variable user of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[212,13] cannot find symbol
+  symbol:   method setRole(com.example.cms.entity.User.Role)
+  location: variable user of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[213,13] cannot find symbol
+  symbol:   method setEnabled(boolean)
+  location: variable user of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[214,13] cannot find symbol
+  symbol:   method setEmailVerified(boolean)
+  location: variable user of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[219,17] cannot find symbol
+  symbol:   method setSector(com.example.cms.entity.Sector)
+  location: variable user of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[229,56] cannot find symbol
+  symbol:   method getEmail()
+  location: variable savedUser of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[231,13] cannot find symbol
+  symbol:   variable log
+  location: class com.example.cms.service.AuthService
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[232,30] cannot find symbol
+  symbol:   method getUsername()
+  location: variable savedUser of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[254,12] cannot find symbol
+  symbol:   method setName(java.lang.String)
+  location: variable org of type com.example.cms.entity.Organization
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[255,12] cannot find symbol
+  symbol:   method setSector(com.example.cms.entity.Sector)
+  location: variable org of type com.example.cms.entity.Organization
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[256,12] cannot find symbol
+  symbol:   method setActive(boolean)
+  location: variable org of type com.example.cms.entity.Organization
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[259,21] constructor User in class com.example.cms.entity.User cannot be applied to given types;
+  required: java.lang.String,java.lang.String,com.example.cms.entity.User.Role
+  found:    no arguments
+  reason: actual and formal argument lists differ in length
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[260,13] cannot find symbol
+  symbol:   method setUsername(java.lang.String)
+  location: variable user of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[261,13] cannot find symbol
+  symbol:   method setEmail(java.lang.String)
+  location: variable user of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[262,13] cannot find symbol
+  symbol:   method setPassword(java.lang.String)
+  location: variable user of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[263,13] cannot find symbol
+  symbol:   method setRole(com.example.cms.entity.User.Role)
+  location: variable user of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[264,13] cannot find symbol
+  symbol:   method setUserType(com.example.cms.entity.UserType)
+  location: variable user of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[265,13] cannot find symbol
+  symbol:   method setOrganization(com.example.cms.entity.Organization)
+  location: variable user of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[266,13] cannot find symbol
+  symbol:   method setSector(com.example.cms.entity.Sector)
+  location: variable user of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[267,13] cannot find symbol
+  symbol:   method setEnabled(boolean)
+  location: variable user of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[268,13] cannot find symbol
+  symbol:   method setEmailVerified(boolean)
+  location: variable user of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[277,56] cannot find symbol
+  symbol:   method getEmail()
+  location: variable savedUser of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[279,13] cannot find symbol
+  symbol:   variable log
+  location: class com.example.cms.service.AuthService
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[280,30] cannot find symbol
+  symbol:   method getUsername()
+  location: variable savedUser of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[297,13] cannot find symbol
+  symbol:   method setSector(com.example.cms.entity.Sector)
+  location: variable user of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[332,38] cannot find symbol
+  symbol:   method getUser()
+  location: variable verificationToken of type com.example.cms.entity.VerificationToken
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[333,13] cannot find symbol
+  symbol:   method setEmailVerified(boolean)
+  location: variable user of type com.example.cms.entity.User
+[INFO] 100 errors 
+[INFO] -------------------------------------------------------------
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  16.094 s
+[INFO] Finished at: 2026-03-24T20:52:59+05:30
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.13.0:compile (default-compile) on project cms: Compilation failure: Compilation failure: 
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/config/DataInitializer.java:[81,53] cannot find symbol
+[ERROR]   symbol:   method getRoutePath()
+[ERROR]   location: variable banking of type com.example.cms.entity.Sector
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/config/DataInitializer.java:[82,24] cannot find symbol
+[ERROR]   symbol:   method setRoutePath(java.lang.String)
+[ERROR]   location: variable banking of type com.example.cms.entity.Sector
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/config/DataInitializer.java:[86,59] cannot find symbol
+[ERROR]   symbol:   method getRoutePath()
+[ERROR]   location: variable healthcare of type com.example.cms.entity.Sector
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/config/DataInitializer.java:[87,27] cannot find symbol
+[ERROR]   symbol:   method setRoutePath(java.lang.String)
+[ERROR]   location: variable healthcare of type com.example.cms.entity.Sector
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/config/DataInitializer.java:[91,57] cannot find symbol
+[ERROR]   symbol:   method getRoutePath()
+[ERROR]   location: variable logistics of type com.example.cms.entity.Sector
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/config/DataInitializer.java:[92,26] cannot find symbol
+[ERROR]   symbol:   method setRoutePath(java.lang.String)
+[ERROR]   location: variable logistics of type com.example.cms.entity.Sector
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/config/DataInitializer.java:[96,53] cannot find symbol
+[ERROR]   symbol:   method getRoutePath()
+[ERROR]   location: variable content of type com.example.cms.entity.Sector
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/config/DataInitializer.java:[97,24] cannot find symbol
+[ERROR]   symbol:   method setRoutePath(java.lang.String)
+[ERROR]   location: variable content of type com.example.cms.entity.Sector
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/config/DataInitializer.java:[114,112] cannot find symbol
+[ERROR]   symbol:   method getId()
+[ERROR]   location: variable bankingSector of type com.example.cms.entity.Sector
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/config/DataInitializer.java:[115,122] cannot find symbol
+[ERROR]   symbol:   method getId()
+[ERROR]   location: variable healthcareSector of type com.example.cms.entity.Sector
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/config/DataInitializer.java:[116,126] cannot find symbol
+[ERROR]   symbol:   method getId()
+[ERROR]   location: variable logisticsSector of type com.example.cms.entity.Sector
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/config/DataInitializer.java:[117,118] cannot find symbol
+[ERROR]   symbol:   method getId()
+[ERROR]   location: variable contentSector of type com.example.cms.entity.Sector
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/config/DataInitializer.java:[120,118] cannot find symbol
+[ERROR]   symbol:   method getId()
+[ERROR]   location: variable bankingSector of type com.example.cms.entity.Sector
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/config/DataInitializer.java:[121,125] cannot find symbol
+[ERROR]   symbol:   method getId()
+[ERROR]   location: variable healthcareSector of type com.example.cms.entity.Sector
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/config/DataInitializer.java:[122,130] cannot find symbol
+[ERROR]   symbol:   method getId()
+[ERROR]   location: variable logisticsSector of type com.example.cms.entity.Sector
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/config/DataInitializer.java:[123,124] cannot find symbol
+[ERROR]   symbol:   method getId()
+[ERROR]   location: variable contentSector of type com.example.cms.entity.Sector
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/config/DataInitializer.java:[212,38] cannot find symbol
+[ERROR]   symbol:   method builder()
+[ERROR]   location: class com.example.cms.entity.Shipment
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/config/DataInitializer.java:[223,38] cannot find symbol
+[ERROR]   symbol:   method builder()
+[ERROR]   location: class com.example.cms.entity.Shipment
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/config/DataInitializer.java:[240,33] cannot find symbol
+[ERROR]   symbol:   method builder()
+[ERROR]   location: class com.example.cms.entity.Vehicle
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/config/DataInitializer.java:[249,33] cannot find symbol
+[ERROR]   symbol:   method builder()
+[ERROR]   location: class com.example.cms.entity.Vehicle
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/config/DataInitializer.java:[258,33] cannot find symbol
+[ERROR]   symbol:   method builder()
+[ERROR]   location: class com.example.cms.entity.Vehicle
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/config/DataInitializer.java:[271,47] cannot find symbol
+[ERROR]   symbol:   method builder()
+[ERROR]   location: class com.example.cms.entity.InventoryItem
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/config/DataInitializer.java:[279,47] cannot find symbol
+[ERROR]   symbol:   method builder()
+[ERROR]   location: class com.example.cms.entity.InventoryItem
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/config/DataInitializer.java:[294,36] cannot find symbol
+[ERROR]   symbol:   method builder()
+[ERROR]   location: class com.example.cms.entity.Project
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/config/DataInitializer.java:[305,36] cannot find symbol
+[ERROR]   symbol:   method builder()
+[ERROR]   location: class com.example.cms.entity.Project
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/config/DataInitializer.java:[321,51] cannot find symbol
+[ERROR]   symbol:   method builder()
+[ERROR]   location: class com.example.cms.entity.ContentAsset
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/config/DataInitializer.java:[330,51] cannot find symbol
+[ERROR]   symbol:   method builder()
+[ERROR]   location: class com.example.cms.entity.ContentAsset
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/config/DataInitializer.java:[353,25] constructor Sector in class com.example.cms.entity.Sector cannot be applied to given types;
+[ERROR]   required: java.lang.String,java.lang.String
+[ERROR]   found:    no arguments
+[ERROR]   reason: actual and formal argument lists differ in length
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/config/DataInitializer.java:[354,15] cannot find symbol
+[ERROR]   symbol:   method setName(java.lang.String)
+[ERROR]   location: variable sector of type com.example.cms.entity.Sector
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/config/DataInitializer.java:[355,15] cannot find symbol
+[ERROR]   symbol:   method setDescription(java.lang.String)
+[ERROR]   location: variable sector of type com.example.cms.entity.Sector
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/config/DataInitializer.java:[356,15] cannot find symbol
+[ERROR]   symbol:   method setCode(java.lang.String)
+[ERROR]   location: variable sector of type com.example.cms.entity.Sector
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/config/DataInitializer.java:[357,15] cannot find symbol
+[ERROR]   symbol:   method setRoutePath(java.lang.String)
+[ERROR]   location: variable sector of type com.example.cms.entity.Sector
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/config/DataInitializer.java:[358,15] cannot find symbol
+[ERROR]   symbol:   method setConfiguration(com.fasterxml.jackson.databind.node.ObjectNode)
+[ERROR]   location: variable sector of type com.example.cms.entity.Sector
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/config/DataInitializer.java:[359,15] cannot find symbol
+[ERROR]   symbol:   method setEnabled(boolean)
+[ERROR]   location: variable sector of type com.example.cms.entity.Sector
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/config/DataInitializer.java:[360,15] cannot find symbol
+[ERROR]   symbol:   method setDisplayOrder(int)
+[ERROR]   location: variable sector of type com.example.cms.entity.Sector
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[60,54] cannot find symbol
+[ERROR]   symbol:   method getEmail()
+[ERROR]   location: variable u of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[73,69] cannot find symbol
+[ERROR]   symbol:   method getPassword()
+[ERROR]   location: variable user of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[74,13] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.cms.service.AuthService
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[75,21] cannot find symbol
+[ERROR]   symbol:   method getUsername()
+[ERROR]   location: variable user of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[75,51] cannot find symbol
+[ERROR]   symbol:   method getPassword()
+[ERROR]   location: variable user of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[95,9] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.cms.service.AuthService
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[110,33] cannot find symbol
+[ERROR]   symbol:   method builder()
+[ERROR]   location: class com.example.cms.dto.LoginResponse
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[118,18] cannot find symbol
+[ERROR]   symbol:   method isEmailVerified()
+[ERROR]   location: variable user of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[119,33] cannot find symbol
+[ERROR]   symbol:   method builder()
+[ERROR]   location: class com.example.cms.dto.LoginResponse
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[126,13] cannot find symbol
+[ERROR]   symbol:   method setLastLogin(java.time.LocalDateTime)
+[ERROR]   location: variable user of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[130,17] cannot find symbol
+[ERROR]   symbol:   method getSector()
+[ERROR]   location: variable user of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[130,45] cannot find symbol
+[ERROR]   symbol:   method getRole()
+[ERROR]   location: variable user of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[133,25] cannot find symbol
+[ERROR]   symbol:   method getId()
+[ERROR]   location: variable user of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[143,29] cannot find symbol
+[ERROR]   symbol:   method getSector()
+[ERROR]   location: variable user of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[144,52] cannot find symbol
+[ERROR]   symbol:   method getName()
+[ERROR]   location: variable sector of type com.example.cms.entity.Sector
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[148,21] cannot find symbol
+[ERROR]   symbol:   method getUsername()
+[ERROR]   location: variable user of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[149,21] cannot find symbol
+[ERROR]   symbol:   method getRole()
+[ERROR]   location: variable user of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[153,64] cannot find symbol
+[ERROR]   symbol:   method getUsername()
+[ERROR]   location: variable user of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[156,21] cannot find symbol
+[ERROR]   symbol:   method getId()
+[ERROR]   location: variable user of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[165,50] cannot find symbol
+[ERROR]   symbol:   method builder()
+[ERROR]   location: class com.example.cms.dto.LoginResponse.SectorInfo
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[166,31] cannot find symbol
+[ERROR]   symbol:   method getId()
+[ERROR]   location: variable sector of type com.example.cms.entity.Sector
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[167,33] cannot find symbol
+[ERROR]   symbol:   method getCode()
+[ERROR]   location: variable sector of type com.example.cms.entity.Sector
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[168,33] cannot find symbol
+[ERROR]   symbol:   method getName()
+[ERROR]   location: variable sector of type com.example.cms.entity.Sector
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[169,38] cannot find symbol
+[ERROR]   symbol:   method getRoutePath()
+[ERROR]   location: variable sector of type com.example.cms.entity.Sector
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[173,50] cannot find symbol
+[ERROR]   symbol:   method builder()
+[ERROR]   location: class com.example.cms.dto.LoginResponse.SectorInfo
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[181,29] cannot find symbol
+[ERROR]   symbol:   method builder()
+[ERROR]   location: class com.example.cms.dto.LoginResponse
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[185,45] cannot find symbol
+[ERROR]   symbol:   method builder()
+[ERROR]   location: class com.example.cms.dto.LoginResponse.UserInfo
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[186,33] cannot find symbol
+[ERROR]   symbol:   method getId()
+[ERROR]   location: variable user of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[187,39] cannot find symbol
+[ERROR]   symbol:   method getUsername()
+[ERROR]   location: variable user of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[188,36] cannot find symbol
+[ERROR]   symbol:   method getEmail()
+[ERROR]   location: variable user of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[189,35] cannot find symbol
+[ERROR]   symbol:   method getRole()
+[ERROR]   location: variable user of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[190,39] cannot find symbol
+[ERROR]   symbol:   method getUserType()
+[ERROR]   location: variable user of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[190,68] cannot find symbol
+[ERROR]   symbol:   method getUserType()
+[ERROR]   location: variable user of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[191,45] cannot find symbol
+[ERROR]   symbol:   method getOrganization()
+[ERROR]   location: variable user of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[191,78] cannot find symbol
+[ERROR]   symbol:   method getOrganization()
+[ERROR]   location: variable user of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[208,21] constructor User in class com.example.cms.entity.User cannot be applied to given types;
+[ERROR]   required: java.lang.String,java.lang.String,com.example.cms.entity.User.Role
+[ERROR]   found:    no arguments
+[ERROR]   reason: actual and formal argument lists differ in length
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[209,13] cannot find symbol
+[ERROR]   symbol:   method setUsername(java.lang.String)
+[ERROR]   location: variable user of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[210,13] cannot find symbol
+[ERROR]   symbol:   method setEmail(java.lang.String)
+[ERROR]   location: variable user of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[211,13] cannot find symbol
+[ERROR]   symbol:   method setPassword(java.lang.String)
+[ERROR]   location: variable user of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[212,13] cannot find symbol
+[ERROR]   symbol:   method setRole(com.example.cms.entity.User.Role)
+[ERROR]   location: variable user of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[213,13] cannot find symbol
+[ERROR]   symbol:   method setEnabled(boolean)
+[ERROR]   location: variable user of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[214,13] cannot find symbol
+[ERROR]   symbol:   method setEmailVerified(boolean)
+[ERROR]   location: variable user of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[219,17] cannot find symbol
+[ERROR]   symbol:   method setSector(com.example.cms.entity.Sector)
+[ERROR]   location: variable user of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[229,56] cannot find symbol
+[ERROR]   symbol:   method getEmail()
+[ERROR]   location: variable savedUser of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[231,13] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.cms.service.AuthService
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[232,30] cannot find symbol
+[ERROR]   symbol:   method getUsername()
+[ERROR]   location: variable savedUser of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[254,12] cannot find symbol
+[ERROR]   symbol:   method setName(java.lang.String)
+[ERROR]   location: variable org of type com.example.cms.entity.Organization
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[255,12] cannot find symbol
+[ERROR]   symbol:   method setSector(com.example.cms.entity.Sector)
+[ERROR]   location: variable org of type com.example.cms.entity.Organization
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[256,12] cannot find symbol
+[ERROR]   symbol:   method setActive(boolean)
+[ERROR]   location: variable org of type com.example.cms.entity.Organization
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[259,21] constructor User in class com.example.cms.entity.User cannot be applied to given types;
+[ERROR]   required: java.lang.String,java.lang.String,com.example.cms.entity.User.Role
+[ERROR]   found:    no arguments
+[ERROR]   reason: actual and formal argument lists differ in length
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[260,13] cannot find symbol
+[ERROR]   symbol:   method setUsername(java.lang.String)
+[ERROR]   location: variable user of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[261,13] cannot find symbol
+[ERROR]   symbol:   method setEmail(java.lang.String)
+[ERROR]   location: variable user of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[262,13] cannot find symbol
+[ERROR]   symbol:   method setPassword(java.lang.String)
+[ERROR]   location: variable user of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[263,13] cannot find symbol
+[ERROR]   symbol:   method setRole(com.example.cms.entity.User.Role)
+[ERROR]   location: variable user of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[264,13] cannot find symbol
+[ERROR]   symbol:   method setUserType(com.example.cms.entity.UserType)
+[ERROR]   location: variable user of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[265,13] cannot find symbol
+[ERROR]   symbol:   method setOrganization(com.example.cms.entity.Organization)
+[ERROR]   location: variable user of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[266,13] cannot find symbol
+[ERROR]   symbol:   method setSector(com.example.cms.entity.Sector)
+[ERROR]   location: variable user of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[267,13] cannot find symbol
+[ERROR]   symbol:   method setEnabled(boolean)
+[ERROR]   location: variable user of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[268,13] cannot find symbol
+[ERROR]   symbol:   method setEmailVerified(boolean)
+[ERROR]   location: variable user of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[277,56] cannot find symbol
+[ERROR]   symbol:   method getEmail()
+[ERROR]   location: variable savedUser of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[279,13] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.cms.service.AuthService
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[280,30] cannot find symbol
+[ERROR]   symbol:   method getUsername()
+[ERROR]   location: variable savedUser of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[297,13] cannot find symbol
+[ERROR]   symbol:   method setSector(com.example.cms.entity.Sector)
+[ERROR]   location: variable user of type com.example.cms.entity.User
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[332,38] cannot find symbol
+[ERROR]   symbol:   method getUser()
+[ERROR]   location: variable verificationToken of type com.example.cms.entity.VerificationToken
+[ERROR] /C:/Users/DELL/Desktop/cms/backend/src/main/java/com/example/cms/service/AuthService.java:[333,13] cannot find symbol
+[ERROR]   symbol:   method setEmailVerified(boolean)
+[ERROR]   location: variable user of type com.example.cms.entity.User
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException

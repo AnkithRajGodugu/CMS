@@ -58,6 +58,11 @@ public class SecurityConfig {
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
 
+                // -------- SockJS Support --------
+                .headers(headers -> headers
+                        .frameOptions(frame -> frame.sameOrigin())
+                )
+
                 // -------- Authorization --------
                 .authorizeHttpRequests(auth -> auth
 
