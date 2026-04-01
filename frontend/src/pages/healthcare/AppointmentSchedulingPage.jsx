@@ -1,10 +1,11 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   CalendarDays, CheckCircle2, Clock, Siren, Filter, XCircle
 } from 'lucide-react';
 import { getAllAppointments } from '../../services/healthcareService';
 import { useAuth } from '../../hooks/useAuth';
 import HealthcareKPICard from '../../components/healthcare/HealthcareKPICard';
+import ResponsiveTable from '../../components/shared/ResponsiveTable';
 
 const TYPE_LABELS = {
   CONSULTATION: 'Consultation',
@@ -78,7 +79,7 @@ const AppointmentSchedulingPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 p-6 space-y-6 animate-fade-in-up">
+    <div className="min-h-screen bg-slate-50 p-4 sm:p-5 md:p-6 space-y-5 animate-fade-in-up">
 
       {/* ── Header ── */}
       <div className="bg-gradient-to-r from-teal-900 via-teal-800 to-emerald-900 rounded-2xl p-6 text-white shadow-lg">
@@ -126,60 +127,50 @@ const AppointmentSchedulingPage = () => {
         <span className="ml-auto text-xs text-slate-400">{filtered.length} shown</span>
       </div>
 
-      {/* ── Table ── */}
+      {/* ── Table / Cards ── */}
       <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
         <div className="px-5 py-4 border-b border-slate-100">
           <h2 className="text-base font-bold text-slate-800">
             {filter === 'ALL' ? 'All Appointments' : `${filter} Appointments`} ({filtered.length})
           </h2>
         </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="bg-slate-50 border-b border-slate-100">
-                {['ID', 'Patient', 'Doctor', 'Scheduled Time', 'Type', 'Status', 'Notes'].map(h => (
-                  <th key={h} className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-50">
-              {loading ? (
-                Array.from({ length: 8 }).map((_, i) => <SkeletonRow key={i} cols={7} />)
-              ) : filtered.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className="px-4 py-16 text-center text-slate-400">
-                    <CalendarDays className="w-10 h-10 mx-auto mb-2 opacity-30" />
-                    <p className="font-medium">No appointments found</p>
-                  </td>
-                </tr>
-              ) : (
-                filtered.map(a => {
-                  const sc = STATUS_CONFIG[a.status] || { classes: 'bg-slate-100 text-slate-600', dot: 'bg-slate-400' };
-                  const isUrgent = a.status === 'URGENT';
+        <div className="p-4">
+          <ResponsiveTable
+            loading={loading}
+            data={filtered}
+            rowKey="id"
+            emptyText="No appointments found"
+            theadClass="bg-slate-50 border-b border-slate-100"
+            rowHover="hover:bg-teal-50/40"
+            columns={[
+              { key: 'appointmentId', label: 'ID',       render: (v) => <span className="font-mono text-xs text-slate-500">{v}</span> },
+              { key: 'patientName',   label: 'Patient',  render: (v) => <span className="font-semibold text-slate-800">{v}</span> },
+              { key: 'doctorName',    label: 'Doctor',   render: (v) => <span className="text-slate-600">{v}</span> },
+              { key: 'appointmentTime', label: 'Time',   render: (v) => <span className="text-xs text-slate-500 whitespace-nowrap">{fmtTime(v)}</span> },
+              {
+                key: 'type',
+                label: 'Type',
+                render: (v) => (
+                  <span className="inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 border border-slate-200">
+                    {TYPE_LABELS[v] ?? v}
+                  </span>
+                ),
+              },
+              {
+                key: 'status',
+                label: 'Status',
+                render: (v) => {
+                  const sc = STATUS_CONFIG[v] || { classes: 'bg-slate-100 text-slate-600 border border-slate-200', dot: 'bg-slate-400' };
                   return (
-                    <tr key={a.id} className={`transition-colors duration-150 ${isUrgent ? 'bg-red-50/30 hover:bg-red-50/60' : 'hover:bg-teal-50/40'}`}>
-                      <td className="px-4 py-3 font-mono text-xs text-slate-500">{a.appointmentId}</td>
-                      <td className="px-4 py-3 font-semibold text-slate-800">{a.patientName}</td>
-                      <td className="px-4 py-3 text-slate-600">{a.doctorName}</td>
-                      <td className="px-4 py-3 text-xs text-slate-500 whitespace-nowrap">{fmtTime(a.appointmentTime)}</td>
-                      <td className="px-4 py-3">
-                        <span className="inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 border border-slate-200">
-                          {TYPE_LABELS[a.type] ?? a.type}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3">
-                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold ${sc.classes}`}>
-                          <span className={`w-1.5 h-1.5 rounded-full ${sc.dot}`} />
-                          {a.status}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-xs text-slate-400 max-w-[160px] truncate">{a.notes ?? '—'}</td>
-                    </tr>
+                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold ${sc.classes}`}>
+                      <span className={`w-1.5 h-1.5 rounded-full ${sc.dot}`} />{v}
+                    </span>
                   );
-                })
-              )}
-            </tbody>
-          </table>
+                },
+              },
+              { key: 'notes', label: 'Notes', render: (v) => <span className="text-xs text-slate-400 line-clamp-1">{v ?? '—'}</span> },
+            ]}
+          />
         </div>
       </div>
     </div>

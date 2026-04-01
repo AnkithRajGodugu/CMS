@@ -1,4 +1,4 @@
-﻿import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { useTheme } from '../../context/SectorThemeProvider';
@@ -6,7 +6,7 @@ import { getHomeRoute, isAdmin, isManager, isSuperAdmin, isUser } from '../../ut
 import DynamicLogo from '../logos/DynamicLogo';
 import NotificationsDropdown from '../NotificationsDropdown';
 
-const SafeNavbar = ({ hideSectorSwitcher = false, externalSearchOpen = false, onExternalSearchClose }) => {
+const SafeNavbar = ({ hideSectorSwitcher = false, externalSearchOpen = false, onExternalSearchClose, drawerId = 'mobile-sidebar-drawer', onMobileMenuOpen }) => {
   const { user, logout, isAuthenticated } = useAuth();
   const { currentTheme, changeSector, getAllSectors } = useTheme();
   const navigate = useNavigate();
@@ -158,11 +158,15 @@ const SafeNavbar = ({ hideSectorSwitcher = false, externalSearchOpen = false, on
       <div className="navbar-start">
         {/* Mobile Sidebar Toggle */}
         <div className="lg:hidden mr-2">
-          <label htmlFor="mobile-sidebar-drawer" className="btn btn-ghost btn-circle">
+          <button
+            onClick={onMobileMenuOpen}
+            className="btn btn-ghost btn-circle"
+            aria-label="Open navigation menu"
+          >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h7" />
             </svg>
-          </label>
+          </button>
         </div>
         <Link to="/" className="flex items-center p-1">
           <img src="/favicon/favicon.svg" alt="CMS Logo" className="h-full w-auto max-h-12" />

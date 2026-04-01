@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   DollarSign, CheckCircle2, Clock, XCircle, BarChart2, Filter, Eye
 } from 'lucide-react';
@@ -6,6 +6,7 @@ import { getAllInsuranceClaims, getInsuranceClaimStats } from '../../services/he
 import { useAuth } from '../../hooks/useAuth';
 import HealthcareKPICard from '../../components/healthcare/HealthcareKPICard';
 import { RadialBarChart, RadialBar, ResponsiveContainer, PolarAngleAxis } from 'recharts';
+import ResponsiveTable from '../../components/shared/ResponsiveTable';
 
 const STATUS_BADGE = {
   APPROVED: 'bg-emerald-50 text-emerald-700 border border-emerald-200',
@@ -78,7 +79,7 @@ const InsuranceManagementPage = () => {
   const radialData = [{ value: stats.successRate, fill: stats.successRate >= 75 ? '#0d9488' : '#f59e0b' }];
 
   return (
-    <div className="min-h-screen bg-slate-50 p-6 space-y-6 animate-fade-in-up">
+    <div className="min-h-screen bg-slate-50 p-4 sm:p-5 md:p-6 space-y-5 animate-fade-in-up">
 
       {/* ── Header ── */}
       <div className="bg-gradient-to-r from-teal-900 via-teal-800 to-emerald-900 rounded-2xl p-6 text-white shadow-lg">
@@ -159,54 +160,45 @@ const InsuranceManagementPage = () => {
         <span className="ml-auto text-xs text-slate-400">{filtered.length} claims</span>
       </div>
 
-      {/* ── Claims Table ── */}
+      {/* ── Claims Table / Cards ── */}
       <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
         <div className="px-5 py-4 border-b border-slate-100">
           <h2 className="text-base font-bold text-slate-800">Insurance Claims</h2>
         </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="bg-slate-50 border-b border-slate-100">
-                {['Claim #', 'Patient', 'Amount', 'Submitted', 'Status', 'Actions'].map(h => (
-                  <th key={h} className={`px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500 ${h === 'Amount' ? 'text-right' : 'text-left'}`}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-50">
-              {loading ? (
-                Array.from({ length: 6 }).map((_, i) => <SkeletonRow key={i} cols={6} />)
-              ) : filtered.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="px-4 py-16 text-center text-slate-400">No claims found</td>
-                </tr>
-              ) : (
-                filtered.map(c => (
-                  <tr key={c.id} className="hover:bg-teal-50/40 transition-colors duration-150">
-                    <td className="px-4 py-3 font-mono text-xs text-slate-500">CLM-{String(c.id).padStart(4, '0')}</td>
-                    <td className="px-4 py-3 font-semibold text-slate-800">{c.patientName || 'Unknown Patient'}</td>
-                    <td className="px-4 py-3 text-right font-bold text-slate-800 tabular-nums">{fmtUSD(c.amount)}</td>
-                    <td className="px-4 py-3 text-xs text-slate-400">{fmtDate(c.submittedAt)}</td>
-                    <td className="px-4 py-3">
-                      <span className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-semibold ${STATUS_BADGE[c.status] ?? 'bg-slate-100 text-slate-600'}`}>
-                        {c.status || 'PENDING'}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex gap-2">
-                        <button className="inline-flex items-center gap-1 px-3 py-1 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 rounded-lg hover:bg-slate-100 transition">
-                          <Eye className="w-3 h-3" />View
-                        </button>
-                        <button className="inline-flex items-center gap-1 px-3 py-1 text-xs font-medium text-teal-700 bg-teal-50 border border-teal-200 rounded-lg hover:bg-teal-100 transition">
-                          Process
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+        <div className="p-4">
+          <ResponsiveTable
+            loading={loading}
+            data={filtered}
+            rowKey="id"
+            emptyText="No claims found"
+            theadClass="bg-slate-50 border-b border-slate-100"
+            rowHover="hover:bg-teal-50/40"
+            columns={[
+              { key: 'id',          label: 'Claim #',   render: (v) => <span className="font-mono text-xs text-slate-500">CLM-{String(v).padStart(4,'0')}</span> },
+              { key: 'patientName', label: 'Patient',   render: (v) => <span className="font-semibold text-slate-800">{v || 'Unknown Patient'}</span> },
+              { key: 'amount',      label: 'Amount',    className: 'text-right', render: (v) => <span className="font-bold text-slate-800 tabular-nums">{fmtUSD(v)}</span> },
+              { key: 'submittedAt', label: 'Submitted', render: (v) => <span className="text-xs text-slate-400">{fmtDate(v)}</span> },
+              {
+                key: 'status',
+                label: 'Status',
+                render: (v) => (
+                  <span className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-semibold ${STATUS_BADGE[v] ?? 'bg-slate-100 text-slate-600'}`}>
+                    {v || 'PENDING'}
+                  </span>
+                ),
+              },
+            ]}
+            getRowActions={(row) => (
+              <>
+                <button className="inline-flex items-center gap-1 px-3 py-1 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-200 rounded-lg hover:bg-slate-100 transition">
+                  <Eye className="w-3 h-3" />View
+                </button>
+                <button className="inline-flex items-center gap-1 px-3 py-1 text-xs font-medium text-teal-700 bg-teal-50 border border-teal-200 rounded-lg hover:bg-teal-100 transition">
+                  Process
+                </button>
+              </>
+            )}
+          />
         </div>
       </div>
     </div>

@@ -233,6 +233,23 @@ html, body, #root {
   overflow-x: hidden;
 }
 
+/* ─────────────────────────────────────────────────────────────────
+   FORM UX — full-width inputs on mobile
+   ───────────────────────────────────────────────────────────────── */
+@media (max-width: 767px) {
+  .form-control input,
+  .form-control select,
+  .form-control textarea {
+    width: 100% !important;
+  }
+  /* Modals: full-width on small screens */
+  .modal-box {
+    width: 95vw !important;
+    max-width: 95vw !important;
+    margin: 0.5rem;
+  }
+}
+
 /* Card-view table rows on mobile */
 .table-card-row {
   display: flex;

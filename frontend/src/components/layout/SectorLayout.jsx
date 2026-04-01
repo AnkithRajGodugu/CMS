@@ -1,63 +1,100 @@
 import { Outlet } from 'react-router-dom';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import Navbar from './Navbar';
 import Sidebar from './Sidebar';
 import MobileBottomNav from './MobileBottomNav';
+import UserOnboardingModal from '../UserOnboardingModal';
 
+const DRAWER_ID = 'mobile-sidebar-drawer';
+
+/**
+ * SectorLayout
+ *
+ * Desktop (≥ lg):  Persistent sidebar column + Navbar on top of content area.
+ * Mobile  (< lg):  Full-width. Hamburger opens a sidebar overlay (React-state
+ *                  driven, not DaisyUI checkbox) so layout is never broken.
+ */
 const SectorLayout = () => {
-    const [searchOpen, setSearchOpen] = useState(false);
+    const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [searchOpen,  setSearchOpen]  = useState(false);
 
-    const openSearch = useCallback(() => setSearchOpen(true), []);
-    const closeSearch = useCallback(() => setSearchOpen(false), []);
+    const openSearch   = useCallback(() => setSearchOpen(true),   []);
+    const closeSearch  = useCallback(() => setSearchOpen(false),  []);
+    const openSidebar  = useCallback(() => setSidebarOpen(true),  []);
+    const closeSidebar = useCallback(() => setSidebarOpen(false), []);
+
+    // Close sidebar on route change / resize to desktop
+    useEffect(() => {
+        const onResize = () => { if (window.innerWidth >= 1024) setSidebarOpen(false); };
+        window.addEventListener('resize', onResize);
+        return () => window.removeEventListener('resize', onResize);
+    }, []);
+
+    // Lock body scroll when sidebar overlay is open on mobile
+    useEffect(() => {
+        document.body.style.overflow = sidebarOpen ? 'hidden' : '';
+        return () => { document.body.style.overflow = ''; };
+    }, [sidebarOpen]);
 
     return (
-        /*
-         * DaisyUI drawer in lg:drawer-open mode:
-         *   - On lg+: sidebar is always visible, takes up left column
-         *   - On < lg: sidebar is a sheet/overlay triggered by the checkbox toggle;
-         *              the drawer-content takes FULL width (w-full, no offset)
-         */
-        <div className="drawer lg:drawer-open min-h-screen">
-            <input id="mobile-sidebar-drawer" type="checkbox" className="drawer-toggle" />
+        <>
+            {/* ── Root shell ─────────────────────────────────────────────── */}
+            <div className="flex h-screen w-full overflow-hidden">
 
-            {/* ─── Main content ─────────────────────────────────────── */}
-            <div className="drawer-content flex flex-col min-h-screen w-full">
-                {/* Navbar */}
-                <div className="z-40 w-full flex-shrink-0 sticky top-0">
-                    <Navbar
-                        externalSearchOpen={searchOpen}
-                        onExternalSearchClose={closeSearch}
+                {/* Desktop sidebar — always visible, hidden on mobile */}
+                <div className="hidden lg:flex lg:flex-shrink-0">
+                    <Sidebar drawerId={DRAWER_ID} onNavClick={() => {}} />
+                </div>
+
+                {/* Content column */}
+                <div className="flex flex-col flex-1 overflow-hidden min-w-0">
+
+                    {/* Sticky navbar — passes hamburger handler on mobile */}
+                    <div className="flex-shrink-0 sticky top-0 z-40">
+                        <Navbar
+                            drawerId={DRAWER_ID}
+                            onMobileMenuOpen={openSidebar}
+                            externalSearchOpen={searchOpen}
+                            onExternalSearchClose={closeSearch}
+                        />
+                    </div>
+
+                    {/* Page content */}
+                    <main className="flex-1 overflow-y-auto scroll-touch bg-base-200 pb-nav-safe lg:pb-0">
+                        <div className="p-3 sm:p-5 md:p-6 lg:p-8 max-w-[1600px] mx-auto">
+                            <Outlet />
+                        </div>
+                    </main>
+
+                    {/* Mobile bottom nav — CSS hides on lg+ */}
+                    <MobileBottomNav
+                        onSearchOpen={openSearch}
+                        onMenuOpen={openSidebar}
+                        drawerId={DRAWER_ID}
                     />
                 </div>
+            </div>
 
-                {/* Page content — pb clears the mobile bottom nav bar */}
-                <main className="flex-1 overflow-y-auto scroll-touch w-full bg-base-200">
-                    <div className="p-3 md:p-6 lg:p-8 max-w-[1600px] mx-auto pb-nav-safe lg:pb-8">
-                        <Outlet />
+            {/* ── Mobile sidebar overlay ──────────────────────────────────── */}
+            {/* Rendered as a portal outside the flex row so it never         */}
+            {/* affects desktop layout. Controlled by React state.            */}
+            {sidebarOpen && (
+                <div className="lg:hidden fixed inset-0 z-[200] flex">
+                    {/* Dark backdrop */}
+                    <div
+                        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+                        onClick={closeSidebar}
+                        aria-label="Close menu"
+                    />
+                    {/* Sidebar panel */}
+                    <div className="relative z-10 h-full shadow-2xl animate-slide-in-right">
+                        <Sidebar drawerId={DRAWER_ID} onNavClick={closeSidebar} />
                     </div>
-                </main>
-            </div>
-
-            {/* ─── Sidebar drawer ───────────────────────────────────── */}
-            {/*
-             * On lg+: rendered as a persistent left column (lg:drawer-open)
-             * On < lg: rendered as an overlay sheet over the content.
-             *          The drawer-overlay click closes it.
-             */}
-            <div className="drawer-side z-50">
-                <label
-                    htmlFor="mobile-sidebar-drawer"
-                    aria-label="close sidebar"
-                    className="drawer-overlay"
-                />
-                <div className="min-h-full">
-                    <Sidebar />
                 </div>
-            </div>
+            )}
 
-            {/* Mobile Bottom Nav — hidden on lg+ by CSS inside component */}
-            <MobileBottomNav onSearchOpen={openSearch} />
-        </div>
+            <UserOnboardingModal />
+        </>
     );
 };
 

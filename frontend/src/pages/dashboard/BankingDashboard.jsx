@@ -127,7 +127,7 @@ const BankingDashboard = () => {
         
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold">Banking Dashboard</h1>
+           <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">Banking Dashboard</h1>
             <p className="text-base-content/70 text-sm md:text-base">
               Real-time banking analytics overview
             </p>
@@ -148,7 +148,7 @@ const BankingDashboard = () => {
             <span className="loading loading-spinner loading-lg"></span>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
 
             {stats.map((stat, index) => (
               <div key={index} className="card bg-base-100 shadow-lg">
@@ -188,7 +188,7 @@ const BankingDashboard = () => {
         {/* Quick Actions */}
         <div className="mb-8 mt-8">
           <h2 className="text-2xl font-bold mb-4">Quick Actions</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 md:gap-4">
             <Link to="/dashboard/banking/accounts">
               <div className="card bg-base-100 shadow-xl hover:shadow-2xl transition-all cursor-pointer">
                 <div className="card-body items-center text-center">

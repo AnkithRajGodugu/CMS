@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useRef, useState, useContext, useCallback } from 'react';
+import React, { useEffect, useRef, useState, useContext, useCallback } from 'react';
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import { toast } from 'sonner';
@@ -154,7 +154,7 @@ export const NotificationProvider = ({ children }) => {
         clientRef.current.deactivate();
       }
     };
-  }, [isAuthenticated, user, sector?.code, addNotification]);
+  }, [isAuthenticated, user?.id, sector?.code, addNotification]);
 
   const contextValue = {
     notifications,

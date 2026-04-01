@@ -1,11 +1,12 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Users, UserCheck, AlertCircle, HeartPulse,
-  Search, X, ChevronLeft, ChevronRight
+  Search, X
 } from 'lucide-react';
 import { getAllPatients, searchPatients } from '../../services/healthcareService';
 import { useAuth } from '../../hooks/useAuth';
 import HealthcareKPICard from '../../components/healthcare/HealthcareKPICard';
+import ResponsiveTable from '../../components/shared/ResponsiveTable';
 
 function PatientInitials({ name }) {
   const parts = (name || '').split(' ').filter(Boolean);
@@ -95,7 +96,7 @@ const PatientRecordsPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 p-6 space-y-6 animate-fade-in-up">
+    <div className="min-h-screen bg-slate-50 p-4 sm:p-5 md:p-6 space-y-5 animate-fade-in-up">
 
       {/* ── Header ── */}
       <div className="bg-gradient-to-r from-teal-900 via-teal-800 to-emerald-900 rounded-2xl p-6 text-white shadow-lg">
@@ -138,63 +139,58 @@ const PatientRecordsPage = () => {
         {!loading && <span className="text-sm text-slate-500">{patients.length} patient{patients.length !== 1 ? 's' : ''}</span>}
       </div>
 
-      {/* ── Table ── */}
+      {/* ── Table / Cards ── */}
       <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
         <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
           <h2 className="text-base font-bold text-slate-800">Patient Directory</h2>
           <span className="text-sm text-slate-400">{patients.length} records</span>
         </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="bg-slate-50 border-b border-slate-100">
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Patient</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">ID</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Age</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Condition</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Last Visit</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Contact</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-50">
-              {loading ? (
-                Array.from({ length: 8 }).map((_, i) => <SkeletonRow key={i} cols={7} />)
-              ) : patients.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className="px-4 py-16 text-center text-slate-400">
-                    <Users className="w-10 h-10 mx-auto mb-2 opacity-30" />
-                    <p className="font-medium">No patients found</p>
-                  </td>
-                </tr>
-              ) : (
-                patients.map(p => {
-                  const sc = STATUS_CONFIG[p.status] || { classes: 'bg-slate-100 text-slate-600', dot: 'bg-slate-400' };
+        <div className="p-4">
+          <ResponsiveTable
+            loading={loading}
+            data={patients}
+            rowKey="id"
+            emptyText="No patients found"
+            theadClass="bg-slate-50 border-b border-slate-100"
+            rowHover="hover:bg-teal-50/40"
+            columns={[
+              {
+                key: 'firstName',
+                label: 'Patient',
+                render: (v, row) => {
+                  const name = `${row.firstName ?? ''} ${row.lastName ?? ''}`.trim();
+                  const colors = ['from-teal-600 to-emerald-600', 'from-cyan-600 to-teal-600', 'from-emerald-600 to-green-600'];
+                  const idx = (name || '').charCodeAt(0) % colors.length;
                   return (
-                    <tr key={p.id} className="hover:bg-teal-50/40 transition-colors duration-150">
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-2">
-                          <PatientInitials name={`${p.firstName} ${p.lastName}`} />
-                          <span className="font-semibold text-slate-800">{p.firstName} {p.lastName}</span>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 font-mono text-xs text-slate-500">{p.patientId}</td>
-                      <td className="px-4 py-3 text-slate-600">{p.age}</td>
-                      <td className="px-4 py-3 text-slate-600">{p.condition || '—'}</td>
-                      <td className="px-4 py-3 text-xs text-slate-400">{p.lastVisit ?? '—'}</td>
-                      <td className="px-4 py-3 text-slate-600">{p.contactNumber ?? '—'}</td>
-                      <td className="px-4 py-3">
-                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold ${sc.classes}`}>
-                          <span className={`w-1.5 h-1.5 rounded-full ${sc.dot}`} />
-                          {p.status || 'STABLE'}
-                        </span>
-                      </td>
-                    </tr>
+                    <div className="flex items-center gap-2">
+                      <div className={`w-7 h-7 rounded-full bg-gradient-to-br ${colors[idx]} flex items-center justify-center text-white text-xs font-bold flex-shrink-0`}>
+                        {name.split(' ').filter(Boolean).map(p => p[0]).slice(0,2).join('').toUpperCase() || '?'}
+                      </div>
+                      <span className="font-semibold text-slate-800 text-sm">{name || '—'}</span>
+                    </div>
                   );
-                })
-              )}
-            </tbody>
-          </table>
+                },
+              },
+              { key: 'patientId', label: 'ID', render: (v) => <span className="font-mono text-xs text-slate-500">{v}</span> },
+              { key: 'age', label: 'Age', render: (v) => <span className="text-slate-600">{v ?? '—'}</span> },
+              { key: 'condition', label: 'Condition', render: (v) => <span className="text-slate-600">{v || '—'}</span> },
+              { key: 'lastVisit', label: 'Last Visit', render: (v) => <span className="text-xs text-slate-400">{v ?? '—'}</span> },
+              { key: 'contactNumber', label: 'Contact', render: (v) => <span className="text-slate-600">{v ?? '—'}</span> },
+              {
+                key: 'status',
+                label: 'Status',
+                render: (v) => {
+                  const sc = STATUS_CONFIG[v] || { classes: 'bg-slate-100 text-slate-600 border border-slate-200', dot: 'bg-slate-400' };
+                  return (
+                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold ${sc.classes}`}>
+                      <span className={`w-1.5 h-1.5 rounded-full ${sc.dot}`} />
+                      {v || 'STABLE'}
+                    </span>
+                  );
+                },
+              },
+            ]}
+          />
         </div>
       </div>
     </div>

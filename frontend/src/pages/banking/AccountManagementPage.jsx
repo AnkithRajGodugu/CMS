@@ -1,10 +1,11 @@
-﻿import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import {
   Users, CreditCard, CheckCircle, AlertTriangle, XCircle,
   Search, ChevronLeft, ChevronRight, X
 } from 'lucide-react';
 import api from '../../services/api';
 import BankingKPICard from '../../components/banking/BankingKPICard';
+import ResponsiveTable from '../../components/shared/ResponsiveTable';
 
 const statusConfig = {
   ACTIVE:    { label: 'Active',    classes: 'bg-emerald-50 text-emerald-700 border border-emerald-200', icon: CheckCircle },
@@ -82,7 +83,7 @@ const AccountManagementPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 p-6 space-y-6 animate-fade-in-up">
+    <div className="min-h-screen bg-slate-50 p-4 sm:p-5 md:p-6 space-y-5 animate-fade-in-up">
       {/* ── Header ── */}
       <div className="bg-gradient-to-r from-slate-900 via-blue-950 to-indigo-950 rounded-2xl p-6 text-white shadow-lg">
         <div className="flex items-center gap-3 mb-1">
@@ -134,69 +135,71 @@ const AccountManagementPage = () => {
         </div>
       )}
 
-      {/* ── Table ── */}
+      {/* ── Table / Cards ── */}
       <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="bg-slate-50 border-b border-slate-100">
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Account</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Customer</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Type</th>
-                <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-500">Balance</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Status</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Created</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-50">
-              {loading ? (
-                Array.from({ length: 8 }).map((_, i) => <SkeletonRow key={i} cols={6} />)
-              ) : filtered.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="px-4 py-16 text-center text-slate-400">
-                    <Users className="w-10 h-10 mx-auto mb-2 opacity-30" />
-                    <p className="font-medium">No accounts found</p>
-                  </td>
-                </tr>
-              ) : (
-                filtered.map(a => {
-                  const sc = statusConfig[a.status] || { label: a.status, classes: 'bg-slate-100 text-slate-600', icon: null };
-                  const StatusIcon = sc.icon;
-                  const typeClass  = accountTypeColors[a.accountType] || 'bg-slate-100 text-slate-600';
-                  const isNeg      = (a.balance ?? 0) < 0;
-                  return (
-                    <tr key={a.id} className="hover:bg-blue-50/40 transition-colors duration-150">
-                      <td className="px-4 py-3 font-mono text-xs text-slate-600">{a.accountNumber}</td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-2">
-                          <Initials name={a.customerName} />
-                          <span className="font-semibold text-slate-800">{a.customerName}</span>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${typeClass}`}>
-                          {a.accountType}
-                        </span>
-                      </td>
-                      <td className={`px-4 py-3 text-right font-bold tabular-nums ${isNeg ? 'text-red-600' : 'text-emerald-600'}`}>
-                        {isNeg ? '-' : ''}${Math.abs(a.balance ?? 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}
-                      </td>
-                      <td className="px-4 py-3">
-                        <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold ${sc.classes}`}>
-                          {StatusIcon && <StatusIcon className="w-3 h-3" />}
-                          {sc.label}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-slate-500 text-xs">
-                        {a.createdAt ? new Date(a.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : '—'}
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
+        <ResponsiveTable
+          loading={loading}
+          data={filtered}
+          rowKey="id"
+          emptyText="No accounts found"
+          theadClass="bg-slate-50 border-b border-slate-100"
+          rowHover="hover:bg-blue-50/40"
+          columns={[
+            {
+              key: 'accountNumber',
+              label: 'Account',
+              render: (v) => <span className="font-mono text-xs text-slate-600">{v}</span>,
+            },
+            {
+              key: 'customerName',
+              label: 'Customer',
+              render: (v) => (
+                <div className="flex items-center gap-2">
+                  <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                    {(v || '?').split(' ').map(p => p[0]).slice(0,2).join('').toUpperCase()}
+                  </div>
+                  <span className="font-semibold text-slate-800 text-sm">{v}</span>
+                </div>
+              ),
+            },
+            {
+              key: 'accountType',
+              label: 'Type',
+              render: (v) => {
+                const cls = { SAVINGS: 'bg-blue-50 text-blue-700', CHECKING: 'bg-purple-50 text-purple-700', LOAN: 'bg-orange-50 text-orange-700', BUSINESS: 'bg-indigo-50 text-indigo-700' }[v] || 'bg-slate-100 text-slate-600';
+                return <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${cls}`}>{v}</span>;
+              },
+            },
+            {
+              key: 'balance',
+              label: 'Balance',
+              className: 'text-right',
+              render: (v) => {
+                const isNeg = (v ?? 0) < 0;
+                return <span className={`font-bold tabular-nums text-sm ${isNeg ? 'text-red-600' : 'text-emerald-600'}`}>{isNeg ? '-' : ''}${Math.abs(v ?? 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>;
+              },
+            },
+            {
+              key: 'status',
+              label: 'Status',
+              render: (v) => {
+                const sc = statusConfig[v] || { label: v, classes: 'bg-slate-100 text-slate-600 border border-slate-200', icon: null };
+                const StatusIcon = sc.icon;
+                return (
+                  <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold ${sc.classes}`}>
+                    {StatusIcon && <StatusIcon className="w-3 h-3" />}
+                    {sc.label}
+                  </span>
+                );
+              },
+            },
+            {
+              key: 'createdAt',
+              label: 'Created',
+              render: (v) => <span className="text-slate-500 text-xs">{v ? new Date(v).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : '—'}</span>,
+            },
+          ]}
+        />
 
         {/* ── Pagination ── */}
         {totalPages > 1 && (

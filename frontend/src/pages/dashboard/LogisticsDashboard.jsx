@@ -79,7 +79,7 @@ const LogisticsDashboard = () => {
             <div>
               <div className="flex items-center gap-2 mb-1">
                 <FaTruck className="text-2xl md:text-4xl text-warning" />
-                <h1 className="text-2xl md:text-4xl font-bold">Logistics Dashboard</h1>
+                <h1 className="text-xl sm:text-2xl md:text-4xl font-bold">Logistics Dashboard</h1>
               </div>
               <p className="text-base-content/70 text-sm md:text-base">Manage shipments, inventory, and supply chain operations</p>
             </div>
@@ -90,7 +90,7 @@ const LogisticsDashboard = () => {
         <SystemMetricsWidget />
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           {stats.map((stat, index) => (
             <div key={index} className="card bg-base-100 shadow-xl">
               <div className="card-body p-4">
@@ -110,7 +110,7 @@ const LogisticsDashboard = () => {
         {/* Quick Actions */}
         <div className="mb-8">
           <h2 className="text-xl md:text-2xl font-bold mb-4">Quick Actions</h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 md:gap-4">
             {quickActions.map((action, index) => (
               <Link key={index} to={action.path}>
                 <div className="card bg-base-100 shadow-xl hover:shadow-2xl transition-all cursor-pointer">

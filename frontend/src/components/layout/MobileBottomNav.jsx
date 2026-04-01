@@ -1,9 +1,9 @@
-﻿import { NavLink, useNavigate, useLocation } from 'react-router-dom';
+import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { useTheme } from '../../context/SectorThemeProvider';
 import { getHomeRoute } from '../../utils/roleUtils';
 
-const MobileBottomNav = ({ onSearchOpen }) => {
+const MobileBottomNav = ({ onSearchOpen, drawerId = 'mobile-sidebar-drawer', onMenuOpen }) => {
     const { user } = useAuth();
     const { currentTheme } = useTheme();
     const navigate = useNavigate();
@@ -112,9 +112,9 @@ const MobileBottomNav = ({ onSearchOpen }) => {
                     <span style={{ opacity: isProfile ? 1 : 0.5 }}>Profile</span>
                 </NavLink>
 
-                {/* Menu — opens sidebar drawer */}
-                <label
-                    htmlFor="mobile-sidebar-drawer"
+                {/* Menu — opens sidebar */}
+                <button
+                    onClick={onMenuOpen}
                     className={navBtnBase + ' cursor-pointer'}
                     aria-label="Open menu"
                 >
@@ -125,7 +125,7 @@ const MobileBottomNav = ({ onSearchOpen }) => {
                         </svg>
                     </div>
                     <span className="opacity-50">Menu</span>
-                </label>
+                </button>
 
             </div>
         </nav>

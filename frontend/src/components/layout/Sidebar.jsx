@@ -1,4 +1,4 @@
-﻿import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { useTheme } from '../../context/SectorThemeProvider';
 import { getSectorNavItems } from '../../utils/roleUtils';
@@ -12,12 +12,12 @@ const SectorIcon = ({ iconName, className }) => {
 };
 
 // Closes the DaisyUI drawer on mobile when a nav item is tapped
-const closeMobileDrawer = () => {
-    const toggle = document.getElementById('mobile-sidebar-drawer');
+const closeMobileDrawer = (drawerId = 'mobile-sidebar-drawer') => {
+    const toggle = document.getElementById(drawerId);
     if (toggle) toggle.checked = false;
 };
 
-const Sidebar = () => {
+const Sidebar = ({ drawerId = 'mobile-sidebar-drawer', onNavClick }) => {
     const { user } = useAuth();
     const { currentTheme, currentSector } = useTheme();
     const location = useLocation();
@@ -86,7 +86,7 @@ const Sidebar = () => {
                             to={item.path}
                             end={item.path.split('/').length <= 3}
                             title={collapsed ? item.label : undefined}
-                            onClick={closeMobileDrawer}
+                            onClick={() => onNavClick ? onNavClick() : closeMobileDrawer(drawerId)}
                             className={({ isActive }) =>
                                 `group relative flex items-center gap-3 rounded-xl px-3 py-2.5 lg:py-2.5 text-sm transition-all duration-200
                                 min-h-[44px] lg:min-h-0
