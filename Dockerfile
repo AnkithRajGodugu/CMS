@@ -53,13 +53,15 @@ USER appuser
 EXPOSE 8081
 
 # JVM tuned for Render free tier — 512MB total RAM
-# Heap: 220MB max  +  Metaspace: 96MB  +  threads/stack/JIT ~= ~420MB total
+# Budget: Heap(150) + Metaspace(160) + threads/native(~75) = ~385MB
+# Root cause of OOM: Spring Boot needs ~150MB Metaspace for class loading
+# (JPA + Kafka + Redis/Redisson + Security + Actuator + WebSocket)
 ENV JAVA_OPTS="\
 -XX:MaxRAM=512m \
--Xms64m \
--Xmx220m \
--XX:MetaspaceSize=64m \
--XX:MaxMetaspaceSize=96m \
+-Xms32m \
+-Xmx150m \
+-XX:MetaspaceSize=96m \
+-XX:MaxMetaspaceSize=160m \
 -Xss256k \
 -XX:+UseSerialGC \
 -XX:+UseStringDeduplication \
