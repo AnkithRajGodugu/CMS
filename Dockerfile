@@ -52,12 +52,21 @@ USER appuser
 
 EXPOSE 8081
 
-# JVM container tuning
+# JVM tuned for Render free tier — 512MB total RAM
+# Heap: 220MB max  +  Metaspace: 96MB  +  threads/stack/JIT ~= ~420MB total
 ENV JAVA_OPTS="\
+-XX:MaxRAM=512m \
+-Xms64m \
+-Xmx220m \
+-XX:MetaspaceSize=64m \
+-XX:MaxMetaspaceSize=96m \
+-Xss256k \
+-XX:+UseSerialGC \
+-XX:+UseStringDeduplication \
+-XX:TieredStopAtLevel=1 \
 -XX:+UseContainerSupport \
--XX:MaxRAMPercentage=75.0 \
--XX:+UseG1GC \
--XX:+OptimizeStringConcat"
+-XX:+OptimizeStringConcat \
+-Djava.security.egd=file:/dev/./urandom"
 
 ENV SPRING_PROFILES_ACTIVE=prod
 
